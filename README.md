@@ -1,0 +1,2 @@
+# WarMorale
+A fancy RTS.
