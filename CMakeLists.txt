@@ -13,7 +13,7 @@ add_executable(WarMorale ${SOURCES})
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
   # Hide Console
-	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup")
+  # set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup")
   
   set(GLEW_DIR "C:\\A\\Git\\ThirdParty\\C\\glew-2.1.0")
   set(GLFW_DIR "C:\\A\\Git\\ThirdParty\\C\\glfw-3.2.1")
@@ -22,6 +22,9 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
   find_library(OPENGL opengl32)
   set(GLEW_INCLUDE "${GLEW_DIR}\\include")
   set(GLFW_INCLUDE "${GLFW_DIR}\\include")
+  
+  add_custom_command(TARGET WarMorale POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${GLEW_DIR}/bin/Release/Win32/glew32.dll $<TARGET_FILE_DIR:WarMorale>/glew32.dll)
+  add_custom_command(TARGET WarMorale POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/assets $<TARGET_FILE_DIR:WarMorale>/assets)
 endif()
 
 
