@@ -12,10 +12,10 @@ public:
 
   vertex_array() {
     float buffer[] = {
-    //   x,    y,    z,    s,    t
-      0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-      1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-      0.0f, 1.0f, 0.0f, 0.0f, 1.0f};
+    //   x,    y,    s,    t
+      0.0f, 0.0f, 0.0f, 0.0f,
+      1.0f, 0.0f, 1.0f, 0.0f,
+      0.0f, 1.0f, 0.0f, 1.0f};
 
     glGenBuffers(1, &vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
@@ -29,11 +29,11 @@ public:
 
     // vetex
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), 0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
 
     // texture coordinates
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)(3 * sizeof(float)));
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void *)(2 * sizeof(float)));
 
   }
 
