@@ -1,3 +1,5 @@
+#pragma once
+
 #include "stb_image.h"
 
 class texture {
@@ -45,5 +47,10 @@ public:
 
   ~texture() {
     glDeleteTextures(1, &tex);
+  }
+
+  void activate_bind(GLenum texture) const {
+    glActiveTexture(texture);
+    glBindTexture(GL_TEXTURE_2D, tex);
   }
 };

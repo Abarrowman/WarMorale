@@ -1,4 +1,6 @@
 #pragma once
+#include <cmath>
+
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
@@ -7,6 +9,8 @@
 #include <string>
 #include <fstream>
 #include <sstream>
+
+#define PI_F 3.14159265358979323846f
 
 inline void check_gl_errors() {
   GLenum err;

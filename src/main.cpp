@@ -1,5 +1,4 @@
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
+#include "utils.h"
 
 #include <cmath>
 #include <cstdio>
@@ -8,6 +7,9 @@
 #include "vertex_array.h"
 #include "utils.h"
 #include "texture.h"
+#include "matrix_3f.h"
+#include "renderable.h"
+#include "sprite.h"
 
 extern "C" {
   __declspec(dllexport) unsigned int NvOptimusEnablement = 1;
@@ -46,47 +48,51 @@ int main(void) {
   const GLubyte* version = glGetString(GL_VERSION);
   printf("Renderer: %s\n", renderer);
   printf("OpenGL version supported %s\n", version);
-  
-  glEnable(GL_DEPTH_TEST);
-  glDepthFunc(GL_LESS);
 
-  float time = 0;
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  
+  float x_min = -320;
+  float y_min = -240;
+  float x_max = 320;
+  float y_max = 240;
+  matrix_3f proj = matrix_3f::orthographic_projection(x_min, x_max, y_min, y_max);
+
+
+  float angle = 0;
 
   std::string const fragment_shader = read_file_to_string("./assets/shaders/2d.frag");
-
   std::string const vertex_shader = read_file_to_string("./assets/shaders/2d.vert");
+  shader sprite_shader{ vertex_shader.c_str(), fragment_shader.c_str() };
+  texture face_texture{"./assets/textures/sad.png"};
+  texture fire_texture{ "./assets/textures/fire.png" };
+  vertex_array sprite_vertex = vertex_array::create_rectangle();
 
-  shader s{ vertex_shader.c_str(), fragment_shader.c_str() };
-  texture t{"./assets/textures/brick.png"};
-  vertex_array v;
+  sprite_context ctx{ sprite_shader, sprite_vertex };
+  ctx.update_projection(proj);
 
+  sprite face{ctx, face_texture};
+  sprite fire{ctx, fire_texture };
+
+
+  vertex_array tru = vertex_array::create_triangle();
 
   /* Loop until the user closes the window */
   while (!glfwWindowShouldClose(window)){
     /* Render here */
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    time += 0.001f;
-    /*glBegin(GL_TRIANGLES);
-    glColor3f(0.1f, 0.2f, 0.3f);
-    glVertex3f(0, 0, 0);
-    glVertex3f(cos(t), sin(t), 0);
-    glVertex3f(-sin(t), cos(t), 0);
-    glEnd();*/
+    angle += 0.001f;
 
-    glUseProgram(s.program);
+    //ctx.update_projection(proj);
 
-    float transMat[] = {
-      cos(time), -sin(time), 0,
-      sin(time), cos(time), 0,
-      0, 0, 1
-    };
+    matrix_3f global_trans = matrix_3f::identity();
 
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, t.tex);
-    glUniformMatrix3fv(glGetUniformLocation(s.program, "transMat"), 1, GL_TRUE, transMat);
-    glBindVertexArray(v.vao);
-    glDrawArrays(GL_TRIANGLES, 0, 3);
+    face.local_trans = matrix_3f::transformation_matrix(480, angle);
+    face.render(global_trans);
+
+    fire.local_trans = matrix_3f::transformation_matrix(240, -angle, 240);
+    fire.render(global_trans);
 
     glfwSwapBuffers(window);
     glfwPollEvents();
