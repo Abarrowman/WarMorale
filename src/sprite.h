@@ -23,14 +23,13 @@ public:
   }
 };
 
-class sprite : renderable {
+class sprite : public renderable {
 public:
 
   sprite_context context;
   std::reference_wrapper<texture const> tex;
-  matrix_3f local_trans;
 
-  sprite(sprite_context const& ctx, texture const& t, matrix_3f&& trans = matrix_3f::identity()) : context(ctx), tex(t), local_trans(trans) {}
+  sprite(sprite_context const& ctx, texture const& t) : context(ctx), tex(t) {}
 
 
   void render(matrix_3f const& parent_trans) override {
@@ -41,6 +40,10 @@ public:
     context.sprite_vertex_array.draw();
   }
 
+  virtual bool update() override {
+    return false;
+  }
 
+  virtual ~sprite() {}
 
 };

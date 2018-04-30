@@ -10,6 +10,7 @@
 #include "matrix_3f.h"
 #include "renderable.h"
 #include "sprite.h"
+#include <memory>
 
 extern "C" {
   __declspec(dllexport) unsigned int NvOptimusEnablement = 1;
@@ -72,31 +73,42 @@ int main(void) {
   ctx.update_projection(proj);
 
   sprite face{ctx, face_texture};
-  sprite fire{ctx, fire_texture };
+  sprite fire{ctx, fire_texture};
+
+
+  ordered_parent container;
+  container.add_orphan(new sprite(ctx, fire_texture));
+  container.add_orphan(new sprite(ctx, fire_texture));
+  container.child_at(0).local_trans = matrix_3f::transformation_matrix(120, 120, 0, 110);
+  static_cast<sprite&>(container.child_at(1)).local_trans = matrix_3f::transformation_matrix(-120, 120, 0, -110);
 
 
   vertex_array tru = vertex_array::create_triangle();
 
   /* Loop until the user closes the window */
   while (!glfwWindowShouldClose(window)){
-    /* Render here */
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    // Start Update
     angle += 0.001f;
-
+    face.local_trans = matrix_3f::transformation_matrix(480, 480, angle);
+    fire.local_trans = matrix_3f::transformation_matrix(240, 240, -angle, 240);
+    container.local_trans = matrix_3f::transformation_matrix(1, 1, angle);
     //ctx.update_projection(proj);
+    // End Update
+
+    // Start Render
+    glClear(GL_COLOR_BUFFER_BIT);
 
     matrix_3f global_trans = matrix_3f::identity();
-
-    face.local_trans = matrix_3f::transformation_matrix(480, angle);
     face.render(global_trans);
-
-    fire.local_trans = matrix_3f::transformation_matrix(240, -angle, 240);
     fire.render(global_trans);
+    container.render(global_trans);
 
     glfwSwapBuffers(window);
-    glfwPollEvents();
+    // End Render
 
+      
+    glfwPollEvents();
     check_gl_errors();
   }
 

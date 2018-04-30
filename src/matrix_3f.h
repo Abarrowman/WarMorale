@@ -9,11 +9,11 @@ class matrix_3f {
 public:
   std::array<float, 9> values;
 
-  static matrix_3f transformation_matrix(float scale = 1.0f, float angle = 0.0f, float trans_x = 0.0f, float trans_y = 0.0f) {
+  static matrix_3f transformation_matrix(float scale_x = 1.0f, float scale_y = 1.0f, float angle = 0.0f, float trans_x = 0.0f, float trans_y = 0.0f) {
     matrix_3f trans;
     trans.values = {
-      scale * cos(angle), -scale * sin(angle), trans_x,
-      scale * sin(angle), scale * cos(angle), trans_y,
+      scale_x * cos(angle), -scale_y * sin(angle), trans_x,
+      scale_x * sin(angle), scale_y * cos(angle), trans_y,
       0, 0, 1
     };
     return trans;
