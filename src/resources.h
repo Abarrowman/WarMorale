@@ -37,8 +37,8 @@ public:
     textures.emplace_back("./assets/textures/ship.png");
 
 
-    std::string const sprite_fragment_shader = read_file_to_string("./assets/shaders/2d.frag");
-    std::string const sprite_vertex_shader = read_file_to_string("./assets/shaders/2d.vert");
+    std::string const sprite_fragment_shader = read_file_to_string("./assets/shaders/sprite.frag");
+    std::string const sprite_vertex_shader = read_file_to_string("./assets/shaders/sprite.vert");
     shaders.emplace_back(sprite_vertex_shader.c_str(), sprite_fragment_shader.c_str());
 
 
