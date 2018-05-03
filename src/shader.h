@@ -7,19 +7,19 @@
 class shader {
 public:
   GLuint vs;
-  GLuint fs;
   GLuint gs;
+  GLuint fs;
   GLuint program;
 
-  shader(const char* geometry_shader, const char* vertex_shader, const char* fragment_shader) {
-
-    gs = glCreateShader(GL_GEOMETRY_SHADER);
-    glShaderSource(gs, 1, &geometry_shader, NULL);
-    glCompileShader(gs);
+  shader(const char* vertex_shader, const char* geometry_shader, const char* fragment_shader) {
 
     vs = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vs, 1, &vertex_shader, NULL);
     glCompileShader(vs);
+
+    gs = glCreateShader(GL_GEOMETRY_SHADER);
+    glShaderSource(gs, 1, &geometry_shader, NULL);
+    glCompileShader(gs);
 
     fs = glCreateShader(GL_FRAGMENT_SHADER);
     glShaderSource(fs, 1, &fragment_shader, NULL);
@@ -53,16 +53,23 @@ public:
     gs = 0;
   }
 
-  // do not copy or move
+  // do not copy or assign
   shader(shader&) = delete;
-  shader(shader&&) = delete;
   shader& operator=(const shader&) = delete;
+
+  //moving is ok
+  shader(shader&& old) : program(old.program), vs(old.vs), gs(old.gs), fs(old.fs) {
+    old.program = 0;
+    old.vs = 0;
+    old.gs = 0;
+    old.fs = 0;
+  }
 
   ~shader() {
     glDeleteProgram(program);
     glDeleteShader(fs);
-    glDeleteShader(vs);
     glDeleteShader(gs);
+    glDeleteShader(vs);
   }
 
   void use() const {

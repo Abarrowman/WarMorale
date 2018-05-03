@@ -42,7 +42,7 @@ public:
     return array;
   }
 
-  static vertex_array create_rectangle() {
+  static vertex_array create_sprite_vertex_array() {
 
     GLuint vbo;
     GLuint vao;

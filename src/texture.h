@@ -40,10 +40,14 @@ public:
 
   }
 
-  // do not copy or move
+  // do not copy or assign
   texture(texture&) = delete;
-  texture(texture&&) = delete;
   texture& operator=(const texture&) = delete;
+
+  //moving is ok
+  texture(texture&& old) : tex(old.tex) {
+    old.tex = 0;
+  }
 
   ~texture() {
     glDeleteTextures(1, &tex);

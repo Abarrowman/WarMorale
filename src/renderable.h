@@ -19,7 +19,7 @@ public:
   */
   virtual bool update() = 0;
   
-  virtual ~renderable() {}
+  virtual ~renderable() {} // this is a base class
 };
 
 template<bool ordered>
@@ -105,7 +105,9 @@ public:
     return static_cast<int>(children.size());
   }
 
-  virtual ~renderable_parent() {}
+  renderable_parent() {};
+  virtual ~renderable_parent() {} // this is a base class
+  renderable_parent(renderable_parent&) = delete; // do not copy
 
   void render(matrix_3f const& parent_trans) {
     matrix_3f trans = inner_render(parent_trans);
