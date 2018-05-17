@@ -57,6 +57,10 @@ public:
 
 
   void render(matrix_3f const& parent_trans) override {
+    if (!visible) {
+      return;
+    }
+
     context->sprite_shader->use();
 
     tex->activate_bind(GL_TEXTURE0);
@@ -69,10 +73,6 @@ public:
     glUniform1i(context->shader_frame_row_idx, frame_row);
 
     context->sprite_vertex_array->draw();
-  }
-
-  virtual bool update() override {
-    return false;
   }
 
   virtual ~sprite() {}

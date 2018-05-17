@@ -7,6 +7,7 @@
 class renderable {
 public:
   matrix_3f local_trans = matrix_3f::identity();
+  bool visible = true;
 
   /*
   Renders this renderable with a parent transformation.
@@ -17,7 +18,9 @@ public:
   Updates the renderable.
   Return true if the renderable should be deleted by its parent.
   */
-  virtual bool update() = 0;
+  virtual bool update() {
+    return false;
+  }
   
   virtual ~renderable() {} // this is a base class
 };
@@ -26,15 +29,6 @@ template<bool ordered>
 class renderable_parent : public renderable {
 private:
   std::vector<std::unique_ptr<renderable>> children;
-
-protected:
-  virtual matrix_3f inner_render(matrix_3f const& parent_trans) {
-    return parent_trans * local_trans;
-  }
-
-  virtual bool inner_update() {
-    return false;
-  }
 
 public:
 
@@ -109,20 +103,23 @@ public:
   virtual ~renderable_parent() {} // this is a base class
   renderable_parent(renderable_parent&) = delete; // do not copy
 
-  void render(matrix_3f const& parent_trans) {
-    matrix_3f trans = inner_render(parent_trans);
+  virtual void render(matrix_3f const& parent_trans) {
+    if (!visible) {
+      return;
+    }
+    matrix_3f trans = parent_trans * local_trans;
     for (int i = 0; i < child_count(); i++) {
       child_at(i).render(trans);
     }
   }
 
-  bool update() {
+  virtual bool update() {
     for (int i = child_count() - 1; i >= 0; i--) {
       if (child_at(i).update()) {
         remove_child_at(i);
       }
     }
-    return inner_update();
+    return false;
   }
 };
 

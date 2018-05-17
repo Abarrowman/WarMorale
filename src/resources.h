@@ -1,11 +1,14 @@
 #pragma once
 #include "utils.h"
 #include <vector>
+#include <unordered_map>
+#include <string>
+#include <memory>
 
 enum class static_texture_id {
   face,
   fire,
-  ship,
+  //ship,
   COUNT
 };
 
@@ -27,15 +30,14 @@ private:
   std::vector<vertex_array> vertex_arrays;
 public:
   static_resources() {
-    // pre-allocate to avoid pointers to avoid pointer invalidation
+    // pre-allocate to avoid pointers to avoid reference invalidation
     textures.reserve(static_cast<int>(static_texture_id::COUNT));
     shaders.reserve(static_cast<int>(static_shader_id::COUNT));
     vertex_arrays.reserve(static_cast<int>(static_vertex_array_id::COUNT));
 
     textures.emplace_back("./assets/textures/sad.png");
     textures.emplace_back("./assets/textures/fire.png");
-    textures.emplace_back("./assets/textures/ship.png");
-
+    //textures.emplace_back("./assets/textures/ship.png");
 
     std::string const sprite_fragment_shader = read_file_to_string("./assets/shaders/sprite.frag");
     std::string const sprite_vertex_shader = read_file_to_string("./assets/shaders/sprite.vert");
@@ -71,8 +73,43 @@ public:
   }
 
 
-  // do not copy, assign, or move
+  // do not copy or assign
   static_resources(static_resources&) = delete;
   static_resources& operator=(const static_resources&) = delete;
-  static_resources(static_resources&& old) = delete;
 };
+
+/*
+Maps to unique pointers are used to allow insertion and deletion without reference invalidation
+*/
+template<typename K>
+class dyanamic_resources {
+private:
+  std::unordered_map<K, std::unique_ptr<texture>> textures;
+  std::unordered_map<K, std::unique_ptr<shader>> shaders;
+  std::unordered_map<K, std::unique_ptr<vertex_array>> vertex_arrays;
+public:
+
+  texture& get_texture(K const& id) {
+    return *(textures[id].get());
+  }
+
+  shader& get_shader(K const& id) {
+    return *(textures[id].get());
+  }
+
+  vertex_array& get_vertex_array(K const& id) {
+    return *(vertex_arrays[id].get());
+  }
+
+  void add_texutre(K const& id, std::unique_ptr<texture> texture) {
+    textures[id] = std::move(texture);
+  }
+
+  dyanamic_resources() {}
+
+  // do not copy or assign
+  dyanamic_resources(dyanamic_resources&) = delete;
+  dyanamic_resources& operator=(const dyanamic_resources&) = delete;
+};
+
+using int_keyed_resources = dyanamic_resources<int>;

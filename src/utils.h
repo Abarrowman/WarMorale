@@ -4,8 +4,8 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
+#include <cassert>
 #include <cstdio>
-
 #include <string>
 #include <fstream>
 #include <sstream>
