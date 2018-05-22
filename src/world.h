@@ -6,6 +6,13 @@
 #include "units/grunt.h"
 
 inline world::world(GLFWwindow* win, static_resources& sr, int_keyed_resources& dr) : stage(win, sr, dr) {
+  s_ctx.init(&static_res.get_shader(static_shader_id::sprite), &static_res.get_vertex_array(static_vertex_array_id::sprite));
+  p_ctx.init(&static_res.get_shader(static_shader_id::polygon_fill));
+
+  tri = new owning_polygon(&p_ctx, vertex_array::create_triangle());
+  tri->fill_color.floats = {0.0, 0.5f, 0.5f, 1.0f};
+  add_orphan(tri);
+
 
   teams_layer = new ordered_parent();
   add_orphan(teams_layer);
@@ -29,19 +36,19 @@ inline world::world(GLFWwindow* win, static_resources& sr, int_keyed_resources& 
 
 
   /*angle = 0;
-  face = ctx.create_orphan(&static_res.get_texture(static_texture_id::face));
+  face = s_ctx.create_orphan(&static_res.get_texture(static_texture_id::face));
   add_orphan(face);
 
-  fire = ctx.create_orphan(&static_res.get_texture(static_texture_id::fire));
+  fire = s_ctx.create_orphan(&static_res.get_texture(static_texture_id::fire));
   add_orphan(fire);
 
   dynamic_res.add_texutre(0, std::make_unique<texture>("./assets/textures/ship.png"));
   texture* ship_texture = &(dynamic_res.get_texture(0));
 
   container = new ordered_parent();
-  container->add_orphan(ctx.create_orphan(&static_res.get_texture(static_texture_id::fire)));
-  container->add_orphan(ctx.create_orphan(&static_res.get_texture(static_texture_id::fire)));
-  container->add_orphan(ctx.create_orphan(ship_texture));
+  container->add_orphan(s_ctx.create_orphan(&static_res.get_texture(static_texture_id::fire)));
+  container->add_orphan(s_ctx.create_orphan(&static_res.get_texture(static_texture_id::fire)));
+  container->add_orphan(s_ctx.create_orphan(ship_texture));
   container->child_at(0).local_trans = matrix_3f::transformation_matrix(120, 120, 0, 110);
   container->child_at(1).local_trans = matrix_3f::transformation_matrix(-120, 120, 0, -110);
   add_orphan(container);
@@ -63,9 +70,14 @@ inline bool world::update() {
   fire->local_trans = matrix_3f::transformation_matrix(240, 240, -angle, 240);
   container->local_trans = matrix_3f::transformation_matrix(1, 1, angle);*/
 
-  ctx.update_projection(proj);
+  s_ctx.update_projection(proj);
+  p_ctx.update_projection(proj);
 
-  enemy_first_legion->order.pos = { 100.0f * cos(frame_count / 100.0f), 100.0f * sin(frame_count / 100.0f)};
+  float ang = frame_count / 100.0f;
+  enemy_first_legion->order.pos = vector_2f::create_polar(ang, 100);
+  tri->local_trans = matrix_3f::transformation_matrix(100, 100, ang + PI_F);
+
+
 
   stage::update(); //update children
 
@@ -87,4 +99,8 @@ inline void world::cursor_position_callback(double xpos, double ypos) {
 inline vector_2f world::window_to_world(double xpos, double ypos) {
   vector_2f fixed = { static_cast<float>(xpos) - width / 2, height / 2 - static_cast<float>(ypos) };
   return fixed;
+}
+
+inline sprite* world::static_sprite_orphan(static_texture_id id) {
+  return s_ctx.create_orphan(&(static_res.get_texture(id)));
 }

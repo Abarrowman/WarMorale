@@ -49,7 +49,10 @@ public:
   int frame_col = 0;
   int frame_row = 0;
 
-  sprite() {}
+  sprite() {
+    context = nullptr;
+    tex = nullptr;
+  }
   sprite(sprite_context* ctx, texture* t) {
     init(ctx, t);
   }
@@ -64,9 +67,10 @@ public:
     if (!visible) {
       return;
     }
-
+    assert(context != nullptr);
     context->sprite_shader->use();
 
+    assert(tex != nullptr);
     tex->activate_bind(GL_TEXTURE0);
     matrix_3f full_trans = parent_trans * local_trans;
     glUniformMatrix3fv(context->shader_trans_mat_idx, 1, GL_TRUE, full_trans.values.data());
@@ -76,13 +80,13 @@ public:
     glUniform1i(context->shader_frame_col_idx, frame_col);
     glUniform1i(context->shader_frame_row_idx, frame_row);
 
-    context->sprite_vertex_array->draw();
+    context->sprite_vertex_array->draw(GL_TRIANGLES);
   }
 
   virtual ~sprite() {}
 
 };
 
-sprite* sprite_context::create_orphan(texture* t) {
+inline sprite* sprite_context::create_orphan(texture* t) {
     return new sprite(this, t);
 }

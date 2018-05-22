@@ -108,6 +108,14 @@ public:
     return { x * other, y * other };
   }
 
+  static vector_2f create_polar(float ang) {
+    return { cos(ang), sin(ang) };
+  }
+
+  static vector_2f create_polar(float ang, float mag) {
+    return create_polar(ang) * mag;
+  }
+
 };
 
 class trans_state {

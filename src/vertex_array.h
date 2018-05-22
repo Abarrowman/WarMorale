@@ -13,7 +13,6 @@ public:
   GLuint vbo;
   GLuint vao;
   GLsizei size;
-  GLenum mode;
 
   static vertex_array create_triangle() {
     GLuint vbo;
@@ -38,7 +37,7 @@ public:
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), 0);
 
-    vertex_array array{vbo, vao, 3, GL_TRIANGLES};
+    vertex_array array{vbo, vao, 3};
     return array;
   }
 
@@ -73,24 +72,23 @@ public:
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void *)(2 * sizeof(float)));
 
-    vertex_array array{vbo, vao, 6, GL_TRIANGLES};
+    vertex_array array{vbo, vao, 6};
 
     return array;
   }
 
-  vertex_array(GLuint vertex_buffer_idx, GLuint vertex_array_object, GLuint vertex_count, GLenum draw_mode) :
-    vbo(vertex_buffer_idx), vao(vertex_array_object), size(vertex_count), mode(draw_mode) {}
+  vertex_array(GLuint vertex_buffer_idx, GLuint vertex_array_object, GLuint vertex_count) :
+    vbo(vertex_buffer_idx), vao(vertex_array_object), size(vertex_count) {}
 
   // do not copy or assign
   vertex_array(vertex_array&) = delete;
   vertex_array& operator=(const vertex_array&) = delete;
 
   //moving is ok
-  vertex_array(vertex_array&& old) : vbo(old.vbo), vao(old.vao), size(old.size), mode(old.mode) {
+  vertex_array(vertex_array&& old) : vbo(old.vbo), vao(old.vao), size(old.size) {
     old.vao = 0;
     old.vbo = 0;
     old.size = 0;
-    old.mode = 0;
   }
 
   ~vertex_array() {
@@ -98,7 +96,7 @@ public:
     glDeleteBuffers(1, &vbo);
   }
 
-  void draw() const {
+  void draw(GLenum mode) const {
     glBindVertexArray(vao);
     glDrawArrays(mode, 0, size);
   }
