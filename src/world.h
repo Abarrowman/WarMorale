@@ -7,16 +7,18 @@
 
 inline world::world(GLFWwindow* win, static_resources& sr, int_keyed_resources& dr) : stage(win, sr, dr) {
   s_ctx.init(&static_res.get_shader(static_shader_id::sprite), &static_res.get_vertex_array(static_vertex_array_id::sprite));
-  p_ctx.init(&static_res.get_shader(static_shader_id::polygon_fill));
+  p_ctx.init(&static_res.get_shader(static_shader_id::polygon_fill), &static_res.get_shader(static_shader_id::polygon_edge));
 
   tri = new owning_polygon(&p_ctx, vertex_array::create_triangle());
   tri->fill_color.floats = {0.0, 0.5f, 0.5f, 1.0f};
+  tri->edge_color.floats = { 0.0, 0.2f, 0.2f, 1.0f };
+  tri->edge_width = 0.1f;
   add_orphan(tri);
 
 
   teams_layer = new ordered_parent();
   add_orphan(teams_layer);
-
+    
   player_team = new team();
   enemy_team = new team();
   teams_layer->add_orphan(player_team);

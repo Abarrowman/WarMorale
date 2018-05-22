@@ -15,6 +15,7 @@ enum class static_texture_id {
 enum class static_shader_id {
   sprite,
   polygon_fill,
+  polygon_edge,
   COUNT
 };
 
@@ -41,14 +42,20 @@ public:
     textures.emplace_back("./assets/textures/grunt.png");
 
     {
-      std::string const sprite_fragment_shader = read_file_to_string("./assets/shaders/sprite.frag");
       std::string const sprite_vertex_shader = read_file_to_string("./assets/shaders/sprite.vert");
+      std::string const sprite_fragment_shader = read_file_to_string("./assets/shaders/sprite.frag");
       shaders.emplace_back(sprite_vertex_shader.c_str(), sprite_fragment_shader.c_str());
     }
     {
-      std::string const sprite_fragment_shader = read_file_to_string("./assets/shaders/polygon.frag");
-      std::string const sprite_vertex_shader = read_file_to_string("./assets/shaders/polygon.vert");
-      shaders.emplace_back(sprite_vertex_shader.c_str(), sprite_fragment_shader.c_str());
+      std::string const polygon_vertex_shader = read_file_to_string("./assets/shaders/polygon.vert");
+      std::string const polygon_fragment_shader = read_file_to_string("./assets/shaders/polygon.frag");
+      shaders.emplace_back(polygon_vertex_shader.c_str(), polygon_fragment_shader.c_str());
+
+
+      std::string const polygon_edge_vertex_shader = read_file_to_string("./assets/shaders/polygon_edge.vert");
+      std::string const polygon_edge_geometry_shader = read_file_to_string("./assets/shaders/polygon_edge.geom");
+      // TODO multiple copies of the same shaders are being compiled into programs
+      shaders.emplace_back(polygon_edge_vertex_shader.c_str(), polygon_edge_geometry_shader.c_str(), polygon_fragment_shader.c_str());
     }
     
     vertex_array sprite_vertex_array = vertex_array::create_sprite_vertex_array();

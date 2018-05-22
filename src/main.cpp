@@ -54,7 +54,8 @@ int main(void) {
   
   /* Create a windowed mode window and its OpenGL context */
   bool windowed = true;
-  int window_width = 1280;
+  int window_width = 720;
+  //int window_width = 1280;
   int window_height = 720;
   char const* window_title = "War Morale";
   GLFWwindow* window;
