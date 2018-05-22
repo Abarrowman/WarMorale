@@ -26,6 +26,15 @@ public:
     proj = matrix_3f::orthographic_projection(x_min, x_max, y_min, y_max);
   }
 
+  sprite* static_sprite_orphan(static_texture_id id) {
+    return ctx.create_orphan(&(static_res.get_texture(id)));
+  }
+
 
   virtual void key_callback(int key, int scancode, int action, int mods) {}
+
+  virtual void cursor_position_callback(double xpos, double ypos) {}
+
+  virtual ~stage() {} // this is a base class
+
 };

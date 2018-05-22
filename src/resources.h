@@ -8,7 +8,7 @@
 enum class static_texture_id {
   face,
   fire,
-  //ship,
+  grunt,
   COUNT
 };
 
@@ -37,7 +37,7 @@ public:
 
     textures.emplace_back("./assets/textures/sad.png");
     textures.emplace_back("./assets/textures/fire.png");
-    //textures.emplace_back("./assets/textures/ship.png");
+    textures.emplace_back("./assets/textures/grunt.png");
 
     std::string const sprite_fragment_shader = read_file_to_string("./assets/shaders/sprite.frag");
     std::string const sprite_vertex_shader = read_file_to_string("./assets/shaders/sprite.vert");
@@ -88,6 +88,21 @@ private:
   std::unordered_map<K, std::unique_ptr<shader>> shaders;
   std::unordered_map<K, std::unique_ptr<vertex_array>> vertex_arrays;
 public:
+
+  bool has_texture(K const& id) {
+    return (textures.end() != textures.find(id));
+
+  }
+
+  bool has_shader(K const& id) {
+    return (shaders.end() != shaders.find(id));
+
+  }
+
+  bool has_vertex_array(K const& id) {
+    return (vertex_array.end() != vertex_array.find(id));
+
+  }
 
   texture& get_texture(K const& id) {
     return *(textures[id].get());

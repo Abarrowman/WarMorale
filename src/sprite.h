@@ -6,6 +6,8 @@
 #include "vertex_array.h"
 #include <functional>
 
+class sprite;
+
 class sprite_context {
 public:
   shader* sprite_shader;
@@ -33,6 +35,8 @@ public:
     sprite_shader->use();
     glUniformMatrix3fv(shader_proj_mat_idx, 1, GL_TRUE, proj_mat.values.data());
   }
+
+  sprite* create_orphan(texture* t);
 };
 
 class sprite : public renderable {
@@ -78,3 +82,7 @@ public:
   virtual ~sprite() {}
 
 };
+
+sprite* sprite_context::create_orphan(texture* t) {
+    return new sprite(this, t);
+}

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "utils.h"
-
+#include <cmath>
 #include <cstring>
 #include <array>
 
@@ -81,4 +81,69 @@ public:
     return *this;
   }
 
+};
+
+class vector_2f {
+public:
+  float x;
+  float y;
+
+  float magnitude() const {
+    return std::sqrt(x * x + y * y);
+  }
+
+  float angle() const {
+    return std::atan2(y, x);
+  }
+
+  vector_2f operator-(vector_2f const& other) const {
+    return { x - other.x, y - other.y };
+  }
+
+  vector_2f operator+(vector_2f const& other) const {
+    return { x + other.x, y + other.y };
+  }
+
+  vector_2f operator*(float other) const {
+    return { x * other, y * other };
+  }
+
+};
+
+class trans_state {
+public:
+  float scale_x = 1.0f;
+  float scale_y = 1.0f;
+  float angle = 0.0f;
+  float x = 0.0f;
+  float y = 0.0f;
+  
+  matrix_3f to_matrix() {
+    return matrix_3f::transformation_matrix(scale_x, scale_y, angle, x, y);
+  }
+
+  vector_2f translation_to(trans_state const& other) const {
+    return other.get_position() - get_position();
+  }
+
+  vector_2f translation_to(vector_2f const& other) const {
+    return other - get_position();
+  }
+
+  vector_2f get_position() const {
+    return {x, y};
+  }
+
+  void set_position(vector_2f pos) {
+    x = pos.x;
+    y = pos.y;
+  }
+
+  void set_clamped_angle(float unclamped_angle) {
+    angle = angle_clamp(unclamped_angle);
+  }
+
+  void clamp_angle() {
+    angle = angle_clamp(angle);
+  }
 };

@@ -25,22 +25,23 @@ public:
   virtual ~renderable() {} // this is a base class
 };
 
-template<bool ordered>
+template<bool ordered, typename child_type>
 class renderable_parent : public renderable {
 private:
-  std::vector<std::unique_ptr<renderable>> children;
+  std::vector<std::unique_ptr<child_type>> children;
 
 public:
 
-  void add_orphan(renderable* child) {
+  child_type& add_orphan(child_type* child) {
     children.emplace_back(child);
+    return *child;
   }
 
-  void add_child(std::unique_ptr<renderable> child) {
+  void add_child(std::unique_ptr<child_type> child) {
     children.push_back(std::move(child));
   }
 
-  renderable& child_at(int idx) {
+  child_type& child_at(int idx) {
     return *(children[idx].get());
   }
 
@@ -71,9 +72,9 @@ public:
   Returns -1 if the child is not one of the renderable_parent's children.
   O(n)
   */
-  int index_of_child(renderable& target) {
-    renderable* target_address = &target;
-    auto it = std::find_if(children.begin(), children.end(), [target_address](std::unique_ptr<renderable> const& child) {
+  int index_of_child(child_type& target) {
+    child_type* target_address = &target;
+    auto it = std::find_if(children.begin(), children.end(), [target_address](std::unique_ptr<child_type> const& child) {
       return (target_address == child.get());
     });
     if (it == children.end()) {
@@ -88,7 +89,7 @@ public:
   Removes the child from the parent.
   O(n)
   */
-  void remove_child(renderable& child) {
+  void remove_child(child_type& child) {
     int idx = index_of_child(child);
     if (idx != -1) {
       remove_child_at(idx);
@@ -123,5 +124,5 @@ public:
   }
 };
 
-using ordered_parent = renderable_parent<true>;
-using unordered_parent = renderable_parent<false>;
+using ordered_parent = renderable_parent<true, renderable>;
+using unordered_parent = renderable_parent<false, renderable>;

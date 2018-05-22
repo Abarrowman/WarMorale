@@ -31,9 +31,15 @@ void error_callback(int error, const char* description) {
   fprintf(stderr, "Error: %s\n", description);
 }
 
-void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
   if (global_stage != nullptr) {
     global_stage->key_callback(key, scancode, action, mods);
+  }
+}
+
+static void cursor_position_callback(GLFWwindow* window, double xpos, double ypos) {
+  if (global_stage != nullptr) {
+    global_stage->cursor_position_callback(xpos, ypos);
   }
 }
 
@@ -64,6 +70,7 @@ int main(void) {
     return -1;
   }
   glfwSetKeyCallback(window, key_callback);
+  glfwSetCursorPosCallback(window, cursor_position_callback);
   /* Make the window's context current */
   glfwMakeContextCurrent(window);
 
