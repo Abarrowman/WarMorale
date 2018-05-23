@@ -1,10 +1,25 @@
 #pragma once
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
-
+#include <vector>
 #include "utils.h"
 
 class shader {
+private:
+  static void compile_and_check(GLuint shader_idx) {
+    glCompileShader(shader_idx);
+    GLint success = 0;
+    glGetShaderiv(shader_idx, GL_COMPILE_STATUS, &success);
+    if (!success) {
+      GLint log_buffer_size = 0;
+      glGetShaderiv(shader_idx, GL_INFO_LOG_LENGTH, &log_buffer_size);
+      std::vector<GLchar> error_log(log_buffer_size);
+      GLint log_length = 0;
+      glGetShaderInfoLog(shader_idx, log_buffer_size, &log_length, error_log.data());
+      fprintf(stderr, "Shader Compile Error [%.*s]\n", log_length, error_log.data());
+    }
+  }
+
 public:
   GLuint vs;
   GLuint gs;
@@ -15,15 +30,15 @@ public:
 
     vs = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vs, 1, &vertex_shader, NULL);
-    glCompileShader(vs);
+    compile_and_check(vs);
 
     gs = glCreateShader(GL_GEOMETRY_SHADER);
     glShaderSource(gs, 1, &geometry_shader, NULL);
-    glCompileShader(gs);
+    compile_and_check(gs);
 
     fs = glCreateShader(GL_FRAGMENT_SHADER);
     glShaderSource(fs, 1, &fragment_shader, NULL);
-    glCompileShader(fs);
+    compile_and_check(fs);
 
     program = glCreateProgram();
     glAttachShader(program, fs);
@@ -38,10 +53,10 @@ public:
   shader(const char* vertex_shader, const char* fragment_shader) {
     vs = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vs, 1, &vertex_shader, NULL);
-    glCompileShader(vs);
+    compile_and_check(vs);
     fs = glCreateShader(GL_FRAGMENT_SHADER);
     glShaderSource(fs, 1, &fragment_shader, NULL);
-    glCompileShader(fs);
+    compile_and_check(fs);
 
     program = glCreateProgram();
     glAttachShader(program, fs);

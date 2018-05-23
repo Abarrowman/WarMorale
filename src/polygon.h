@@ -22,6 +22,8 @@ public:
   GLint edge_proj_mat_idx;
   GLint edge_width_idx;
   GLint edge_color_idx;
+  GLint edge_cap_type_idx;
+
 
   void init(shader* fill_shader, shader* edge_shader) {
     polygon_fill_shader = fill_shader;
@@ -35,6 +37,7 @@ public:
     edge_proj_mat_idx = glGetUniformLocation(polygon_edge_shader->program, "proj_mat");
     edge_width_idx = glGetUniformLocation(polygon_edge_shader->program, "width");
     edge_color_idx = glGetUniformLocation(polygon_edge_shader->program, "color");
+    edge_cap_type_idx = glGetUniformLocation(polygon_edge_shader->program, "cap_type");
   }
 
   void update_projection(matrix_3f const& proj_mat) {
@@ -97,6 +100,7 @@ public:
     glUniformMatrix3fv(context->edge_trans_mat_idx, 1, GL_TRUE, full_trans.values.data());
     glUniform4fv(context->edge_color_idx, 1, edge_color.floats.data());
     glUniform1f(context->edge_width_idx, edge_width);
+    glUniform1i(context->edge_cap_type_idx, 2);
     arr.draw(GL_LINE_LOOP);
   }
 };

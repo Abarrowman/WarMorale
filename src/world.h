@@ -12,7 +12,7 @@ inline world::world(GLFWwindow* win, static_resources& sr, int_keyed_resources& 
   tri = new owning_polygon(&p_ctx, vertex_array::create_triangle());
   tri->fill_color.floats = {0.0, 0.5f, 0.5f, 1.0f};
   tri->edge_color.floats = { 0.0, 0.2f, 0.2f, 1.0f };
-  tri->edge_width = 0.1f;
+  tri->edge_width = 0.3f;//0.1f;
   add_orphan(tri);
 
 
@@ -105,8 +105,12 @@ inline void world::mouse_button_callback(int button, int action, int mods) {
       if (!mouse_down) {
         // press started
         //printf("Press\n");
+
         std::array<vector_2f, 4> square_arr{ {{1, 0}, {0, 1}, {-1, 0}, {0, -1}} };
         tri->arr.set_veritices(square_arr);
+
+        /*std::array<vector_2f, 2> line_arr{{{ -1, 0 }, { 0, 1 }}};
+        tri->arr.set_veritices(line_arr);*/
       }
       mouse_down = true;
     } else {
