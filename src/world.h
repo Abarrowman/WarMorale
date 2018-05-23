@@ -7,7 +7,7 @@
 
 inline world::world(GLFWwindow* win, static_resources& sr, int_keyed_resources& dr) : stage(win, sr, dr) {
   s_ctx.init(&static_res.get_shader(static_shader_id::sprite), &static_res.get_vertex_array(static_vertex_array_id::sprite));
-  p_ctx.init(&static_res.get_shader(static_shader_id::polygon_fill), &static_res.get_shader(static_shader_id::polygon_edge));
+  p_ctx.init(&static_res.get_shader(static_shader_id::polygon_fill), &static_res.get_shader(static_shader_id::line));
 
   tri = new owning_polygon(&p_ctx, vertex_array::create_triangle());
   tri->fill_color.floats = {0.0, 0.5f, 0.5f, 1.0f};
@@ -77,6 +77,7 @@ inline bool world::update() {
 
   float ang = frame_count / 100.0f;
   enemy_first_legion->order.pos = vector_2f::create_polar(ang, 100);
+  player_first_legion->order.pos = mouse_pos;
   tri->local_trans = matrix_3f::transformation_matrix(100, 100, ang + PI_F);
 
 
@@ -95,7 +96,33 @@ inline void world::key_callback(int key, int scancode, int action, int mods) {
 }
 
 inline void world::cursor_position_callback(double xpos, double ypos) {
-  player_first_legion->order.pos = window_to_world(xpos, ypos);
+  mouse_pos = window_to_world(xpos, ypos);
+}
+
+inline void world::mouse_button_callback(int button, int action, int mods) {
+  if (button == GLFW_MOUSE_BUTTON_LEFT) {
+    if (action == GLFW_PRESS) {
+      if (!mouse_down) {
+        // press started
+        //printf("Press\n");
+        std::array<vector_2f, 4> square_arr{ {{1, 0}, {0, 1}, {-1, 0}, {0, -1}} };
+        tri->arr.set_veritices(square_arr);
+      }
+      mouse_down = true;
+    } else {
+      if (mouse_down) {
+        // release started
+        //printf("Release\n");
+        std::array<vector_2f, 3> tri_arr{{
+          { 1, 0 },
+          { cos(PI_F * 2 / 3), sin(PI_F * 2 / 3) },
+          { cos(PI_F * 2 / 3), sin(PI_F * 4 / 3) }
+         }};
+        tri->arr.set_veritices(tri_arr);
+      }
+      mouse_down = false;
+    }
+  }
 }
 
 inline vector_2f world::window_to_world(double xpos, double ypos) {

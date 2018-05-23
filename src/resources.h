@@ -15,7 +15,7 @@ enum class static_texture_id {
 enum class static_shader_id {
   sprite,
   polygon_fill,
-  polygon_edge,
+  line,
   COUNT
 };
 
@@ -48,14 +48,14 @@ public:
     }
     {
       std::string const polygon_vertex_shader = read_file_to_string("./assets/shaders/polygon.vert");
-      std::string const polygon_fragment_shader = read_file_to_string("./assets/shaders/polygon.frag");
-      shaders.emplace_back(polygon_vertex_shader.c_str(), polygon_fragment_shader.c_str());
+      std::string const solid_fragment_shader = read_file_to_string("./assets/shaders/solid.frag");
+      shaders.emplace_back(polygon_vertex_shader.c_str(), solid_fragment_shader.c_str());
 
 
-      std::string const polygon_edge_vertex_shader = read_file_to_string("./assets/shaders/polygon_edge.vert");
-      std::string const polygon_edge_geometry_shader = read_file_to_string("./assets/shaders/polygon_edge.geom");
+      std::string const line_vertex_shader = read_file_to_string("./assets/shaders/line.vert");
+      std::string const line_geometry_shader = read_file_to_string("./assets/shaders/line.geom");
       // TODO multiple copies of the same shaders are being compiled into programs
-      shaders.emplace_back(polygon_edge_vertex_shader.c_str(), polygon_edge_geometry_shader.c_str(), polygon_fragment_shader.c_str());
+      shaders.emplace_back(line_vertex_shader.c_str(), line_geometry_shader.c_str(), solid_fragment_shader.c_str());
     }
     
     vertex_array sprite_vertex_array = vertex_array::create_sprite_vertex_array();

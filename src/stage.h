@@ -6,7 +6,7 @@
 
 class stage : public ordered_parent {
 public:
-  GLFWwindow * window;
+  GLFWwindow* window;
   static_resources& static_res;
   int_keyed_resources& dynamic_res;
   matrix_3f proj;
@@ -27,6 +27,8 @@ public:
   virtual void key_callback(int key, int scancode, int action, int mods) {}
 
   virtual void cursor_position_callback(double xpos, double ypos) {}
+
+  virtual void mouse_button_callback(int button, int action, int mods) {};
 
   virtual ~stage() {} // this is a base class
 

@@ -6,6 +6,7 @@ class world;
 #include "team.h"
 #include "sprite.h"
 #include "polygon.h"
+#include "matrix_3f.h"
 
 class world : public stage {
 
@@ -14,6 +15,8 @@ public:
   sprite_context s_ctx;
   polygon_context p_ctx;
   long frame_count = 0;
+  vector_2f mouse_pos = { 0, 0 };
+  bool mouse_down = false;
 
   team* player_team;
   team* enemy_team;
@@ -32,6 +35,8 @@ public:
   
   void key_callback(int key, int scancode, int action, int mods) override;
   void cursor_position_callback(double xpos, double ypos) override;
+  void mouse_button_callback(int button, int action, int mods) override;
+
 
   sprite* world::static_sprite_orphan(static_texture_id id);
 

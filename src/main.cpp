@@ -43,6 +43,12 @@ static void cursor_position_callback(GLFWwindow* window, double xpos, double ypo
   }
 }
 
+void mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
+  if (global_stage != nullptr) {
+    global_stage->mouse_button_callback(button, action, mods);
+  }
+}
+
 int main(void) {
 
   /* Initialize the library */
@@ -54,8 +60,7 @@ int main(void) {
   
   /* Create a windowed mode window and its OpenGL context */
   bool windowed = true;
-  int window_width = 720;
-  //int window_width = 1280;
+  int window_width = 1280;
   int window_height = 720;
   char const* window_title = "War Morale";
   GLFWwindow* window;
@@ -72,6 +77,7 @@ int main(void) {
   }
   glfwSetKeyCallback(window, key_callback);
   glfwSetCursorPosCallback(window, cursor_position_callback);
+  glfwSetMouseButtonCallback(window, mouse_button_callback);
   /* Make the window's context current */
   glfwMakeContextCurrent(window);
 
