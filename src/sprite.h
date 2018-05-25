@@ -37,6 +37,7 @@ public:
   }
 
   sprite* create_orphan(texture* t);
+  sprite create(texture* t);
 };
 
 class sprite : public renderable {
@@ -89,4 +90,8 @@ public:
 
 inline sprite* sprite_context::create_orphan(texture* t) {
     return new sprite(this, t);
+}
+
+inline sprite sprite_context::create(texture * t) {
+  return sprite(this, t);
 }

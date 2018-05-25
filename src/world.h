@@ -35,42 +35,21 @@ inline world::world(GLFWwindow* win, static_resources& sr, int_keyed_resources& 
 
   enemy_team->establish_hostility(player_team);
 
+  threat_layer = new threat_parent();
+  sprite fire_sprite = static_sprite(static_texture_id::fire);
+  fire_sprite.local_trans = matrix_3f::transformation_matrix(32, 32);
+  point_threat* fire = new point_threat(fire_sprite, 10);
+  fire->trans.set_position({200, 200});
+  threat_layer->add_orphan(fire);
+  add_orphan(threat_layer);
 
-
-  /*angle = 0;
-  face = s_ctx.create_orphan(&static_res.get_texture(static_texture_id::face));
-  add_orphan(face);
-
-  fire = s_ctx.create_orphan(&static_res.get_texture(static_texture_id::fire));
-  add_orphan(fire);
-
-  dynamic_res.add_texutre(0, std::make_unique<texture>("./assets/textures/ship.png"));
-  texture* ship_texture = &(dynamic_res.get_texture(0));
-
-  container = new ordered_parent();
-  container->add_orphan(s_ctx.create_orphan(&static_res.get_texture(static_texture_id::fire)));
-  container->add_orphan(s_ctx.create_orphan(&static_res.get_texture(static_texture_id::fire)));
-  container->add_orphan(s_ctx.create_orphan(ship_texture));
-  container->child_at(0).local_trans = matrix_3f::transformation_matrix(120, 120, 0, 110);
-  container->child_at(1).local_trans = matrix_3f::transformation_matrix(-120, 120, 0, -110);
-  add_orphan(container);
-
-  sprite& ship_sprite = static_cast<sprite&>(container->child_at(2));
-  ship_sprite.frame_width = 4;
-  ship_sprite.frame_height = 4;
-  ship_sprite.local_trans = matrix_3f::transformation_matrix(32, 32, PI_F / 2);*/
+  over_effects_layer = new ordered_parent();
+  add_orphan(over_effects_layer);
 
 }
 
 inline bool world::update() {
   frame_count += 1;
-  // before children update
-  /*angle += 0.001f;
-
-  face->local_trans = matrix_3f::transformation_matrix(480, 480, angle);
-
-  fire->local_trans = matrix_3f::transformation_matrix(240, 240, -angle, 240);
-  container->local_trans = matrix_3f::transformation_matrix(1, 1, angle);*/
 
   s_ctx.update_projection(proj);
   p_ctx.update_projection(proj);
@@ -79,8 +58,6 @@ inline bool world::update() {
   enemy_first_legion->order.pos = vector_2f::create_polar(ang, 100);
   player_first_legion->order.pos = mouse_pos;
   tri->local_trans = matrix_3f::transformation_matrix(100, 100, ang + PI_F);
-
-
 
   stage::update(); //update children
 
@@ -136,4 +113,8 @@ inline vector_2f world::window_to_world(double xpos, double ypos) {
 
 inline sprite* world::static_sprite_orphan(static_texture_id id) {
   return s_ctx.create_orphan(&(static_res.get_texture(id)));
+}
+
+inline sprite world::static_sprite(static_texture_id id) {
+  return s_ctx.create(&(static_res.get_texture(id)));
 }

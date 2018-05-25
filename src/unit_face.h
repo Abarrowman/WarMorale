@@ -1,5 +1,8 @@
 #pragma once
 
+#include "matrix_3f.h"
+
+class point_threat;
 class team;
 class legion;
 class world;
@@ -15,25 +18,29 @@ class unit_reference;
 class unit : public ordered_parent {
 private:
   unit_status status = unit_status::LIVING;
-
+  void take_threats();
 public:
   world& land;
   team& side;
   legion* group;
+  int const max_health;
+  int current_health;
 
   trans_state trans;
 
-  unit(world& w, team& t, legion* l);
+  unit(world& w, team& t, legion* l, int max_hp);
   virtual ~unit(); // base class
   bool update() override;
   bool is_living();
 
+  virtual bool take_point_threat(point_threat& pt) = 0;
+
+
 protected:
   /*
   Updates the unit.
-  Return true if the unit should die.
   */
-  virtual bool living_update() { return false; }
+  virtual void living_update() = 0;
 
   unit_reference find_closest_enemy();
 };

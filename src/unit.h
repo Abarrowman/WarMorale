@@ -4,7 +4,15 @@
 #include "team_face.h"
 #include "unit_face.h"
 
-inline unit::unit(world& w, team& t, legion* l) : land(w), side(t), group(l) {
+inline void unit::take_threats() {
+  int threat_count = land.threat_layer->child_count();
+  for (int n = 0; n < threat_count; n++) {
+    land.threat_layer->child_at(n).hurt(*this);
+  }
+}
+
+inline unit::unit(world& w, team& t, legion* l, int max_hp) : land(w), side(t), group(l), max_health(max_hp) {
+  current_health = max_health;
   group->add_unit(this);
 }
 
@@ -19,7 +27,9 @@ inline bool unit::update() {
   assert(group != nullptr);
   switch (status) {
   case LIVING:
-    if (living_update()) {
+    living_update();
+    take_threats();
+    if (current_health <= 0) {
       visible = false;
       status = unit_status::KILLED;
     }

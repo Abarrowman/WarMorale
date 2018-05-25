@@ -4,21 +4,32 @@
 #include "../world_face.h"
 #include "../team_face.h"
 #include "../unit_face.h"
+#include "../threat.h"
 
 class grunt : public unit {
 private:
   sprite* ship;
   //float ang = 0;
 public:
-  grunt(world& w, team& t, legion* l) : unit(w, t, l) {
+  grunt(world& w, team& t, legion* l) : unit(w, t, l, 10) {
     ship = land.static_sprite_orphan(static_texture_id::grunt);
     ship->local_trans = matrix_3f::transformation_matrix(32, 32);
     add_orphan(ship);
-
   }
 
+  bool take_point_threat(point_threat& pt) override {
+    vector_2f dis = trans.translation_to(pt.trans);
+    if (dis.magnitude() < 16) {
+      current_health -= pt.damage;
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+
 protected:
-  bool living_update() override {
+  void living_update() override {
     unit_reference closest_enemy_ref = find_closest_enemy();
 
     if (closest_enemy_ref.valid()) {
@@ -31,7 +42,6 @@ protected:
       trans.angle += 0.1f * e_angle;
       trans.set_position(trans.get_position() + e_pos * 0.1f);
     }
-    return false;
   }
 };
 

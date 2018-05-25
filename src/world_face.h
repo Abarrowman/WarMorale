@@ -7,6 +7,7 @@ class world;
 #include "sprite.h"
 #include "polygon.h"
 #include "matrix_3f.h"
+#include "threat.h"
 
 class world : public stage {
 
@@ -25,7 +26,11 @@ public:
 
 
   ordered_parent* teams_layer;
-  ordered_parent* effects_layer;
+  threat_parent* threat_layer;
+  
+  // A container for effects to render over-top the main game elements
+  ordered_parent* over_effects_layer;
+
 
   owning_polygon* tri;
 
@@ -39,6 +44,7 @@ public:
 
 
   sprite* world::static_sprite_orphan(static_texture_id id);
+  sprite world::static_sprite(static_texture_id id);
 
 
   /*~world() {
