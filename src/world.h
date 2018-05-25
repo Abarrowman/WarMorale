@@ -8,8 +8,9 @@
 inline world::world(GLFWwindow* win, static_resources& sr, int_keyed_resources& dr) : stage(win, sr, dr) {
   s_ctx.init(&static_res.get_shader(static_shader_id::sprite), &static_res.get_vertex_array(static_vertex_array_id::sprite));
   p_ctx.init(&static_res.get_shader(static_shader_id::polygon_fill), &static_res.get_shader(static_shader_id::line));
+  pp_ctx.init(&static_res.get_shader(static_shader_id::point_particle));
 
-  tri = new owning_polygon(&p_ctx, vertex_array::create_triangle());
+  tri = new owning_polygon(&p_ctx, simple_vertex_array::create_triangle());
   tri->fill_color.floats = {0.0, 0.5f, 0.5f, 1.0f};
   tri->edge_color.floats = { 0.0, 0.2f, 0.2f, 1.0f };
   tri->edge_width = 0.3f;//0.1f;
@@ -45,7 +46,6 @@ inline world::world(GLFWwindow* win, static_resources& sr, int_keyed_resources& 
 
   over_effects_layer = new ordered_parent();
   add_orphan(over_effects_layer);
-
 }
 
 inline bool world::update() {
@@ -53,6 +53,7 @@ inline bool world::update() {
 
   s_ctx.update_projection(proj);
   p_ctx.update_projection(proj);
+  pp_ctx.update_projection(proj);
 
   float ang = frame_count / 100.0f;
   enemy_first_legion->order.pos = vector_2f::create_polar(ang, 100);

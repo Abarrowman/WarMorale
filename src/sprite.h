@@ -11,7 +11,7 @@ class sprite;
 class sprite_context {
 public:
   shader* sprite_shader;
-  vertex_array* sprite_vertex_array;
+  simple_vertex_array* sprite_vertex_array;
   GLint shader_trans_mat_idx;
   GLint shader_proj_mat_idx;
   GLint shader_frame_width_idx;
@@ -19,7 +19,7 @@ public:
   GLint shader_frame_col_idx;
   GLint shader_frame_row_idx;
 
-  void init(shader* s_shader, vertex_array* s_vertex_array) {
+  void init(shader* s_shader, simple_vertex_array* s_vertex_array) {
     sprite_shader = s_shader;
     sprite_vertex_array = s_vertex_array;
     shader_trans_mat_idx = glGetUniformLocation(sprite_shader->program, "trans_mat");

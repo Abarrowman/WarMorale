@@ -16,6 +16,7 @@ enum class static_shader_id {
   sprite,
   polygon_fill,
   line,
+  point_particle,
   COUNT
 };
 
@@ -29,7 +30,7 @@ class static_resources {
 private:
   std::vector<texture> textures;
   std::vector<shader> shaders;
-  std::vector<vertex_array> vertex_arrays;
+  std::vector<simple_vertex_array> vertex_arrays;
 public:
   static_resources() {
     // pre-allocate to avoid pointers to avoid reference invalidation
@@ -57,8 +58,13 @@ public:
       // TODO multiple copies of the same shaders are being compiled into programs
       shaders.emplace_back(line_vertex_shader.c_str(), line_geometry_shader.c_str(), solid_fragment_shader.c_str());
     }
+    {
+      std::string const pt_particle_vertex_shader = read_file_to_string("./assets/shaders/pt_particle.vert");
+      std::string const vertex_interp_fragment_shader = read_file_to_string("./assets/shaders/vertex_interp.frag");
+      shaders.emplace_back(pt_particle_vertex_shader.c_str(), vertex_interp_fragment_shader.c_str());
+    }
     
-    vertex_array sprite_vertex_array = vertex_array::create_sprite_vertex_array();
+    simple_vertex_array sprite_vertex_array = simple_vertex_array::create_sprite_vertex_array();
     vertex_arrays.push_back(std::move(sprite_vertex_array));
   }
 
@@ -74,7 +80,7 @@ public:
   Return the statically mapped vertex array associated with the id.
   O(1)
   */
-  vertex_array& get_vertex_array(static_vertex_array_id id) {
+  simple_vertex_array& get_vertex_array(static_vertex_array_id id) {
     return vertex_arrays[static_cast<int>(id)];
   }
 
@@ -100,7 +106,7 @@ class dyanamic_resources {
 private:
   std::unordered_map<K, std::unique_ptr<texture>> textures;
   std::unordered_map<K, std::unique_ptr<shader>> shaders;
-  std::unordered_map<K, std::unique_ptr<vertex_array>> vertex_arrays;
+  std::unordered_map<K, std::unique_ptr<simple_vertex_array>> vertex_arrays;
 public:
 
   bool has_texture(K const& id) {
@@ -114,7 +120,7 @@ public:
   }
 
   bool has_vertex_array(K const& id) {
-    return (vertex_array.end() != vertex_array.find(id));
+    return (simple_vertex_array.end() != vertex_array.find(id));
 
   }
 
@@ -126,7 +132,7 @@ public:
     return *(textures[id].get());
   }
 
-  vertex_array& get_vertex_array(K const& id) {
+  simple_vertex_array& get_vertex_array(K const& id) {
     return *(vertex_arrays[id].get());
   }
 

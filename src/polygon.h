@@ -4,11 +4,7 @@
 #include "renderable.h"
 #include "shader.h"
 #include "vertex_array.h"
-
-class color {
-public:
-  std::array<float, 4> floats = { 1, 1, 1, 1 };
-};
+#include "color.h"
 
 class polygon_context {
 public:
@@ -52,7 +48,7 @@ public:
 /*class sharing_polygon : public renderable {
 public:
   polygon_context* context;
-  vertex_array* arr;
+  simple_vertex_array* arr;
   color fill_color;
 
   void render(matrix_3f const& parent_trans) {
@@ -74,13 +70,13 @@ public:
 class owning_polygon : public renderable {
 public:
   polygon_context* context;
-  vertex_array arr;
+  simple_vertex_array arr;
 
   color fill_color;
   color edge_color;
   float edge_width = 1;
 
-  owning_polygon(polygon_context* ctx, vertex_array va) : context(ctx), arr(std::move(va)) {
+  owning_polygon(polygon_context* ctx, simple_vertex_array va) : context(ctx), arr(std::move(va)) {
   }
 
   void render(matrix_3f const& parent_trans) {

@@ -30,6 +30,7 @@ inline bool unit::update() {
     living_update();
     take_threats();
     if (current_health <= 0) {
+      death_action();
       visible = false;
       status = unit_status::KILLED;
     }

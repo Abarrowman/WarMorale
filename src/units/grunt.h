@@ -43,5 +43,58 @@ protected:
       trans.set_position(trans.get_position() + e_pos * 0.1f);
     }
   }
+
+  void death_action() override {
+    int image_width = 32;
+    int image_height = 32;
+    std::vector<unsigned char> pixel_data;
+    pixel_data.resize(4 * image_width * image_height);
+
+    glGetTextureImage(ship->tex->tex, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixel_data.size(), pixel_data.data());
+
+    int max_particle_count = image_height * image_width;
+    vector_2f image_center = { static_cast<float>(image_width - 1) / 2.0f, static_cast<float>(image_height - 1) / 2.0f };
+    std::vector<vector_2f> positions;
+    std::vector<color> colors;
+    std::vector<vector_2f> velocities;
+    positions.reserve(max_particle_count);
+    colors.reserve(max_particle_count);
+    velocities.reserve(max_particle_count);
+
+    vector_2f center = trans.get_position();
+    matrix_3f total_trans = trans.to_matrix() * ship->local_trans;
+
+    for (int x = 0; x < image_width; x++) {
+      for (int y = 0; y < image_height; y++) {
+        unsigned char a_val = pixel_data[(y * image_width + x) * 4 + 3];
+        if (a_val != 0) {
+          unsigned char r_val = pixel_data[(y * image_width + x) * 4 + 0];
+          unsigned char g_val = pixel_data[(y * image_width + x) * 4 + 1];
+          unsigned char b_val = pixel_data[(y * image_width + x) * 4 + 2];
+
+          color p_col = { r_val / 255.0f, g_val / 255.0f, b_val / 255.0f, a_val / 255.0f};
+          vector_2f pos = vector_2f(static_cast<float>(x) / (image_width - 1) - 0.5f, static_cast<float>(y) / (image_height - 1) - 0.5f);
+          vector_2f trans_pos = total_trans * pos;
+
+          positions.push_back(trans_pos);
+          colors.push_back(p_col);
+          velocities.push_back((trans_pos - center) * 0.5f);
+          //velocities.push_back({0, 0});
+        }
+      }
+    }
+
+    /*int zero_count = 0;
+    for (unsigned char val : pixel_data) {
+      if (val == 0) {
+        zero_count++;
+      }
+    }*/
+
+    int particle_count = positions.size();
+    explosion_effect* boom = new explosion_effect(&land.pp_ctx, particle_count, 20, std::move(positions), std::move(colors), std::move(velocities));
+    //explosion_effect* boom = explosion_effect::create_example_orphan(&land.pp_ctx, trans.get_position());
+    land.over_effects_layer->add_orphan(boom);
+  }
 };
 

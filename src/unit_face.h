@@ -41,6 +41,7 @@ protected:
   Updates the unit.
   */
   virtual void living_update() = 0;
+  virtual void death_action() {}
 
   unit_reference find_closest_enemy();
 };

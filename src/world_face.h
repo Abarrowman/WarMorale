@@ -8,6 +8,7 @@ class world;
 #include "polygon.h"
 #include "matrix_3f.h"
 #include "threat.h"
+#include "explosion_effect.h"
 
 class world : public stage {
 
@@ -15,6 +16,8 @@ public:
 
   sprite_context s_ctx;
   polygon_context p_ctx;
+  point_particle_context pp_ctx;
+
   long frame_count = 0;
   vector_2f mouse_pos = { 0, 0 };
   bool mouse_down = false;

@@ -5,6 +5,8 @@
 #include <cstring>
 #include <array>
 
+class vector_2f;
+
 class matrix_3f {
 public:
   std::array<float, 9> values;
@@ -51,6 +53,8 @@ public:
     values[row * 3 + col] = value;
   }
 
+  vector_2f operator*(vector_2f const& c) const;
+
   matrix_3f operator*(matrix_3f const& c) const {
     matrix_3f result = *this;
     for (int row = 0; row < 3; row++) {
@@ -88,6 +92,10 @@ public:
   float x;
   float y;
 
+  vector_2f() {};
+  vector_2f(float vx, float vy) : x(vx), y(vy)  {};
+
+
   float magnitude() const {
     return std::sqrt(x * x + y * y);
   }
@@ -102,6 +110,12 @@ public:
 
   vector_2f operator+(vector_2f const& other) const {
     return { x + other.x, y + other.y };
+  }
+
+  vector_2f operator+=(vector_2f const& other) {
+    x += other.x;
+    y += other.y;
+    return *this;
   }
 
   vector_2f operator*(float other) const {
@@ -155,3 +169,7 @@ public:
     angle = angle_clamp(angle);
   }
 };
+
+inline vector_2f matrix_3f::operator*(vector_2f const& c) const {
+  return { values[0] * c.x + values[1] * c.y + values[2], values[3] * c.x + values[4] * c.y + values[5] };
+}
