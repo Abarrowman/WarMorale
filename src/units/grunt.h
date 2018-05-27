@@ -9,7 +9,6 @@
 class grunt : public unit {
 private:
   sprite* ship;
-  //float ang = 0;
 public:
   grunt(world& w, team& t, legion* l) : unit(w, t, l, 10) {
     ship = land.static_sprite_orphan(static_texture_id::grunt);
@@ -45,8 +44,10 @@ protected:
   }
 
   void death_action() override {
-    int image_width = 32;
-    int image_height = 32;
+    assert(ship->tex != nullptr);
+
+    int const image_width = ship->tex->width;
+    int const image_height = ship->tex->height;
     std::vector<unsigned char> pixel_data;
     pixel_data.resize(4 * image_width * image_height);
 
@@ -79,21 +80,12 @@ protected:
           positions.push_back(trans_pos);
           colors.push_back(p_col);
           velocities.push_back((trans_pos - center) * 0.5f);
-          //velocities.push_back({0, 0});
         }
       }
     }
-
-    /*int zero_count = 0;
-    for (unsigned char val : pixel_data) {
-      if (val == 0) {
-        zero_count++;
-      }
-    }*/
-
     int particle_count = positions.size();
+
     explosion_effect* boom = new explosion_effect(&land.pp_ctx, particle_count, 20, std::move(positions), std::move(colors), std::move(velocities));
-    //explosion_effect* boom = explosion_effect::create_example_orphan(&land.pp_ctx, trans.get_position());
     land.over_effects_layer->add_orphan(boom);
   }
 };

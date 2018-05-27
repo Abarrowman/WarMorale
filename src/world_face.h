@@ -9,6 +9,8 @@ class world;
 #include "matrix_3f.h"
 #include "threat.h"
 #include "explosion_effect.h"
+#include "bitmap_text.h"
+#include "running_average.h"
 
 class world : public stage {
 
@@ -17,6 +19,8 @@ public:
   sprite_context s_ctx;
   polygon_context p_ctx;
   point_particle_context pp_ctx;
+  fixed_width_bitmap_text_context fwbt_ctx;
+  frame_rate_meter frm;
 
   long frame_count = 0;
   vector_2f mouse_pos = { 0, 0 };
@@ -28,14 +32,15 @@ public:
   legion* enemy_first_legion;
 
 
+  owning_polygon* tri;
+
+
   ordered_parent* teams_layer;
   threat_parent* threat_layer;
-  
-  // A container for effects to render over-top the main game elements
-  ordered_parent* over_effects_layer;
+  ordered_parent* over_effects_layer; // A container for effects to render over-top the main game elements
+  ordered_parent* ui_layer;
 
-
-  owning_polygon* tri;
+  fixed_width_bitmap_text* frame_rate_text;
 
   world(GLFWwindow* win, static_resources& sr, int_keyed_resources& dr);
 

@@ -50,7 +50,7 @@ public:
   texture& operator=(const texture&) = delete;
 
   //moving is ok
-  texture(texture&& old) : tex(old.tex) {
+  texture(texture&& old) : tex(old.tex), width(old.width), height(old.height) {
     old.tex = 0;
   }
 

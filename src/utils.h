@@ -10,13 +10,14 @@
 #include <fstream>
 #include <sstream>
 #include <vector>
+#include <memory>
 
 #define PI_F 3.14159265358979323846f
 
 inline void check_gl_errors() {
   GLenum err;
   while ((err = glGetError()) != GL_NO_ERROR) {
-    fprintf(stderr, "Error %#010x ", err);
+    fprintf(stderr, "Polled Error %#010x ", err);
     switch (err) {
     case GL_INVALID_ENUM:
       fprintf(stderr, "GL_INVALID_ENUM\n");
@@ -28,6 +29,14 @@ inline void check_gl_errors() {
       fprintf(stderr, "UNKNOWN\n");
     }
   }
+}
+
+template<typename ... Args>
+std::string string_format(std::string const& format, Args ... args) {
+  size_t size = std::snprintf(nullptr, 0, format.c_str(), args ...) + 1; // leave space for 0 suffix
+  std::unique_ptr<char[]> buf(new char[size]);
+  std::snprintf(buf.get(), size, format.c_str(), args ...);
+  return std::string(buf.get(), buf.get() + size - 1); // remove 0 suffix
 }
 
 inline std::string read_file_to_string(std::string const& filename) {

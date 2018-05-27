@@ -9,6 +9,7 @@ inline world::world(GLFWwindow* win, static_resources& sr, int_keyed_resources& 
   s_ctx.init(&static_res.get_shader(static_shader_id::sprite), &static_res.get_vertex_array(static_vertex_array_id::sprite));
   p_ctx.init(&static_res.get_shader(static_shader_id::polygon_fill), &static_res.get_shader(static_shader_id::line));
   pp_ctx.init(&static_res.get_shader(static_shader_id::point_particle));
+  fwbt_ctx.init(&static_res.get_shader(static_shader_id::fixed_width_bitmap_text));
 
   tri = new owning_polygon(&p_ctx, simple_vertex_array::create_triangle());
   tri->fill_color.floats = {0.0, 0.5f, 0.5f, 1.0f};
@@ -46,14 +47,21 @@ inline world::world(GLFWwindow* win, static_resources& sr, int_keyed_resources& 
 
   over_effects_layer = new ordered_parent();
   add_orphan(over_effects_layer);
+
+  ui_layer = new ordered_parent();
+  add_orphan(ui_layer);
+
+  frame_rate_text = new fixed_width_bitmap_text(&fwbt_ctx, &(static_res.get_font(static_font_id::consolas_12)));
+  vector_2f trans = window_to_world(0, 0);
+  frame_rate_text->local_trans = matrix_3f::transformation_matrix(1, 1, 0, trans.x, trans.y);
+  frame_rate_text->text_color = {1, 1, 0, 1};
+  ui_layer->add_orphan(frame_rate_text);
 }
 
-inline bool world::update() {
+inline bool world::update() { 
+  frm.count_frame();
   frame_count += 1;
-
-  s_ctx.update_projection(proj);
-  p_ctx.update_projection(proj);
-  pp_ctx.update_projection(proj);
+  frame_rate_text->text = string_format("FPS:%3.1f", frm.average_frame_rate());
 
   float ang = frame_count / 100.0f;
   enemy_first_legion->order.pos = vector_2f::create_polar(ang, 100);
@@ -62,7 +70,13 @@ inline bool world::update() {
 
   stage::update(); //update children
 
+
+
   // after children update
+  s_ctx.update_projection(proj);
+  p_ctx.update_projection(proj);
+  pp_ctx.update_projection(proj);
+  fwbt_ctx.update_projection(proj);
   return false;
 }
 

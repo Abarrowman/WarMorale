@@ -2,6 +2,8 @@
 
 #include <cmath>
 #include <cstdio>
+#include <memory>
+#include <chrono>
 
 #include "shader.h"
 #include "vertex_array.h"
@@ -12,7 +14,6 @@
 #include "sprite.h"
 #include "world.h"
 #include "resources.h"
-#include <memory>
 
 stage* global_stage = nullptr;
 
@@ -28,7 +29,7 @@ extern "C"
 #endif
 
 void error_callback(int error, const char* description) {
-  fprintf(stderr, "Error: %s\n", description);
+  fprintf(stderr, "Callback Error: %s\n", description);
 }
 
 static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
@@ -78,8 +79,9 @@ int main(void) {
   glfwSetKeyCallback(window, key_callback);
   glfwSetCursorPosCallback(window, cursor_position_callback);
   glfwSetMouseButtonCallback(window, mouse_button_callback);
-  /* Make the window's context current */
+
   glfwMakeContextCurrent(window);
+  glfwSwapInterval(1); // enable vsync
 
   // start GLEW extension handler
   glewExperimental = GL_TRUE;
@@ -99,14 +101,11 @@ int main(void) {
   global_stage = &w;
   matrix_3f global_trans = matrix_3f::identity();
 
-  /* Loop until the user closes the window */
   while (!glfwWindowShouldClose(window)){
     global_stage->update();
-
     glClear(GL_COLOR_BUFFER_BIT);
     global_stage->render(global_trans);
     glfwSwapBuffers(window);
-      
     glfwPollEvents();
     check_gl_errors();
   }

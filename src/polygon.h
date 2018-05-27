@@ -8,7 +8,7 @@
 
 class polygon_context {
 public:
-  shader * polygon_fill_shader;
+  shader* polygon_fill_shader;
   GLint fill_trans_mat_idx;
   GLint fill_proj_mat_idx;
   GLint fill_color_idx;

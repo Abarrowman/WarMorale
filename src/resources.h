@@ -1,5 +1,10 @@
 #pragma once
 #include "utils.h"
+#include "texture.h"
+#include "shader.h"
+#include "vertex_array.h"
+#include "fixed_width_bitmap_font.h"
+
 #include <vector>
 #include <unordered_map>
 #include <string>
@@ -17,11 +22,17 @@ enum class static_shader_id {
   polygon_fill,
   line,
   point_particle,
+  fixed_width_bitmap_text,
   COUNT
 };
 
 enum class static_vertex_array_id {
   sprite,
+  COUNT
+};
+
+enum class static_font_id {
+  consolas_12,
   COUNT
 };
 
@@ -31,12 +42,15 @@ private:
   std::vector<texture> textures;
   std::vector<shader> shaders;
   std::vector<simple_vertex_array> vertex_arrays;
+  std::vector<fixed_width_bitmap_font> fonts;
+
 public:
   static_resources() {
     // pre-allocate to avoid pointers to avoid reference invalidation
     textures.reserve(static_cast<int>(static_texture_id::COUNT));
     shaders.reserve(static_cast<int>(static_shader_id::COUNT));
     vertex_arrays.reserve(static_cast<int>(static_vertex_array_id::COUNT));
+    fonts.reserve(static_cast<int>(static_font_id::COUNT));
 
     textures.emplace_back("./assets/textures/sad.png");
     textures.emplace_back("./assets/textures/fire.png");
@@ -63,9 +77,25 @@ public:
       std::string const vertex_interp_fragment_shader = read_file_to_string("./assets/shaders/vertex_interp.frag");
       shaders.emplace_back(pt_particle_vertex_shader.c_str(), vertex_interp_fragment_shader.c_str());
     }
+    {
+      std::string const vertex_shader = read_file_to_string("./assets/shaders/fixed_width_bitmap_text.vert");
+      std::string const geometry_shader = read_file_to_string("./assets/shaders/fixed_width_bitmap_text.geom");
+      std::string const fragment_shader = read_file_to_string("./assets/shaders/fixed_width_bitmap_text.frag");
+      shaders.emplace_back(vertex_shader.c_str(), geometry_shader.c_str(), fragment_shader.c_str());
+    }
     
     simple_vertex_array sprite_vertex_array = simple_vertex_array::create_sprite_vertex_array();
     vertex_arrays.push_back(std::move(sprite_vertex_array));
+
+    {
+      texture tex{ "./assets/fonts/consolas_12.png" };
+      fonts.emplace_back(std::move(tex), 8, 16);
+    }
+
+    assert(textures.capacity() == textures.size());
+    assert(shaders.capacity() == shaders.size());
+    assert(vertex_arrays.capacity() == vertex_arrays.size());
+    assert(fonts.capacity() == fonts.size());
   }
 
   /*
@@ -92,6 +122,14 @@ public:
     return shaders[static_cast<int>(id)];
   }
 
+
+  /*
+  Return the statically mapped font associated with the id.
+  O(1)
+  */
+  fixed_width_bitmap_font& get_font(static_font_id id) {
+    return fonts[static_cast<int>(id)];
+  }
 
   // do not copy or assign
   static_resources(static_resources&) = delete;

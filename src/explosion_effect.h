@@ -74,12 +74,6 @@ public:
 
     alpha_step = 1.0f / duration;
 
-    position_buffer.bind();
-    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * particle_count * 2, positions.data(), GL_STREAM_DRAW);
-
-    color_buffer.bind();
-    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * particle_count * 4, colors.data(), GL_STREAM_DRAW);
-
     va.bind();
 
     glEnableVertexAttribArray(0);

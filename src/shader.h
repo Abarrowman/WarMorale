@@ -20,6 +20,20 @@ private:
     }
   }
 
+  static void link_and_check(GLuint program_idx) {
+    glLinkProgram(program_idx);
+    GLint success = 0;
+    glGetProgramiv(program_idx, GL_LINK_STATUS, &success);
+    if (!success) {
+      GLint log_buffer_size = 0;
+      glGetProgramiv(program_idx, GL_INFO_LOG_LENGTH, &log_buffer_size);
+      std::vector<GLchar> error_log(log_buffer_size);
+      GLint log_length = 0;
+      glGetProgramInfoLog(program_idx, log_buffer_size, &log_length, error_log.data());
+      fprintf(stderr, "Program Link Error [%.*s]\n", log_length, error_log.data());
+    }
+  }
+
 public:
   GLuint vs;
   GLuint gs;
@@ -44,10 +58,7 @@ public:
     glAttachShader(program, fs);
     glAttachShader(program, vs);
     glAttachShader(program, gs);
-    glLinkProgram(program);
-
-    check_gl_errors();
-
+    link_and_check(program);
   }
 
   shader(const char* vertex_shader, const char* fragment_shader) {
@@ -61,9 +72,7 @@ public:
     program = glCreateProgram();
     glAttachShader(program, fs);
     glAttachShader(program, vs);
-    glLinkProgram(program);
-
-    check_gl_errors();
+    link_and_check(program);
 
     gs = 0;
   }
