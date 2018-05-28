@@ -19,7 +19,7 @@ public:
   sprite_context s_ctx;
   polygon_context p_ctx;
   point_particle_context pp_ctx;
-  fixed_width_bitmap_text_context fwbt_ctx;
+  bitmap_text_context bt_ctx;
   frame_rate_meter frm;
 
   long frame_count = 0;
@@ -41,6 +41,8 @@ public:
   ordered_parent* ui_layer;
 
   fixed_width_bitmap_text* frame_rate_text;
+  variable_width_bitmap_text* log_text;
+
 
   world(GLFWwindow* win, static_resources& sr, int_keyed_resources& dr);
 

@@ -4,7 +4,7 @@
 #include "shader.h"
 #include "vertex_array.h"
 #include "fixed_width_bitmap_font.h"
-
+#include "variable_width_bitmap_font.h"
 #include <vector>
 #include <unordered_map>
 #include <string>
@@ -23,6 +23,7 @@ enum class static_shader_id {
   line,
   point_particle,
   fixed_width_bitmap_text,
+  variable_width_bitmap_text,
   COUNT
 };
 
@@ -31,8 +32,13 @@ enum class static_vertex_array_id {
   COUNT
 };
 
-enum class static_font_id {
+enum class static_mono_font_id {
   consolas_12,
+  COUNT
+};
+
+enum class static_prop_font_id {
+  impact_24,
   COUNT
 };
 
@@ -42,7 +48,8 @@ private:
   std::vector<texture> textures;
   std::vector<shader> shaders;
   std::vector<simple_vertex_array> vertex_arrays;
-  std::vector<fixed_width_bitmap_font> fonts;
+  std::vector<fixed_width_bitmap_font> mono_fonts;
+  std::vector<variable_width_bitmap_font> prop_fonts;
 
 public:
   static_resources() {
@@ -50,7 +57,8 @@ public:
     textures.reserve(static_cast<int>(static_texture_id::COUNT));
     shaders.reserve(static_cast<int>(static_shader_id::COUNT));
     vertex_arrays.reserve(static_cast<int>(static_vertex_array_id::COUNT));
-    fonts.reserve(static_cast<int>(static_font_id::COUNT));
+    mono_fonts.reserve(static_cast<int>(static_mono_font_id::COUNT));
+    prop_fonts.reserve(static_cast<int>(static_prop_font_id::COUNT));
 
     textures.emplace_back("./assets/textures/sad.png");
     textures.emplace_back("./assets/textures/fire.png");
@@ -78,10 +86,14 @@ public:
       shaders.emplace_back(pt_particle_vertex_shader.c_str(), vertex_interp_fragment_shader.c_str());
     }
     {
-      std::string const vertex_shader = read_file_to_string("./assets/shaders/fixed_width_bitmap_text.vert");
-      std::string const geometry_shader = read_file_to_string("./assets/shaders/fixed_width_bitmap_text.geom");
-      std::string const fragment_shader = read_file_to_string("./assets/shaders/fixed_width_bitmap_text.frag");
-      shaders.emplace_back(vertex_shader.c_str(), geometry_shader.c_str(), fragment_shader.c_str());
+      std::string const mono_vertex_shader = read_file_to_string("./assets/shaders/fixed_width_bitmap_text.vert");
+      std::string const mono_geometry_shader = read_file_to_string("./assets/shaders/fixed_width_bitmap_text.geom");
+      std::string const fragment_shader = read_file_to_string("./assets/shaders/bitmap_text.frag");
+      shaders.emplace_back(mono_vertex_shader.c_str(), mono_geometry_shader.c_str(), fragment_shader.c_str());
+
+      std::string const prop_vertex_shader = read_file_to_string("./assets/shaders/variable_width_bitmap_text.vert");
+      std::string const prop_geometry_shader = read_file_to_string("./assets/shaders/variable_width_bitmap_text.geom");
+      shaders.emplace_back(prop_vertex_shader.c_str(), prop_geometry_shader.c_str(), fragment_shader.c_str());
     }
     
     simple_vertex_array sprite_vertex_array = simple_vertex_array::create_sprite_vertex_array();
@@ -89,13 +101,20 @@ public:
 
     {
       texture tex{ "./assets/fonts/consolas_12.png" };
-      fonts.emplace_back(std::move(tex), 8, 16);
+      mono_fonts.emplace_back(std::move(tex), 8, 16);
+    }
+
+    {
+      texture tex{ "./assets/fonts/impact_24.png" };
+      prop_fonts.emplace_back(std::move(tex), read_csv_no_header("./assets/fonts/impact_24.csv"));
     }
 
     assert(textures.capacity() == textures.size());
     assert(shaders.capacity() == shaders.size());
     assert(vertex_arrays.capacity() == vertex_arrays.size());
-    assert(fonts.capacity() == fonts.size());
+    assert(mono_fonts.capacity() == mono_fonts.size());
+    assert(prop_fonts.capacity() == prop_fonts.size());
+
   }
 
   /*
@@ -124,11 +143,19 @@ public:
 
 
   /*
-  Return the statically mapped font associated with the id.
+  Return the statically mapped mono-spaced font associated with the id.
   O(1)
   */
-  fixed_width_bitmap_font& get_font(static_font_id id) {
-    return fonts[static_cast<int>(id)];
+  fixed_width_bitmap_font& get_mono_font(static_mono_font_id id) {
+    return mono_fonts[static_cast<int>(id)];
+  }
+
+  /*
+  Return the statically  mapped proportionally-spaced font associated with the id.
+  O(1)
+  */
+  variable_width_bitmap_font& get_prop_font(static_prop_font_id id) {
+    return prop_fonts[static_cast<int>(id)];
   }
 
   // do not copy or assign

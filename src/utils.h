@@ -39,15 +39,15 @@ std::string string_format(std::string const& format, Args ... args) {
   return std::string(buf.get(), buf.get() + size - 1); // remove 0 suffix
 }
 
-inline std::string read_file_to_string(std::string const& filename) {
-  std::ifstream inFile(filename, std::ios::in | std::ios::binary);
-  if (inFile) {
+inline std::string read_file_to_string(char const* filename) {
+  std::ifstream in_file(filename, std::ios::in | std::ios::binary);
+  if (in_file) {
     std::ostringstream strStream;
-    strStream << inFile.rdbuf();
-    inFile.close();
+    strStream << in_file.rdbuf();
+    in_file.close();
     return strStream.str();
   }
-  fprintf(stderr, "Could not read file %s\n", filename.c_str());
+  fprintf(stderr, "Could not read file %s\n", filename);
   exit(-1);
 }
 
