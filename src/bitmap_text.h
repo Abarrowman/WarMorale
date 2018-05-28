@@ -19,13 +19,13 @@ public:
 
   void init(shader* t_shader) {
     text_shader = t_shader;
-    shader_trans_mat_idx = glGetUniformLocation(text_shader->program, "trans_mat");
-    shader_proj_mat_idx = glGetUniformLocation(text_shader->program, "proj_mat");
-    shader_char_width = glGetUniformLocation(text_shader->program, "char_width");
-    shader_char_height = glGetUniformLocation(text_shader->program, "char_height");
-    shader_texture_width = glGetUniformLocation(text_shader->program, "texture_width");
-    shader_texture_height = glGetUniformLocation(text_shader->program, "texture_height");
-    shader_color = glGetUniformLocation(text_shader->program, "color");
+    shader_trans_mat_idx = text_shader->get_uniform_location("trans_mat");
+    shader_proj_mat_idx = text_shader->get_uniform_location("proj_mat");
+    shader_char_width = text_shader->get_uniform_location("char_width");
+    shader_char_height = text_shader->get_uniform_location("char_height");
+    shader_texture_width = text_shader->get_uniform_location("texture_width");
+    shader_texture_height = text_shader->get_uniform_location("texture_height");
+    shader_color = text_shader->get_uniform_location("color");
   }
 
   void update_projection(matrix_3f const& proj_mat) {
@@ -51,12 +51,10 @@ public:
     glEnableVertexAttribArray(0);
     corner_buffer.bind();
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), 0);
-    glVertexAttribDivisor(0, 1); // 1 position per letter
 
     glEnableVertexAttribArray(1);
     character_buffer.bind();
     glVertexAttribIPointer(1, 1, GL_INT, 1 * sizeof(int), 0);
-    glVertexAttribDivisor(1, 1); // 1 character per letter
   }
 
   void render(matrix_3f const& parent_trans) {
@@ -104,6 +102,7 @@ public:
 
     va.bind();
     font->tex.activate_bind(GL_TEXTURE0);
-    glDrawArraysInstanced(GL_POINTS, 0, 1, render_char_count);
+    glDrawArrays(GL_POINTS, 0, render_char_count);
+
   }
 };

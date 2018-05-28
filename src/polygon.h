@@ -23,17 +23,17 @@ public:
 
   void init(shader* fill_shader, shader* edge_shader) {
     polygon_fill_shader = fill_shader;
-    fill_trans_mat_idx = glGetUniformLocation(polygon_fill_shader->program, "trans_mat");
-    fill_proj_mat_idx = glGetUniformLocation(polygon_fill_shader->program, "proj_mat");
-    fill_color_idx = glGetUniformLocation(polygon_fill_shader->program, "color");
+    fill_trans_mat_idx = polygon_fill_shader->get_uniform_location("trans_mat");
+    fill_proj_mat_idx = polygon_fill_shader->get_uniform_location("proj_mat");
+    fill_color_idx = polygon_fill_shader->get_uniform_location("color");
 
 
     polygon_edge_shader = edge_shader;
-    edge_trans_mat_idx = glGetUniformLocation(polygon_edge_shader->program, "trans_mat");
-    edge_proj_mat_idx = glGetUniformLocation(polygon_edge_shader->program, "proj_mat");
-    edge_width_idx = glGetUniformLocation(polygon_edge_shader->program, "width");
-    edge_color_idx = glGetUniformLocation(polygon_edge_shader->program, "color");
-    edge_cap_type_idx = glGetUniformLocation(polygon_edge_shader->program, "cap_type");
+    edge_trans_mat_idx = polygon_edge_shader->get_uniform_location("trans_mat");
+    edge_proj_mat_idx = polygon_edge_shader->get_uniform_location("proj_mat");
+    edge_width_idx = polygon_edge_shader->get_uniform_location("width");
+    edge_color_idx = polygon_edge_shader->get_uniform_location("color");
+    edge_cap_type_idx = polygon_edge_shader->get_uniform_location("cap_type");
   }
 
   void update_projection(matrix_3f const& proj_mat) {

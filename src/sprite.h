@@ -22,12 +22,12 @@ public:
   void init(shader* s_shader, simple_vertex_array* s_vertex_array) {
     sprite_shader = s_shader;
     sprite_vertex_array = s_vertex_array;
-    shader_trans_mat_idx = glGetUniformLocation(sprite_shader->program, "trans_mat");
-    shader_proj_mat_idx = glGetUniformLocation(sprite_shader->program, "proj_mat");
-    shader_frame_width_idx = glGetUniformLocation(sprite_shader->program, "frame_width");
-    shader_frame_height_idx = glGetUniformLocation(sprite_shader->program, "frame_height");
-    shader_frame_col_idx = glGetUniformLocation(sprite_shader->program, "frame_col");
-    shader_frame_row_idx = glGetUniformLocation(sprite_shader->program, "frame_row");
+    shader_trans_mat_idx = sprite_shader->get_uniform_location("trans_mat");
+    shader_proj_mat_idx = sprite_shader->get_uniform_location("proj_mat");
+    shader_frame_width_idx = sprite_shader->get_uniform_location("frame_width");
+    shader_frame_height_idx = sprite_shader->get_uniform_location("frame_height");
+    shader_frame_col_idx = sprite_shader->get_uniform_location("frame_col");
+    shader_frame_row_idx = sprite_shader->get_uniform_location("frame_row");
 
   }
 

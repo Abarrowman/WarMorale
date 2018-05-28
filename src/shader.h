@@ -77,6 +77,10 @@ public:
     gs = 0;
   }
 
+  GLint get_uniform_location(char const* name) {
+    return glGetUniformLocation(program, name);
+  }
+
   // do not copy or assign
   shader(shader&) = delete;
   shader& operator=(const shader&) = delete;

@@ -14,8 +14,8 @@ public:
 
   void init(shader* p_shader) {
     point_particle_shader = p_shader;
-    shader_trans_mat_idx = glGetUniformLocation(point_particle_shader->program, "trans_mat");
-    shader_proj_mat_idx = glGetUniformLocation(point_particle_shader->program, "proj_mat");
+    shader_trans_mat_idx = point_particle_shader->get_uniform_location("trans_mat");
+    shader_proj_mat_idx = point_particle_shader->get_uniform_location("proj_mat");
 
   }
 
@@ -79,12 +79,10 @@ public:
     glEnableVertexAttribArray(0);
     position_buffer.bind();
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), 0);
-    glVertexAttribDivisor(0, 1); // 1 position per point
 
     glEnableVertexAttribArray(1);
     color_buffer.bind();
     glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
-    glVertexAttribDivisor(1, 1); // 1 color per point
   }
 
   // do not copy or assign
@@ -117,6 +115,6 @@ public:
     glUniformMatrix3fv(context->shader_trans_mat_idx, 1, GL_TRUE, full_trans.values.data());
 
     va.bind();
-    glDrawArraysInstanced(GL_POINTS, 0, 1, particle_count);
+    glDrawArrays(GL_POINTS, 0, particle_count);
   }
 };
