@@ -4,7 +4,7 @@ layout(points) in;
 layout(triangle_strip, max_vertices = 4) out;
 
 in vertex_data {
-  vec2 tex_cord;
+  flat int v_char;
   float width;
 } vertex_out[1];
 
@@ -15,6 +15,7 @@ out geom_data {
 uniform mat3 trans_mat;
 uniform mat3 proj_mat;
 uniform int char_height;
+uniform int char_max_width;
 uniform int texture_width;
 uniform int texture_height;
 
@@ -23,8 +24,16 @@ vec4 apply_projection(vec2 input) {
   return vec4(homo_vec.xy, 0, 1);
 }
 
+vec2 char_texture_corner(int character) {
+  int idx = character - 32;
+  int row_len = texture_width / char_max_width;
+  int row = idx / row_len;
+  int col = idx % row_len;
+  return vec2((float(col) * char_max_width) / texture_width, (float(row) * char_height) / texture_height);
+}
+
 void main() {
-  vec2 tl_texture_corner = vertex_out[0].tex_cord;
+  vec2 tl_texture_corner = char_texture_corner(vertex_out[0].v_char);
   float char_width = vertex_out[0].width;
   vec2 top_left = gl_in[0].gl_Position.xy;
   gl_Position = apply_projection(top_left);

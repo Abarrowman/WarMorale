@@ -33,14 +33,14 @@ public:
     }
   }
 
-  vector_2f char_texture_top_left_coordinates(char c) const {
+  /*vector_2f char_texture_top_left_coordinates(char c) const {
     assert(contains_char(c));
     int idx = c - ' ';
     int row_len = tex.width / char_wide;
     int row = idx / row_len;
     int col = idx % row_len;
     return vector_2f((static_cast<float>(col) * char_wide) / tex.width, (static_cast<float>(row) * char_high) / tex.height);
-  }
+  }*/
 
   bool contains_char(char c) const {
     return ((c >= ' ') && (c <= '~'));
@@ -49,6 +49,10 @@ public:
   int char_width(char c) const {
     assert(contains_char(c));
     return char_widths[static_cast<int>(c - ' ')];
+  }
+
+  int char_max_width() const {
+    return char_wide;
   }
 
   int char_height() const {

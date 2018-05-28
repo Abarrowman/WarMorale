@@ -20,6 +20,7 @@ public:
   shader* prop_shader;
   GLint prop_trans_mat_idx;
   GLint prop_proj_mat_idx;
+  GLint prop_char_max_width;
   GLint prop_char_height;
   GLint prop_texture_width;
   GLint prop_texture_height;
@@ -38,6 +39,7 @@ public:
     prop_shader = p_shader;
     prop_trans_mat_idx = prop_shader->get_uniform_location("trans_mat");
     prop_proj_mat_idx = prop_shader->get_uniform_location("proj_mat");
+    prop_char_max_width = prop_shader->get_uniform_location("char_max_width");
     prop_char_height = prop_shader->get_uniform_location("char_height");
     prop_texture_width = prop_shader->get_uniform_location("texture_width");
     prop_texture_height = prop_shader->get_uniform_location("texture_height");
@@ -127,7 +129,8 @@ public:
 
 class variable_width_bitmap_text : public renderable {
 public:
-  vertex_buffer vb;
+  vertex_buffer corner_buffer;
+  vertex_buffer character_buffer;
   vertex_array va;
 
 
@@ -138,14 +141,16 @@ public:
 
   variable_width_bitmap_text(bitmap_text_context* ctx, variable_width_bitmap_font* fo, std::string tex = "") : context(ctx), font(fo), text(std::move(tex)) {
     va.bind();
-    vb.bind();
 
+    corner_buffer.bind();
     glEnableVertexAttribArray(0); // corner
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), 0);
-    glEnableVertexAttribArray(1); // corner texture coordinate
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)(2 * sizeof(float)));
-    glEnableVertexAttribArray(2); // width
-    glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)(4 * sizeof(float)));
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 3 * sizeof(float), 0);
+    glEnableVertexAttribArray(1); // width
+    glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, 3 * sizeof(int), (void *)(2 * sizeof(float)));
+
+    character_buffer.bind();
+    glEnableVertexAttribArray(2); // character
+    glVertexAttribIPointer(2, 1, GL_INT, 1 * sizeof(int), 0);
   }
 
   void render(matrix_3f const& parent_trans) {
@@ -154,6 +159,8 @@ public:
     //TODO consider allocating these as part of the class
     // they they wouldn't don't need to be reallocated each render
     std::vector<float> vert_data;
+    std::vector<int> characters;
+
     vert_data.reserve(text.size() * 5);
 
     int char_count = 0;
@@ -169,24 +176,26 @@ public:
       vert_data.push_back(top_left_vert.x);
       vert_data.push_back(top_left_vert.y);
 
-      vector_2f top_left_texture = font->char_texture_top_left_coordinates(c);
-      vert_data.push_back(top_left_texture.x);
-      vert_data.push_back(top_left_texture.y);
-
       int char_width = font->char_width(c);
       vert_data.push_back(static_cast<float>(char_width));
+
+      characters.push_back(static_cast<int>(c));
 
       origin.x += char_width;
       char_count++;
     }
 
 
-    vb.bind();
-    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 5 * char_count, vert_data.data(), GL_STREAM_DRAW);
+    corner_buffer.bind();
+    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 3 * char_count, vert_data.data(), GL_STREAM_DRAW);
+
+    character_buffer.bind();
+    glBufferData(GL_ARRAY_BUFFER, sizeof(int) * char_count, characters.data(), GL_STREAM_DRAW);
 
     context->prop_shader->use();
     matrix_3f full_trans = parent_trans * local_trans;
     glUniformMatrix3fv(context->prop_trans_mat_idx, 1, GL_TRUE, full_trans.values.data());
+    glUniform1i(context->prop_char_max_width, font->char_max_width());
     glUniform1i(context->prop_char_height, font->char_height());
     glUniform1i(context->prop_texture_width, font->tex.width);
     glUniform1i(context->prop_texture_height, font->tex.height);
