@@ -25,16 +25,20 @@ public:
   virtual ~renderable() {} // this is a base class
 };
 
-template<bool ordered, typename child_type>
+template<typename child_type, bool ordered>
 class renderable_parent : public renderable {
 private:
   std::vector<std::unique_ptr<child_type>> children;
 
 public:
 
-  child_type& add_orphan(child_type* child) {
+  /*
+  Takes ownership of the raw pointer child adding it to the parent.
+  */
+  template<typename child_sub_type>
+  child_sub_type* add_orphan(child_sub_type* child) {
     children.emplace_back(child);
-    return *child;
+    return child;
   }
 
   void add_child(std::unique_ptr<child_type> child) {
@@ -124,5 +128,5 @@ public:
   }
 };
 
-using ordered_parent = renderable_parent<true, renderable>;
-using unordered_parent = renderable_parent<false, renderable>;
+using ordered_parent = renderable_parent<renderable, true>;
+using unordered_parent = renderable_parent<renderable, false>;

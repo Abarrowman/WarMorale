@@ -2,6 +2,7 @@
 
 class world;
 
+#include <random>
 #include "stage.h"
 #include "team.h"
 #include "sprite.h"
@@ -11,6 +12,7 @@ class world;
 #include "explosion_effect.h"
 #include "bitmap_text.h"
 #include "running_average.h"
+#include "utils.h"
 
 class world : public stage {
 
@@ -20,6 +22,8 @@ public:
   polygon_context p_ctx;
   point_particle_context pp_ctx;
   bitmap_text_context bt_ctx;
+
+
   frame_rate_meter frm;
 
   long frame_count = 0;
@@ -35,7 +39,7 @@ public:
   owning_polygon* tri;
 
 
-  ordered_parent* teams_layer;
+  team_parent* teams_layer;
   threat_parent* threat_layer;
   ordered_parent* over_effects_layer; // A container for effects to render over-top the main game elements
   ordered_parent* ui_layer;
@@ -56,6 +60,7 @@ public:
   sprite* world::static_sprite_orphan(static_texture_id id);
   sprite world::static_sprite(static_texture_id id);
 
+  generator_type& get_generator();
 
   /*~world() {
     fprintf(stderr, "World Destructor\n");
@@ -63,4 +68,6 @@ public:
 
 private:
   vector_2f window_to_world(double xpos, double ypos);
+  generator_type gen;
+  static std::array<unsigned int, 4> get_seed();
 };

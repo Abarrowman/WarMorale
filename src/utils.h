@@ -11,8 +11,19 @@
 #include <sstream>
 #include <vector>
 #include <memory>
+#include <random>
 
-#define PI_F 3.14159265358979323846f
+using generator_type = std::minstd_rand;
+
+float rand_float(generator_type& gen) {
+  return std::uniform_real_distribution<float>{}(gen);
+}
+
+float rand_centered_float(generator_type& gen) {
+  return std::uniform_real_distribution<float>{-1.0, 1.0f}(gen);
+}
+
+#define PI_F (3.14159265358979323846f)
 
 inline void check_gl_errors() {
   GLenum err;

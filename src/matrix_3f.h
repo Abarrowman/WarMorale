@@ -122,6 +122,12 @@ public:
     return { x * other, y * other };
   }
 
+  vector_2f operator*=(float other) {
+    x *= other;
+    y *= other;
+    return *this;
+  }
+
   static vector_2f create_polar(float ang) {
     return { cos(ang), sin(ang) };
   }

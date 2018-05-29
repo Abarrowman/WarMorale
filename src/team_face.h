@@ -22,9 +22,9 @@ public:
   ~legion();
 };
 
-class team : public renderable_parent<true, unit> {
+class team : public renderable_parent<unit, true> {
 private:
-  using super = renderable_parent<true, unit>;
+  using super = renderable_parent<unit, true>;
   std::vector<std::unique_ptr<legion>> legions;
   std::vector<team*> enemy_teams;
 public:
@@ -39,3 +39,5 @@ public:
 
   ~team();
 };
+
+using team_parent = renderable_parent<team, true>;

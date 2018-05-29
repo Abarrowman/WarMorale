@@ -48,4 +48,4 @@ public:
   virtual ~point_threat() {} // this is a base clase
 };
 
-using threat_parent = renderable_parent<true, threat>;
+using threat_parent = renderable_parent<threat, true>;
