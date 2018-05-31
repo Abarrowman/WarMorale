@@ -30,16 +30,16 @@ protected:
   void living_update() override {
     unit_reference closest_enemy_ref = find_closest_enemy();
 
+    // aim
     if (closest_enemy_ref.valid()) {
       unit& closest_enemy = closest_enemy_ref.ref();
-
-
       float e_angle = angle_err(trans.angle, trans.translation_to(closest_enemy.trans).angle());
-      vector_2f e_pos = trans.translation_to(group->order.pos);
-
       trans.angle += 0.1f * e_angle;
-      trans.set_position(trans.get_position() + e_pos * 0.1f);
     }
+     // move
+    vector_2f e_pos = trans.translation_to(group->order.pos);
+    trans.set_position(trans.get_position() + e_pos * 0.1f);
+
   }
 
   void death_action() override {

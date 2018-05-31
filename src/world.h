@@ -36,6 +36,8 @@ inline world::world(GLFWwindow* win, static_resources& sr, int_keyed_resources& 
   player_first_legion = &p_first;
   p_first.order.pos = { 100, 100 };
   player_team->add_orphan(new grunt(*this, *player_team, &p_first))->trans.angle = PI_F / 2;
+  player_team->add_orphan(new grunt(*this, *player_team, &p_first))->trans.set_position({-100, -200});
+
 
   legion& e_first = enemy_team->create_legion();
   enemy_first_legion = &e_first;

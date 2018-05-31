@@ -9,7 +9,7 @@
 #include "vertex_array.h"
 #include "utils.h"
 #include "texture.h"
-#include "matrix_3f.h"
+#include "2d_math.h"
 #include "renderable.h"
 #include "sprite.h"
 #include "world.h"

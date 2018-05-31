@@ -7,7 +7,7 @@ class world;
 #include "team.h"
 #include "sprite.h"
 #include "polygon.h"
-#include "matrix_3f.h"
+#include "2d_math.h"
 #include "threat.h"
 #include "explosion_effect.h"
 #include "bitmap_text.h"
