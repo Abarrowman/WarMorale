@@ -4,7 +4,7 @@
 #include "unit.h"
 #include "team.h"
 #include "units/grunt.h"
-
+#include "kd_tree.h"
 
 
 inline world::world(GLFWwindow* win, static_resources& sr, int_keyed_resources& dr) : stage(win, sr, dr) {
@@ -69,6 +69,36 @@ inline world::world(GLFWwindow* win, static_resources& sr, int_keyed_resources& 
     log_text->local_trans = matrix_3f::transformation_matrix(1, 1, 0, trans.x, trans.y);
     log_text->text_color = { 0, 1, 1, 1 };
     
+  }
+
+  {
+    kd_tree kd;
+    //kd.build_recursive({
+    kd.build_iterative({
+      { { 2, 3 }, 'a'},
+      { { 5, 4 }, 'b' },
+      { { 9, 6 }, 'c' },
+      { { 4, 7 }, 'd' },
+      { { 8, 1 }, 'e' },
+      { { 7, 2 }, 'f' },  
+    });
+
+    for (float x = -1; x < 11; x += 0.1f) {
+      for (float y = -1; y < 11; y += 0.1f) {
+        vector_2f pos{ x, y };
+        kd_node* close = kd.find_closest_recursive(pos);
+        kd_node* close_brute = kd.find_closest_brute(pos);
+        if (close != close_brute) {
+          float brute_dis = (close_brute->pos - pos).magnitude();
+          float dis = (close->pos - pos).magnitude();
+          if (brute_dis < dis) {
+            fprintf(stderr, "Error at (%f, %f)\n", x, y);
+            exit(-1);
+          }
+        }
+      }
+    }
+
   }
 }
 

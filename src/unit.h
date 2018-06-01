@@ -3,6 +3,7 @@
 #include "2d_math.h"
 #include "team_face.h"
 #include "unit_face.h"
+#include <limits>
 
 inline void unit::take_threats() {
   int threat_count = land.threat_layer->child_count();
