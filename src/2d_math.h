@@ -99,6 +99,10 @@ public:
     return std::sqrt(x * x + y * y);
   }
 
+  float manhattan_magnitude() const {
+    return abs(x) + abs(y);
+  }
+
   float angle() const {
     return std::atan2(y, x);
   }
