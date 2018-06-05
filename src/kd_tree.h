@@ -29,6 +29,13 @@ struct kd_node_dist {
 template<typename V>
 class kd_tree {
 private: // static members
+  static int next_division_axis(int division_axis) {
+    return (division_axis + 1) % 2;
+  }
+
+  static int previous_division_axis(int division_axis) {
+    return (division_axis == 0) ? (2 - 1) : (division_axis - 1);
+  }
 
   static bool compare_kd_node_x(kd_node<V> const& left, kd_node<V> const& right) {
     return left.pos.x < right.pos.x;
@@ -52,22 +59,30 @@ private: // static members
   struct build_arg {
     vec_it start;
     vec_it stop;
-    bool divide_x_axis;
+    int division_axis;
   };
 
   struct search_arg {
     vec_it start;
     vec_it stop;
-    bool divide_x_axis;
+    int division_axis;
     kd_node<V>* divider;
   };
 
-  static void consider_for_closests(vector_2f const& pos, std::vector<kd_node_dist<V>>& closests, kd_node<V>& node) {
+  struct search_ctx {
+    vector_2f const& pos;
+    float _max_dist;
+    search_ctx(vector_2f const& p) : pos(p) {}
+    search_ctx(vector_2f const& p, float md) : pos(p), _max_dist(md) {}
+
+  };
+
+  static void consider_for_closests(search_ctx const& ctx, std::vector<kd_node_dist<V>>& closests, kd_node<V>& node) {
     if (closests.size() < closests.capacity()) {
-      closests.push_back({ node, pos });
+      closests.push_back({ node, ctx.pos });
       std::push_heap(closests.begin(), closests.end());
     } else {
-      kd_node_dist<V> new_node{ node, pos };
+      kd_node_dist<V> new_node{ node, ctx.pos };
       if (closests.front().dist > new_node.dist) {
         std::pop_heap(closests.begin(), closests.end());
         closests.back() = new_node;
@@ -76,7 +91,7 @@ private: // static members
     }
   }
 
-  static bool skip_given_closests(std::vector<kd_node_dist<V>>& closests, float min_dist) {
+  static bool skip_given_closests(search_ctx const& ctx, std::vector<kd_node_dist<V>>& closests, float min_dist) {
     if (closests.size() < closests.capacity()) {
       return false;
     } else {
@@ -84,12 +99,23 @@ private: // static members
     }
   }
 
-  static void consider_for_closest(vector_2f const& pos, kd_node_dist<V>& closest, kd_node<V>& node) {
-    closest = better_node_dist(closest, {node, pos });
+  static void consider_for_closest(search_ctx const& ctx, kd_node_dist<V>& closest, kd_node<V>& node) {
+    closest = better_node_dist(closest, {node, ctx.pos });
   }
 
-  static bool skip_given_closest(kd_node_dist<V>& closest, float min_dist) {
+  static bool skip_given_closest(search_ctx const& ctx, kd_node_dist<V>& closest, float min_dist) {
     return (min_dist > closest.dist);
+  }
+
+  static void consider_within_distance(search_ctx const& ctx, std::vector<kd_node_dist<V>>& within, kd_node<V>& node) {
+    kd_node_dist<V> new_node{ node, ctx.pos };
+    if (new_node.dist < ctx._max_dist) {
+      within.push_back(new_node);
+    }
+  }
+
+  static bool skip_given_distance(search_ctx const& ctx, std::vector<kd_node_dist<V>>& within, float min_dist) {
+    return (min_dist > ctx._max_dist);
   }
 
 private: // private varriables
@@ -97,109 +123,109 @@ private: // private varriables
   // The nodes in the kd tree.
   std::vector<kd_node<V>> nodes;
 
-  // The stack used for searching iteratively
-  // TODO consider pre-allocating
-  std::vector<search_arg> arg_stack_;
-
 private: // private methods
 
-  void inner_build_recursive(vec_it start, vec_it stop, bool divide_x_axis) {
+  void inner_build_recursive(vec_it start, vec_it stop, int division_axis) {
     vec_dst dst = std::distance(start, stop);
     if (dst <= 1) { // sorting 1 or fewer elements need not happen
       return;
     }
     vec_dst median_offset = dst / 2;
-    if (divide_x_axis) {
+    if (division_axis == 0) {
       std::nth_element(start, start + median_offset, stop, compare_kd_node_x);
     } else {
       std::nth_element(start, start + median_offset, stop, compare_kd_node_y);
     }
-    inner_build_recursive(start, start + median_offset, !divide_x_axis); // [start, median)
-    inner_build_recursive(start + (median_offset + 1), stop, !divide_x_axis); // (median, stop)
+    inner_build_recursive(start, start + median_offset, next_division_axis(division_axis)); // [start, median)
+    inner_build_recursive(start + (median_offset + 1), stop, next_division_axis(division_axis)); // (median, stop)
   }
 
-  template<typename closest_type, typename skip_func_type, skip_func_type skip_func, typename consider_func_type, consider_func_type consider_func>
-  void inner_find_closest_recursive(vector_2f const& pos, vec_it start, vec_it stop, bool divide_x_axis, closest_type& closest) {
+  template<typename closest_type, typename skip_func_type, skip_func_type skip_func,
+    typename consider_func_type, consider_func_type consider_func>
+  void inner_find_closest_recursive(search_ctx const& ctx, vec_it start, vec_it stop, int division_axis, closest_type& closest) {
     vec_dst dst = std::distance(start, stop);
     if (dst <= 0) {
       return;
     } else if (dst == 1) {
-      consider_func(pos, closest, *start);
+      consider_func(ctx, closest, *start);
       return;
     }
 
     vec_dst median_offset = dst / 2;
     kd_node<V>& median_node = *(start + median_offset);
-    bool condition = divide_x_axis ? (pos.x < median_node.pos.x) : (pos.y < median_node.pos.y);
+    bool condition = (division_axis == 0) ? (ctx.pos.x < median_node.pos.x) : (ctx.pos.y < median_node.pos.y);
 
     if (condition) {
       inner_find_closest_recursive<closest_type, skip_func_type, skip_func, consider_func_type, consider_func>
-        (pos, start, start + median_offset, !divide_x_axis, closest);
+        (ctx, start, start + median_offset, next_division_axis(division_axis), closest);
     } else {
       inner_find_closest_recursive<closest_type, skip_func_type, skip_func, consider_func_type, consider_func>
-        (pos, start + median_offset + 1, stop, !divide_x_axis, closest);
+        (ctx, start + median_offset + 1, stop, next_division_axis(division_axis), closest);
     }
 
-    float min_dist = divide_x_axis ? fabs(pos.x - median_node.pos.x) : fabs(pos.y - median_node.pos.y);
-    if (skip_func(closest, min_dist)) {
+    float min_dist = (division_axis == 0) ? fabs(ctx.pos.x - median_node.pos.x) : fabs(ctx.pos.y - median_node.pos.y);
+    if (skip_func(ctx, closest, min_dist)) {
       return; // this branch can not be closer than the closest so far
     }
 
-    consider_func(pos, closest, median_node);
+    consider_func(ctx, closest, median_node);
 
     if (condition) {
       inner_find_closest_recursive<closest_type, skip_func_type, skip_func, consider_func_type, consider_func>
-        (pos, start + median_offset + 1, stop, !divide_x_axis, closest);
+        (ctx, start + median_offset + 1, stop, next_division_axis(division_axis), closest);
     } else {
       inner_find_closest_recursive<closest_type, skip_func_type, skip_func, consider_func_type, consider_func>
-        (pos, start, start + median_offset, !divide_x_axis, closest);
+        (ctx, start, start + median_offset, next_division_axis(division_axis), closest);
     }
   }
 
-  template<typename closest_type, typename skip_func_type, skip_func_type skip_func, typename consider_func_type, consider_func_type consider_func>
-  void inner_find_closest_itreative(vector_2f const& pos, closest_type& closest) {
-    // not needed since the while loop always empties arg_stack_
-    //arg_stack_.clear();
-    
-    arg_stack_.push_back({ nodes.begin(), nodes.end(), true, nullptr });
+  template<typename closest_type, typename skip_func_type, skip_func_type skip_func,
+    typename consider_func_type, consider_func_type consider_func>
+  void inner_find_closest_iterative(search_ctx const& ctx, closest_type& closest) {
 
-    while (!arg_stack_.empty()) {
-      search_arg args = arg_stack_.back();
-      arg_stack_.pop_back();
+    // TODO consider pre-allocating
+    // TODO consider putting in class
+    std::vector<search_arg> arg_stack;
+    
+    arg_stack.push_back({ nodes.begin(), nodes.end(), 0, nullptr });
+
+    while (!arg_stack.empty()) {
+      search_arg args = arg_stack.back();
+      arg_stack.pop_back();
       vec_it start = args.start;
       vec_it stop = args.stop;
-      bool divide_x_axis = args.divide_x_axis;
-
+      int division_axis = args.division_axis;
       kd_node<V>* divider = args.divider;
 
       if (divider != nullptr) {
-        // Use the negation of divide_x_axis to reason about the previous branch
-        float min_dist = (!divide_x_axis) ? fabs(pos.x - divider->pos.x) : fabs(pos.y - divider->pos.y);
-        if (skip_func(closest, min_dist)) {
+
+
+        float min_dist = (previous_division_axis(division_axis) == 0) ? fabs(ctx.pos.x - divider->pos.x) : fabs(ctx.pos.y - divider->pos.y);
+        if (skip_func(ctx, closest, min_dist)) {
           continue; // this branch can not be closer than the closest so far
         }
-        consider_func(pos, closest, *divider);
+        consider_func(ctx, closest, *divider);
       }
 
       vec_dst dst = std::distance(start, stop);
       if (dst <= 0) {
         continue; // empty sub array
       } else if (dst == 1) {
-        consider_func(pos, closest, *start);
+        consider_func(ctx, closest, *start);
         continue;
       }
 
       vec_dst median_offset = dst / 2;
       kd_node<V>& median_node = *(start + median_offset);
-      bool condition = divide_x_axis ? (pos.x < median_node.pos.x) : (pos.y < median_node.pos.y);
+      bool condition = (division_axis == 0) ? (ctx.pos.x < median_node.pos.x) : (ctx.pos.y < median_node.pos.y);
 
       // put the branch not taken on the bellow the branch taken on the stack
       if (condition) {
-        arg_stack_.push_back({ start + median_offset + 1, stop, !divide_x_axis, &median_node });
-        arg_stack_.push_back({ start, start + median_offset, !divide_x_axis, nullptr });
+        arg_stack.push_back({ start + median_offset + 1, stop, next_division_axis(division_axis), &median_node });
+        arg_stack.push_back({ start, start + median_offset, next_division_axis(division_axis), nullptr });
       } else {
-        arg_stack_.push_back({ start, start + median_offset, !divide_x_axis, &median_node });
-        arg_stack_.push_back({ start + median_offset + 1, stop, !divide_x_axis, nullptr });
+        arg_stack.push_back({ start, start + median_offset, next_division_axis(division_axis), &median_node });
+        arg_stack.push_back({ start + median_offset + 1, stop, next_division_axis(division_axis), nullptr });
       }
 
     }
@@ -211,12 +237,13 @@ public: // public methods
 
   kd_tree(std::vector<kd_node<V>> new_nodes) {
     build_iterative(std::move(new_nodes));
+    //build_recursive(std::move(new_nodes));
   }
 
 
   void build_recursive(std::vector<kd_node<V>> new_nodes) {
     nodes = std::move(new_nodes);
-    inner_build_recursive(nodes.begin(), nodes.end(), true);
+    inner_build_recursive(nodes.begin(), nodes.end(), 0);
   }
 
   void build_iterative(std::vector<kd_node<V>> new_nodes) {
@@ -227,27 +254,27 @@ public: // public methods
     // TODO consider pre-allocating
     std::vector<build_arg> arg_stack;
 
-    arg_stack.push_back({ nodes.begin(), nodes.end(), true });
+    arg_stack.push_back({ nodes.begin(), nodes.end(), 0 });
     while (!arg_stack.empty()) {
       build_arg args = arg_stack.back();
       arg_stack.pop_back();
       vec_it start = args.start;
       vec_it stop = args.stop;
-      bool divide_x_axis = args.divide_x_axis;
+      int division_axis = args.division_axis;
       vec_dst dst = std::distance(start, stop);
       if (dst <= 1) { // sorting 1 or fewer elements need not happen
         continue;
       }
       vec_dst median_offset = dst / 2;
-      if (divide_x_axis) {
+      if (division_axis == 0) {
         std::nth_element(start, start + median_offset, stop, compare_kd_node_x);
       } else {
         std::nth_element(start, start + median_offset, stop, compare_kd_node_y);
       }
       if (dst > 3) { // otherwise both sub arrays will havve 1 or fewer elements
-        arg_stack.push_back({ start, start + median_offset, !divide_x_axis }); // [start, median)
+        arg_stack.push_back({ start, start + median_offset, next_division_axis(division_axis) }); // [start, median)
         if (dst > 4) { // otherwise 1 or fewer elements will be in right the sub array
-          arg_stack.push_back({ start + (median_offset + 1), stop, !divide_x_axis }); // (median, stop)
+          arg_stack.push_back({ start + (median_offset + 1), stop, next_division_axis(division_axis) }); // (median, stop)
         }
       }
     }
@@ -255,10 +282,6 @@ public: // public methods
 
   // O(n) brute force nearest neighbour
   kd_node<V>* find_closest_brute(vector_2f const& pos) {
-    if (nodes.size() == 0) {
-      return nullptr;
-    }
-
     kd_node_dist<V> closest{};
     for (kd_node<V>& node : nodes) {
       consider_for_closest(pos, closest, node);
@@ -268,9 +291,6 @@ public: // public methods
 
   std::vector<kd_node_dist<V>> find_count_closest_brute(vector_2f const& pos, size_t count) {
     std::vector<kd_node_dist<V>> closests;
-    if (nodes.size() == 0) {
-      return closests;
-    }
     closests.reserve(count);
     for (kd_node<V>& node : nodes) {
       consider_for_closests(pos, closests, node);
@@ -279,35 +299,50 @@ public: // public methods
     return closests;
   }
 
+  std::vector<kd_node_dist<V>> find_within_brute(vector_2f const& pos, float max_distance) {
+    std::vector<kd_node_dist<V>> within;
+    search_ctx ctx{ pos, max_distance };
+    for (kd_node<V>& node : nodes) {
+      consider_within_distance(ctx, within, node);
+    }
+    std::sort(within.begin(), within.end());
+    return within;
+  }
+
   kd_node<V>* find_closest_recursive(vector_2f const& pos) {
     kd_node_dist<V> closest{};
     inner_find_closest_recursive<decltype(closest),
       decltype(skip_given_closest), skip_given_closest,
       decltype(consider_for_closest), consider_for_closest>
-      (pos, nodes.begin(), nodes.end(), true, closest);
+      (pos, nodes.begin(), nodes.end(), 0, closest);
     return closest.ptr;
   }
 
   std::vector<kd_node_dist<V>> find_count_closest_recursive(vector_2f const& pos, size_t count) {
     std::vector<kd_node_dist<V>> closests;
-    if (nodes.size() == 0) {
-      return closests;
-    }
     closests.reserve(count);
     inner_find_closest_recursive<decltype(closests),
       decltype(skip_given_closests), skip_given_closests,
       decltype(consider_for_closests), consider_for_closests>
-      (pos, nodes.begin(), nodes.end(), true, closests);
+      (pos, nodes.begin(), nodes.end(), 0, closests);
     std::sort(closests.begin(), closests.end());
     return closests;
   }
 
+  std::vector<kd_node_dist<V>> find_within_recursive(vector_2f const& pos, float max_distance) {
+    std::vector<kd_node_dist<V>> within;
+
+    inner_find_closest_recursive<decltype(within),
+      decltype(skip_given_distance), skip_given_distance,
+      decltype(consider_within_distance), consider_within_distance>
+      ({ pos, max_distance }, nodes.begin(), nodes.end(), 0, within);
+    std::sort(within.begin(), within.end());
+    return within;
+  }
+
   kd_node<V>* find_closest_iterative(vector_2f const& pos) {
-    if (nodes.size() == 0) {
-      return nullptr;
-    }
     kd_node_dist<V> closest{};
-    inner_find_closest_itreative<decltype(closest),
+    inner_find_closest_iterative<decltype(closest),
       decltype(skip_given_closest), skip_given_closest,
       decltype(consider_for_closest), consider_for_closest>(pos, closest);
     return closest.ptr;
@@ -315,15 +350,23 @@ public: // public methods
 
   std::vector<kd_node_dist<V>> find_count_closest_iterative(vector_2f const& pos, size_t count) {
     std::vector<kd_node_dist<V>> closests;
-    if (nodes.size() == 0) {
-      return closests;
-    }
     closests.reserve(count);
-    inner_find_closest_itreative<decltype(closests),
+    inner_find_closest_iterative<decltype(closests),
       decltype(skip_given_closests), skip_given_closests,
       decltype(consider_for_closests), consider_for_closests>(pos, closests);
     std::sort(closests.begin(), closests.end());
     return closests;
+  }
+
+  std::vector<kd_node_dist<V>> find_within_iterative(vector_2f const& pos, float max_distance) {
+    std::vector<kd_node_dist<V>> within;
+
+    inner_find_closest_iterative<decltype(within),
+      decltype(skip_given_distance), skip_given_distance,
+      decltype(consider_within_distance), consider_within_distance>
+      ({ pos, max_distance }, within);
+    std::sort(within.begin(), within.end());
+    return within;
   }
 
 };

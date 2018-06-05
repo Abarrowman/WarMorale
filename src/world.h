@@ -72,21 +72,21 @@ inline world::world(GLFWwindow* win, static_resources& sr, int_keyed_resources& 
   }
 
   {
-    /*kd_tree<char> kd{{
+    kd_tree<char> kd{{
       { { 2, 3 }, 'a'},
       { { 5, 4 }, 'b' },
       { { 9, 6 }, 'c' },
       { { 4, 7 }, 'd' },
       { { 8, 1 }, 'e' },
       { { 7, 2 }, 'f' },
-    }};*/
+    }};
 
-    std::vector<kd_node<char>> nodes;
+    /*std::vector<kd_node<char>> nodes;
     int node_count = 1000;
     for (int n = 0; n < node_count; n++) {
       nodes.push_back({{ rand_float(gen) * 10.0f , rand_float(gen)  * 10.0f }, static_cast<char>(n)});
     }
-    kd_tree<char> kd{ std::move(nodes) };
+    kd_tree<char> kd{ std::move(nodes) };*/
 
     for (float x = -1; x < 11; x += 0.1f) {
       for (float y = -1; y < 11; y += 0.1f) {
@@ -154,6 +154,36 @@ inline world::world(GLFWwindow* win, static_resources& sr, int_keyed_resources& 
             }
           }
         }
+
+        std::vector<kd_node_dist<char>> within_brtue = kd.find_within_brute(pos, 3.0f);
+        std::vector<kd_node_dist<char>> within_rec = kd.find_within_recursive(pos, 3.0f);
+        if (within_rec.size() != within_brtue.size()) {
+          fprintf(stderr, "Error at (%f, %f)\n", x, y);
+          exit(-1);
+        }
+        for (size_t i = 0; i < within_brtue.size(); i++) {
+          if (within_brtue[i].ptr != within_rec[i].ptr) {
+            if (within_brtue[i].dist < within_rec[i].dist) {
+              fprintf(stderr, "Error at (%f, %f)\n", x, y);
+              exit(-1);
+            }
+          }
+        }
+
+        std::vector<kd_node_dist<char>> within_it = kd.find_within_iterative(pos, 3.0f);
+        if (within_it.size() != within_brtue.size()) {
+          fprintf(stderr, "Error at (%f, %f)\n", x, y);
+          exit(-1);
+        }
+        for (size_t i = 0; i < within_brtue.size(); i++) {
+          if (within_brtue[i].ptr != within_it[i].ptr) {
+            if (within_brtue[i].dist < within_it[i].dist) {
+              fprintf(stderr, "Error at (%f, %f)\n", x, y);
+              exit(-1);
+            }
+          }
+        }
+
       }
     }
 
