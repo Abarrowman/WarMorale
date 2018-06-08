@@ -27,7 +27,7 @@ public:
   int const max_health;
   int current_health;
 
-  float pot_radius = 20.0f;
+  float pot_radius = 16.0f;
 
   trans_state trans;
 

@@ -2,28 +2,6 @@
 
 #include "2d_math.h"
 
-inline float quadratic_height(vector_2f center, vector_2f pos) {
-  return (pos - center).magnitude_squared();
-}
-
-inline vector_2f quadratic_gradient(vector_2f center, vector_2f pos) {
-  return 2.0f * (pos - center);
-}
-
-inline float cone_height(vector_2f center, vector_2f pos) {
-  return (pos - center).magnitude();
-}
-
-inline vector_2f cone_gradient(vector_2f center, vector_2f pos) {
-  vector_2f diff = pos - center;
-  float mag = diff.magnitude();
-  if (mag == 0) {
-    return vector_2f::zero();
-  } else {
-    return (1 / mag) * diff;
-  }
-}
-
 inline float quadratic_cone_height(vector_2f center, vector_2f pos, float change_distance) {
   vector_2f diff = pos - center;
   float distance_squared = diff.magnitude_squared();
@@ -60,40 +38,27 @@ inline vector_2f signularity_gradient(vector_2f center, vector_2f pos, float rad
   vector_2f diff = pos - center;
   float distance = diff.magnitude();
   if (distance == 0) {
-    return vector_2f::zero();
+    return vector_2f::zero(); // on top of each other
   } else if (distance > radius) {
     return vector_2f::zero();
-  } else {
-    vector_2f result = (2.0f * ((1.0f / radius) - (1.0f / distance)) / (distance * distance * distance)) * diff;
-    return result;
   }
+
+  vector_2f distance_grad = (1.0f / distance) * diff;
+  float grad_scale = (2 * (1 / radius - 1 / distance) / (distance * distance));
+  return grad_scale * distance_grad;
 }
 
-inline float downwards_cone_height(vector_2f center, vector_2f pos, float max_radius) {
-  // TODO negative heights
-  return max_radius - (pos - center).magnitude();
-}
-
-inline vector_2f downwards_cone_gradient(vector_2f center, vector_2f pos, float max_radius) {
+inline float gaussian_height(vector_2f center, vector_2f pos, float std_dev) {
   vector_2f diff = pos - center;
-  float mag = diff.magnitude();
-  if ((mag == 0) || (mag > max_radius)) {
-    return vector_2f::zero();
-  } else {
-    return (-1 / mag) * diff;
-  }
-}
-inline float downwards_quadratic_height(vector_2f center, vector_2f pos, float max_radius) {
-  float val = max_radius - (pos - center).magnitude();
-  return val * val;
+  vector_2f diff_sq = diff.element_squared();
+  float variance = std_dev * std_dev;
+  return (exp(-diff_sq.x / (4 * variance)) * exp(-diff_sq.y / (4 * variance))) / (2 * math_consts::pi() * variance);
 }
 
-inline vector_2f downwards_quadratic_gradient(vector_2f center, vector_2f pos, float max_radius) {
+inline vector_2f gaussian_gradient(vector_2f center, vector_2f pos, float std_dev) {
   vector_2f diff = pos - center;
-  float mag = diff.magnitude();
-  if ((mag == 0) || (mag > max_radius)) {
-    return vector_2f::zero();
-  } else {
-    return (2.0f * (max_radius * (1.0f / mag) - 1.0f)) * diff;
-  }
+  vector_2f diff_sq = diff.element_squared();
+  float variance = std_dev * std_dev;
+  float common = -(exp(-diff_sq.x / (4 * variance))*exp(-diff_sq.y / (4 * variance))) / (4 * variance * variance * math_consts::pi());
+  return diff * common;
 }

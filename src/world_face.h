@@ -31,7 +31,7 @@ public:
   vector_2f mouse_pos = { 0, 0 };
   bool mouse_down = false;
 
-  space_buckets<unit_reference> unit_buckets{500};
+  space_buckets<unit_reference> unit_buckets{100};
 
   team* player_team;
   team* enemy_team;

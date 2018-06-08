@@ -23,7 +23,6 @@ float rand_centered_float(generator_type& gen) {
   return std::uniform_real_distribution<float>{-1.0, 1.0f}(gen);
 }
 
-#define PI_F (3.14159265358979323846f)
 
 inline void check_gl_errors() {
   GLenum err;
@@ -66,26 +65,6 @@ template<typename T>
 inline void push_unique(std::vector<T>& vec, T const& val) {
   if (std::find(vec.begin(), vec.end(), val) == vec.end()) {
     vec.push_back(val);
-  }
-}
-
-inline float angle_err(float const current_ang, float const target_ang) {
-  float ang_err = target_ang - current_ang;
-  if (ang_err > PI_F) {
-    ang_err = -2 * PI_F + ang_err;
-  } else if (ang_err < -PI_F) {
-    ang_err = 2 * PI_F + ang_err;
-  }
-  return ang_err;
-}
-
-inline float angle_clamp(float const angle) {
-  if (angle > PI_F) {
-    return -2 * PI_F + angle;
-  } else if (angle < -PI_F) {
-    return 2 * PI_F + angle;
-  } else {
-    return angle;
   }
 }
 

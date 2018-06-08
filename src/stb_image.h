@@ -224,12 +224,12 @@ RECENT REVISION HISTORY:
 // generically. You can still load any file through the existing interface;
 // if you attempt to load an HDR file, it will be automatically remapped to
 // LDR, assuming gamma 2.2 and an arbitrary scale factor defaulting to 1;
-// both of these constants can be reconfigured through this interface:
+// both of these math_consts can be reconfigured through this interface:
 //
 //     stbi_hdr_to_ldr_gamma(2.2f);
 //     stbi_hdr_to_ldr_scale(1.0f);
 //
-// (note, do not use _inverse_ constants; stbi_image will invert them
+// (note, do not use _inverse_ math_consts; stbi_image will invert them
 // appropriately).
 //
 // Additionally, there is a new, parallel interface for loading files as
@@ -239,7 +239,7 @@ RECENT REVISION HISTORY:
 //
 // If you load LDR images through this interface, those images will
 // be promoted to floating point values, run through the inverse of
-// constants corresponding to the above:
+// math_consts corresponding to the above:
 //
 //     stbi_ldr_to_hdr_scale(1.0f);
 //     stbi_ldr_to_hdr_gamma(2.2f);
@@ -2220,7 +2220,7 @@ static void stbi__idct_block(stbi_uc *out, int out_stride, short data[64])
          v[0] = v[8] = v[16] = v[24] = v[32] = v[40] = v[48] = v[56] = dcterm;
       } else {
          STBI__IDCT_1D(d[ 0],d[ 8],d[16],d[24],d[32],d[40],d[48],d[56])
-         // constants scaled things up by 1<<12; let's bring them back
+         // math_consts scaled things up by 1<<12; let's bring them back
          // down, but keep 2 extra bits of precision
          x0 += 512; x1 += 512; x2 += 512; x3 += 512;
          v[ 0] = (x0+t3) >> 10;
@@ -2237,7 +2237,7 @@ static void stbi__idct_block(stbi_uc *out, int out_stride, short data[64])
    for (i=0, v=val, o=out; i < 8; ++i,v+=8,o+=out_stride) {
       // no fast case since the first 1D IDCT spread components out
       STBI__IDCT_1D(v[0],v[1],v[2],v[3],v[4],v[5],v[6],v[7])
-      // constants scaled things up by 1<<12, plus we had 1<<2 from first
+      // math_consts scaled things up by 1<<12, plus we had 1<<2 from first
       // loop, plus horizontal and vertical each scale by sqrt(8) so together
       // we've got an extra 1<<3, so 1<<17 total we need to remove.
       // so we want to round that, which means adding 0.5 * 1<<17,

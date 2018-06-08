@@ -35,13 +35,18 @@ inline world::world(GLFWwindow* win, static_resources& sr, int_keyed_resources& 
   legion& p_first = player_team->create_legion();
   player_first_legion = &p_first;
   p_first.order.pos = { 100, 100 };
-  player_team->add_orphan(new grunt(*this, *player_team, &p_first))->trans.angle = PI_F / 2;
+  player_team->add_orphan(new grunt(*this, *player_team, &p_first))->trans.angle = math_consts::pi() / 2;
   player_team->add_orphan(new grunt(*this, *player_team, &p_first))->trans.set_position({-100, -200});
 
 
   legion& e_first = enemy_team->create_legion();
   enemy_first_legion = &e_first;
-  enemy_team->add_orphan(new grunt(*this, *enemy_team, &e_first))->trans.x = 100;
+
+  for (int i = 0; i < 100; i++) {
+    grunt* g = enemy_team->add_orphan(new grunt(*this, *enemy_team, &e_first));
+    g->trans.x = 100.0f * rand_centered_float(get_generator());
+    g->trans.y = 100.0f * rand_centered_float(get_generator());
+  }
 
   enemy_team->establish_hostility(player_team);
 
@@ -104,7 +109,7 @@ inline bool world::update() {
   float ang = frame_count / 100.0f;
   enemy_first_legion->order.pos = vector_2f::create_polar(ang, 100);
   player_first_legion->order.pos = mouse_pos;
-  tri->local_trans = matrix_3f::transformation_matrix(100, 100, ang + PI_F);
+  tri->local_trans = matrix_3f::transformation_matrix(100, 100, ang + math_consts::pi());
 
   stage::update(); //update children
 
@@ -149,8 +154,8 @@ inline void world::mouse_button_callback(int button, int action, int mods) {
         //printf("Release\n");
         std::array<vector_2f, 3> tri_arr{{
           { 1, 0 },
-          { cos(PI_F * 2 / 3), sin(PI_F * 2 / 3) },
-          { cos(PI_F * 2 / 3), sin(PI_F * 4 / 3) }
+          { cos(math_consts::pi() * 2 / 3), sin(math_consts::pi() * 2 / 3) },
+          { cos(math_consts::pi() * 2 / 3), sin(math_consts::pi() * 4 / 3) }
          }};
         tri->arr.set_veritices(tri_arr);
       }

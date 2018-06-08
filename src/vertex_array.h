@@ -118,8 +118,8 @@ public:
     std::array<vector_2f, 3> tri_verts{ {
         //   x, y
         { 1, 0 },
-        { cos(PI_F * 2 / 3), sin(PI_F * 2 / 3)},
-        { cos(PI_F * 2 / 3), sin(PI_F * 4 / 3)}
+        { cos(math_consts::pi() * 2 / 3), sin(math_consts::pi() * 2 / 3)},
+        { cos(math_consts::pi() * 2 / 3), sin(math_consts::pi() * 4 / 3)}
       } };
 
     return create_verticies(tri_verts);

@@ -40,7 +40,7 @@ protected:
 
 
     //vector_2f grad = vector_2f::zero();
-    vector_2f grad = quadratic_cone_gradient(dest, trans.get_position(), 100);
+    vector_2f grad = -0.1f *  quadratic_cone_gradient(dest, trans.get_position(), 100);
     std::vector<unit_reference> references = land.unit_buckets.find_nearby_buckets(position);
     for (unit_reference ref : references) {
       if (!ref.valid()) {
@@ -51,8 +51,13 @@ protected:
       }
       unit& close_unit = ref.ref();
 
-      vector_2f repulse = 20.0f * downwards_quadratic_gradient(close_unit.trans.get_position(), position, close_unit.pot_radius + pot_radius);
-      grad -= repulse;
+      float intersection_radius = close_unit.pot_radius + pot_radius;
+      float std_dev = 0.5f * intersection_radius;
+
+      vector_2f personal_space_force = -1500.0f * std_dev * std_dev * gaussian_gradient(close_unit.trans.get_position(), position, std_dev);
+      vector_2f collision_avoidance_force = -10000.0f * signularity_gradient(close_unit.trans.get_position(), position, intersection_radius);
+
+      grad += personal_space_force + collision_avoidance_force;
     }
 
 
@@ -60,7 +65,7 @@ protected:
     float max_speed = 10.0f;
     if (mag != 0) {
       vector_2f capped_gradient = (std::min(std::min(distance, max_speed), mag) / mag) * grad;
-      trans.set_position(trans.get_position() - capped_gradient);
+      trans.set_position(trans.get_position() + capped_gradient);
     }
 
      /*// move

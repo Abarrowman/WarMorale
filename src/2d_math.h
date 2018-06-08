@@ -4,6 +4,34 @@
 #include <cstring>
 #include <array>
 
+
+class math_consts {
+public:
+  static constexpr float pi() {
+    return 3.14159265358979323846f;
+  }
+};
+
+inline float angle_err(float const current_ang, float const target_ang) {
+  float ang_err = target_ang - current_ang;
+  if (ang_err > math_consts::pi()) {
+    ang_err = -2 * math_consts::pi() + ang_err;
+  } else if (ang_err < -math_consts::pi()) {
+    ang_err = 2 * math_consts::pi() + ang_err;
+  }
+  return ang_err;
+}
+
+inline float angle_clamp(float const angle) {
+  if (angle > math_consts::pi()) {
+    return -2 * math_consts::pi() + angle;
+  } else if (angle < -math_consts::pi()) {
+    return 2 * math_consts::pi() + angle;
+  } else {
+    return angle;
+  }
+}
+
 template<typename T>
 class vector_2 {
 public:
@@ -71,6 +99,10 @@ public:
 
   vector_2<T> round() const {
     return { static_cast<T>(std::round(x)), static_cast<T>(std::round(y)) };
+  }
+
+  vector_2<T> element_squared() const {
+    return { x * x, y * y };
   }
 
   template<typename Y>
