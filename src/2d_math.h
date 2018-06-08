@@ -4,7 +4,114 @@
 #include <cstring>
 #include <array>
 
-class vector_2f;
+template<typename T>
+class vector_2 {
+public:
+  T x;
+  T y;
+
+  vector_2() {};
+  vector_2(T vx, T vy) : x(vx), y(vy)  {};
+
+
+  T magnitude() const {
+    return std::sqrt(magnitude_squared());
+  }
+
+  T manhattan_magnitude() const {
+    return std::abs(x) + std::abs(y);
+  }
+
+  T magnitude_squared() const {
+    return x * x + y * y;
+  }
+
+  T angle() const {
+    return std::atan2(y, x);
+  }
+
+  vector_2<T> normalized() const {
+    float scale = 1 / magnitude;
+    return scale * (*this);
+  }
+
+  vector_2<T> operator-(vector_2<T> const& other) const {
+    return { x - other.x, y - other.y };
+  }
+
+  vector_2<T> operator-=(vector_2<T> const& other) {
+    x -= other.x;
+    y -= other.y;
+    return *this;
+  }
+
+  vector_2<T> operator+(vector_2<T> const& other) const {
+    return { x + other.x, y + other.y };
+  }
+
+  vector_2<T> operator+=(vector_2<T> const& other) {
+    x += other.x;
+    y += other.y;
+    return *this;
+  }
+
+  vector_2<T> operator*(T other) const {
+    return { x * other, y * other };
+  }
+
+  vector_2<T> operator*=(T other) {
+    x *= other;
+    y *= other;
+    return *this;
+  }
+
+  vector_2<T> floor() const {
+    return { static_cast<T>(std::floor(x)), static_cast<T>(std::floor(y)) };
+  }
+
+  vector_2<T> round() const {
+    return { static_cast<T>(std::round(x)), static_cast<T>(std::round(y)) };
+  }
+
+  template<typename Y>
+  vector_2<Y> cast() const {
+    return { static_cast<Y>(x), static_cast<Y>(y) };
+  }
+
+  bool operator==(vector_2<T> const& other) const {
+    return (x == other.x) && (y == other.y);
+  }
+
+  static vector_2<T> create_polar(T ang) {
+    return { std::cos(ang), std::sin(ang) };
+  }
+
+  static vector_2<T> create_polar(T ang, T mag) {
+    return create_polar(ang) * mag;
+  }
+
+  static vector_2<T> zero() {
+    return vector_2<T>(0, 0);
+  }
+};
+
+template<typename T>
+inline vector_2<T> operator*(T left, vector_2<T> const& right) {
+  return right * left;
+}
+
+namespace std {
+  template <typename T>
+  struct hash<vector_2<T>> {  
+    size_t operator()(const vector_2<T>& v) const {
+      return (hash<T>()(v.x) << 1) ^ hash<T>()(v.y);
+    }
+  };
+
+}
+
+using vector_2f = vector_2<float>;
+using vector_2i = vector_2<int>;
 
 class matrix_3f {
 public:
@@ -82,61 +189,6 @@ public:
     }
     values = temp;
     return *this;
-  }
-
-};
-
-class vector_2f {
-public:
-  float x;
-  float y;
-
-  vector_2f() {};
-  vector_2f(float vx, float vy) : x(vx), y(vy)  {};
-
-
-  float magnitude() const {
-    return std::sqrt(x * x + y * y);
-  }
-
-  float manhattan_magnitude() const {
-    return abs(x) + abs(y);
-  }
-
-  float angle() const {
-    return std::atan2(y, x);
-  }
-
-  vector_2f operator-(vector_2f const& other) const {
-    return { x - other.x, y - other.y };
-  }
-
-  vector_2f operator+(vector_2f const& other) const {
-    return { x + other.x, y + other.y };
-  }
-
-  vector_2f operator+=(vector_2f const& other) {
-    x += other.x;
-    y += other.y;
-    return *this;
-  }
-
-  vector_2f operator*(float other) const {
-    return { x * other, y * other };
-  }
-
-  vector_2f operator*=(float other) {
-    x *= other;
-    y *= other;
-    return *this;
-  }
-
-  static vector_2f create_polar(float ang) {
-    return { cos(ang), sin(ang) };
-  }
-
-  static vector_2f create_polar(float ang, float mag) {
-    return create_polar(ang) * mag;
   }
 
 };
