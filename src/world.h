@@ -31,24 +31,29 @@ inline world::world(GLFWwindow* win, static_resources& sr, int_keyed_resources& 
     
   player_team = teams_layer->add_orphan(new team());
   enemy_team = teams_layer->add_orphan(new team());
+  enemy_team->establish_hostility(player_team);
 
-  legion& p_first = player_team->create_legion();
-  player_first_legion = &p_first;
-  p_first.order.pos = { 100, 100 };
-  player_team->add_orphan(new grunt(*this, *player_team, &p_first))->trans.angle = math_consts::pi() / 2;
-  player_team->add_orphan(new grunt(*this, *player_team, &p_first))->trans.set_position({-100, -200});
-
-
-  legion& e_first = enemy_team->create_legion();
-  enemy_first_legion = &e_first;
-
-  for (int i = 0; i < 100; i++) {
-    grunt* g = enemy_team->add_orphan(new grunt(*this, *enemy_team, &e_first));
-    g->trans.x = 100.0f * rand_centered_float(get_generator());
-    g->trans.y = 100.0f * rand_centered_float(get_generator());
+  {
+    legion& p_first = player_team->create_legion();
+    player_first_legion = &p_first;
+    p_first.order.pos = { 100, 100 };
+    for (int i = 0; i < 100; i++) {
+      grunt* g = player_team->add_orphan(new grunt(*this, *player_team, &p_first));
+      g->trans.x = -300 + 100.0f * rand_centered_float(get_generator());
+      g->trans.y = 100.0f * rand_centered_float(get_generator());
+    }
   }
 
-  enemy_team->establish_hostility(player_team);
+  {
+    legion& e_first = enemy_team->create_legion();
+    enemy_first_legion = &e_first;
+    for (int i = 0; i < 100; i++) {
+      grunt* g = enemy_team->add_orphan(new grunt(*this, *enemy_team, &e_first));
+      g->trans.x = 100.0f * rand_centered_float(get_generator());
+      g->trans.y = 100.0f * rand_centered_float(get_generator());
+    }
+  }
+
 
   threat_layer = add_orphan(new threat_parent());
   sprite fire_sprite = static_sprite(static_texture_id::fire);

@@ -81,7 +81,7 @@ int main(void) {
   glfwSetMouseButtonCallback(window, mouse_button_callback);
 
   glfwMakeContextCurrent(window);
-  glfwSwapInterval(1); // enable vsync
+  //glfwSwapInterval(1); // enable vsync
 
   // start GLEW extension handler
   glewExperimental = GL_TRUE;
