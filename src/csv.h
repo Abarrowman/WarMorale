@@ -36,20 +36,18 @@ public:
     buffer[length] = '\0';
     return atof(buffer.data());
   }
-
-};
-
-inline bool operator==(buffer_view const& left , buffer_view const& right) {
-  if (left.length != right.length) {
-    return false;
+  bool operator==(buffer_view const& other) const {
+    if (length != other.length) {
+      return false;
+    }
+    return (memcmp(c_str, other.c_str, length) == 0);
   }
-  return (memcmp(left.c_str, right.c_str, left.length) == 0);
-}
+};
 
 namespace std {
   template <>
   struct hash<buffer_view> {
-    size_t operator()(const buffer_view& k) const {
+    size_t operator()(buffer_view const& k) const {
       // 32 bit FNV-1a hash
       size_t current_hash = 0x811c9dc5;
       for (size_t i = 0; i < k.length; i++) {
