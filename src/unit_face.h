@@ -18,6 +18,7 @@ class unit_reference;
 class unit : public ordered_parent {
 private:
   unit_status status = unit_status::LIVING;
+  vector_2f old_pos;
   void take_threats();
 public:
   world& land;
@@ -25,6 +26,8 @@ public:
   legion* group;
   int const max_health;
   int current_health;
+
+  float pot_radius = 20.0f;
 
   trans_state trans;
 
@@ -35,7 +38,7 @@ public:
 
   virtual bool take_point_threat(point_threat& pt) = 0;
 
-
+  unit_reference ref();
 protected:
   /*
   Updates the unit.
@@ -62,4 +65,5 @@ public:
   bool valid();
   unit* ptr();
   unit& ref();
+  bool operator==(unit_reference const& other) const;
 };

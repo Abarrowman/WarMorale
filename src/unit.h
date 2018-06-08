@@ -28,12 +28,19 @@ inline bool unit::update() {
   assert(group != nullptr);
   switch (status) {
   case LIVING:
+    land.unit_buckets.remove_entry(old_pos, ref());
     living_update();
     take_threats();
     if (current_health <= 0) {
       death_action();
       visible = false;
       status = unit_status::KILLED;
+    } else {
+      ordered_parent::update();
+      trans.clamp_angle();
+      local_trans = trans.to_matrix();
+      land.unit_buckets.add_entry(trans.get_position(), ref());
+      old_pos = trans.get_position();
     }
     break;
   case KILLED:
@@ -43,9 +50,7 @@ inline bool unit::update() {
     return true;
     break;
   }
-  ordered_parent::update();
-  trans.clamp_angle();
-  local_trans = trans.to_matrix();
+  
   return false;
 }
 
@@ -75,6 +80,10 @@ inline bool unit::is_living() {
   return (status == LIVING);
 }
 
+inline unit_reference unit::ref() {
+  return unit_reference(this);
+}
+
 inline void unit_reference::update() {
   if (target != nullptr) {
     if (!(target->is_living())) {
@@ -97,4 +106,8 @@ inline unit& unit_reference::ref() {
   update();
   assert(target != nullptr);
   return *target;
+}
+
+inline bool unit_reference::operator==(unit_reference const & other) const {
+  return (target == other.target);
 }

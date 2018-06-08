@@ -13,6 +13,7 @@ class world;
 #include "bitmap_text.h"
 #include "running_average.h"
 #include "utils.h"
+#include "space_buckets.h"
 
 class world : public stage {
 
@@ -29,6 +30,8 @@ public:
   long frame_count = 0;
   vector_2f mouse_pos = { 0, 0 };
   bool mouse_down = false;
+
+  space_buckets<unit_reference> unit_buckets{500};
 
   team* player_team;
   team* enemy_team;
