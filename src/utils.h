@@ -88,3 +88,8 @@ inline float angle_clamp(float const angle) {
     return angle;
   }
 }
+
+template<typename T>
+inline float value_clamp(T min, T max, T value) {
+  return std::min(max, std::max(value, min));
+}
