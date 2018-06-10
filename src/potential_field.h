@@ -23,7 +23,7 @@ inline vector_2f quadratic_cone_gradient(vector_2f center, vector_2f pos, float 
   }
 }
 
-inline float signularity_height(vector_2f center, vector_2f pos, float radius) {
+inline float obstacle_height(vector_2f center, vector_2f pos, float radius) {
   vector_2f diff = pos - center;
   float distance = diff.magnitude();
   if (distance > radius) {
@@ -34,7 +34,7 @@ inline float signularity_height(vector_2f center, vector_2f pos, float radius) {
   }
 }
 
-inline vector_2f signularity_gradient(vector_2f center, vector_2f pos, float radius) {
+inline vector_2f obstacle_gradient(vector_2f center, vector_2f pos, float radius) {
   vector_2f diff = pos - center;
   float distance = diff.magnitude();
   if (distance == 0) {
@@ -61,4 +61,9 @@ inline vector_2f gaussian_gradient(vector_2f center, vector_2f pos, float std_de
   float variance = std_dev * std_dev;
   float common = -(exp(-diff_sq.x / (4 * variance))*exp(-diff_sq.y / (4 * variance))) / (4 * variance * variance * math_consts::pi());
   return diff * common;
+}
+
+inline vector_2f normalized_gaussian_gradient(vector_2f center, vector_2f pos, float std_dev) {
+  float variance = std_dev * std_dev;
+  return variance * variance * gaussian_gradient(center, pos, std_dev);
 }

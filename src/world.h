@@ -25,7 +25,14 @@ inline world::world(GLFWwindow* win, static_resources& sr, int_keyed_resources& 
   tri->edge_color.floats = { 0.0, 0.2f, 0.2f, 1.0f };
   tri->edge_width = 0.3f;//0.1f;
   
-
+  {
+    obstacle_layer = add_orphan(new obstacle_parent());
+    obstacle* ceres = obstacle_layer->add_orphan(new circular_obstacle(110, static_sprite_orphan(static_texture_id::ceres)));
+    ceres->trans.x = -200;
+    ceres->trans.y = -200;
+    ceres->trans.scale_x = 256;
+    ceres->trans.scale_y = 256;
+  }
 
   teams_layer = add_orphan(new team_parent());
     
@@ -79,30 +86,6 @@ inline world::world(GLFWwindow* win, static_resources& sr, int_keyed_resources& 
     log_text->local_trans = matrix_3f::transformation_matrix(1, 1, 0, trans.x, trans.y);
     log_text->text_color = { 0, 1, 1, 1 };
     
-  }
-  {
-    space_buckets<int> buckets{ 100 };
-    buckets.add_entry({ 0, 0 }, 0);
-    buckets.add_entry({ 10, 10 }, 1);
-    buckets.add_entry({ 50, 110 }, 2);
-    buckets.add_entry({ 800, 900 }, 3);
-
-    vector_2f search_loc{ 30.0f, 30.0f };
-
-    auto range = buckets.find_local_bucket(search_loc);
-    for (auto it = range.first; it != range.second; ++it) {
-      printf("Found Locally %d\n", it->second);
-    }
-
-    for (int i : buckets.find_nearby_buckets(search_loc)) {
-      printf("Found Nearby %d\n", i);
-    }
-
-    buckets.move_entry({ 0, 0 }, { 820, 910 }, 0);
-
-    for (int i : buckets.find_nearby_buckets(search_loc)) {
-      printf("Found Nearby After Move %d\n", i);
-    }
   }
 }
 

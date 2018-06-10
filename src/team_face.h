@@ -33,6 +33,8 @@ public:
 
   void establish_hostility(team* enemy);
 
+  bool is_hositle(team* enemy);
+
   bool update() override;
 
   legion& create_legion();

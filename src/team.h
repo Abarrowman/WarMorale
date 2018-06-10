@@ -45,6 +45,10 @@ inline void team::establish_hostility(team* enemy) {
 
 }
 
+inline bool team::is_hositle(team* enemy) {
+  return (std::find(enemy_teams.cbegin(), enemy_teams.cend(), enemy) != enemy_teams.cend());
+}
+
 inline bool team::update() {
   // pre-calculate things for the team
   // worry about this if and when it matters

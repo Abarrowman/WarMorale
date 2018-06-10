@@ -19,8 +19,7 @@ private:
     return map.equal_range(bucket);
   }
 
-  std::vector<T> find_nearby_buckets(vector_2i const& bucket) const {
-    std::vector<T> vec;
+  void find_nearby_buckets(vector_2i const& bucket, std::vector<T>& vec) const {
     for (int ix = -1; ix < 2; ix++) {
       for (int iy = -1; iy < 2; iy++) {
         auto range = find_local_bucket(bucket + vector_2i(ix, iy));
@@ -29,10 +28,23 @@ private:
         }
       }
     }
-    return vec;
+  }
+
+  bool contains(vector_2i const& bucket, T const& entry) {
+    auto range = find_local_bucket(bucket);
+    for (auto it = range.first; it != range.second; ++it) {
+      if (it->second == entry) {
+        return true;
+      }
+    }
+    return false;
   }
 
 public:
+
+  bool contains(vector_2f const& pos, T const& entry) {
+    return contains(compute_bucket(pos), entry);
+  }
 
   vector_2i compute_bucket(vector_2f const& pos) const {
     return ((1.0f / cell_size) * pos).round().cast<int>();
@@ -49,7 +61,14 @@ public:
   }
 
   std::vector<T> find_nearby_buckets(vector_2f const& pos) const {
-    return find_nearby_buckets(compute_bucket(pos));
+    std::vector<T> vec;
+    find_nearby_buckets(compute_bucket(pos), vec);
+    return vec;
+  }
+
+  std::vector<T>& find_nearby_buckets(vector_2f const& pos, std::vector<T>& vec) const {
+    find_nearby_buckets(compute_bucket(pos), vec);
+    return vec;
   }
 
   void remove_entry(vector_2f const& pos, T const& entry) {

@@ -10,6 +10,8 @@
 class grunt : public unit {
 private:
   sprite* ship;
+  std::vector<unit_reference> references;
+
 public:
   grunt(world& w, team& t, legion* l) : unit(w, t, l, 10) {
     ship = add_orphan(land.static_sprite_orphan(static_texture_id::grunt));
@@ -38,10 +40,12 @@ protected:
     vector_2f diff = dest - position;
     float distance = diff.magnitude();
 
+    references.clear();
+    land.unit_buckets.find_nearby_buckets(position, references);
+
 
     //vector_2f grad = vector_2f::zero();
     vector_2f grad = -0.1f *  quadratic_cone_gradient(dest, trans.get_position(), 100);
-    std::vector<unit_reference> references = land.unit_buckets.find_nearby_buckets(position);
     for (unit_reference ref : references) {
       if (!ref.valid()) {
         continue;
@@ -55,11 +59,13 @@ protected:
       float std_dev = 0.5f * intersection_radius;
 
       vector_2f personal_space_force = -1500.0f * std_dev * std_dev * gaussian_gradient(close_unit.trans.get_position(), position, std_dev);
-      vector_2f collision_avoidance_force = -10000.0f * signularity_gradient(close_unit.trans.get_position(), position, intersection_radius);
+      vector_2f collision_avoidance_force = -10000.0f * obstacle_gradient(close_unit.trans.get_position(), position, intersection_radius);
 
       grad += personal_space_force + collision_avoidance_force;
     }
 
+
+    grad += land.obstacle_layer->get_exerted_gradient(position);
 
     float mag = grad.magnitude();
     float max_speed = 10.0f;
@@ -69,10 +75,11 @@ protected:
     }
 
      /*// move
-    vector_2f e_pos = trans.translation_to(group->order.pos);
-    trans.set_position(position + e_pos * 0.1f);*/
+    vector_2f e_pos = old_trans.translation_to(group->order.pos);
+    old_trans.set_position(position + e_pos * 0.1f);*/
 
     // aim
+    //unit_reference closest_enemy_ref = find_closest_enemy(references);
     unit_reference closest_enemy_ref = find_closest_enemy();
     if (closest_enemy_ref.valid()) {
       unit& closest_enemy = closest_enemy_ref.ref();

@@ -14,6 +14,7 @@ class world;
 #include "running_average.h"
 #include "utils.h"
 #include "space_buckets.h"
+#include "obstacle.h"
 
 class world : public stage {
 
@@ -41,7 +42,7 @@ public:
 
   owning_polygon* tri;
 
-
+  obstacle_parent* obstacle_layer;
   team_parent* teams_layer;
   threat_parent* threat_layer;
   ordered_parent* over_effects_layer; // A container for effects to render over-top the main game elements

@@ -14,6 +14,7 @@ enum class static_texture_id {
   face,
   fire,
   grunt,
+  ceres,
   COUNT
 };
 
@@ -63,6 +64,7 @@ public:
     textures.emplace_back("./assets/textures/sad.png");
     textures.emplace_back("./assets/textures/fire.png");
     textures.emplace_back("./assets/textures/grunt.png");
+    textures.emplace_back("./assets/textures/ceres.png");
 
     {
       std::string const sprite_vertex_shader = read_file_to_string("./assets/shaders/sprite.vert");
@@ -96,8 +98,10 @@ public:
       shaders.emplace_back(prop_vertex_shader.c_str(), prop_geometry_shader.c_str(), fragment_shader.c_str());
     }
     
-    simple_vertex_array sprite_vertex_array = simple_vertex_array::create_sprite_vertex_array();
-    vertex_arrays.push_back(std::move(sprite_vertex_array));
+    {
+      simple_vertex_array sprite_vertex_array = simple_vertex_array::create_sprite_vertex_array();
+      vertex_arrays.push_back(std::move(sprite_vertex_array));
+    }
 
     {
       texture tex{ "./assets/fonts/consolas_12.png" };

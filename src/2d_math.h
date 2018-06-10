@@ -261,6 +261,18 @@ public:
   void clamp_angle() {
     angle = angle_clamp(angle);
   }
+
+  bool operator==(trans_state const& other) const {
+    bool equal = (scale_x == other.scale_x) &&
+      (scale_y == other.scale_y) &&
+      (angle == other.angle) &&
+      (x == other.x) &&
+      (y == other.y);
+    return equal;
+  }
+  bool operator!=(trans_state const& other) const {
+    return !(operator==(other));
+  }
 };
 
 inline vector_2f matrix_3f::operator*(vector_2f const& c) const {

@@ -94,6 +94,7 @@ public:
           unsigned char b_val = pixel_data[(y * image_width + x) * 4 + 2];
 
           color p_col = { r_val / 255.0f, g_val / 255.0f, b_val / 255.0f, a_val / 255.0f };
+          //TODO add to p_col to make explosions look better
           vector_2f pos = vector_2f(static_cast<float>(x) / (image_width - 1) - 0.5f, static_cast<float>(y) / (image_height - 1) - 0.5f);
           vector_2f trans_pos = total_trans * pos;
 

@@ -46,7 +46,11 @@ protected:
   virtual void living_update() = 0;
   virtual void death_action() {}
 
+  // Find the closest enemy of all enemies
   unit_reference find_closest_enemy();
+
+  // Find the closest enemy within a vector of unit references
+  unit_reference find_closest_enemy(std::vector<unit_reference>& references);
 };
 
 /*

@@ -76,6 +76,26 @@ inline unit_reference unit::find_closest_enemy() {
   return closest_enemy;
 }
 
+inline unit_reference unit::find_closest_enemy(std::vector<unit_reference>& references) {
+  unit_reference closest_enemy{ nullptr };
+  float closest_dist = std::numeric_limits<float>::max();
+  for (unit_reference ref : references) {
+    if (!ref.valid()) {
+      continue;
+    }
+    unit& other = ref.ref();
+    if (!side.is_hositle(&(other.side))) {
+      continue;
+    }
+    float enemy_dist = other.trans.translation_to(trans).magnitude();
+    if (enemy_dist < closest_dist) {
+      closest_dist = enemy_dist;
+      closest_enemy = ref;
+    }
+  }
+  return closest_enemy;
+}
+
 inline bool unit::is_living() {
   return (status == LIVING);
 }

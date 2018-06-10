@@ -28,6 +28,7 @@ public:
       return;
     }
     if (target.take_point_threat(*this)) {
+      // TOOD make threats that don't destroy themselves when used
       destroyed = true;
     }
   }
