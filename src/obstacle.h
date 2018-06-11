@@ -4,6 +4,8 @@
 #include "sprite.h"
 #include "potential_field.h"
 #include "space_buckets.h"
+#include "polygon.h"
+#include <array>
 
 class obstacle_parent;
 
@@ -19,7 +21,7 @@ public:
     return ordered_parent::update();
   }
 
-  virtual vector_2f get_exerted_gradient(vector_2f effected_location) = 0;
+  virtual vector_2f get_exerted_gradient(vector_2f effected_location, float other_radius) = 0;
   virtual ~obstacle() {} // base class
 };
 
@@ -28,16 +30,19 @@ private:
   float radius;
 
 public:
-  circular_obstacle(float rad, sprite* orphan) : radius(rad) {
+  circular_obstacle(float rad, sprite* orphan, polygon_context* p_ctx) : radius(rad) {
+    /*std::array<vector_2f, 2>verts{ { { 0.0f, 0.0f },{ 0.0f, 0.0001f } } };
+    simple_vertex_array arr = simple_vertex_array::create_verticies(std::move(verts));
+    add_orphan(new owning_polygon(p_ctx, std::move(arr)))->edge_color = { 0.0f, 1.0f, 1.0f, 1.0f };*/
     add_orphan(orphan);
+
   }
 
-  vector_2f get_exerted_gradient(vector_2f location) {
-    float half_radius = radius * 0.5f;
-    vector_2f personal_space_force = -45000.0f * half_radius * half_radius * gaussian_gradient(trans.get_position(), location, half_radius);
-   // vector_2f collision_avoidance_force = -100000000.0f * obstacle_gradient(trans.get_position(), location, radius);
-    //return personal_space_force + collision_avoidance_force;
-    return personal_space_force;
+  vector_2f get_exerted_gradient(vector_2f location, float other_radius) {
+    vector_2f gauss_force = 5.0f * normalized_absolute_gaussian_gradient(trans.get_position(), location, other_radius / 2.0f + 20.0f, radius - 40.0f);
+    //vector_2f obs_force = 000.f * normalized_absolute_obstacle_gradient(trans.get_position(), location, radius + other_radius, radius);
+    //return gauss_force + obs_force;
+    return gauss_force;
   }
 };
 
@@ -61,11 +66,11 @@ public:
     return result;
   }
 
-  vector_2f get_exerted_gradient(vector_2f location) {
+  vector_2f get_exerted_gradient(vector_2f location, float radius) {
     std::vector<obstacle*> nearby = buckets.find_nearby_buckets(location);
     vector_2f grad = vector_2f::zero();
     for (obstacle* ob_ptr : nearby) {
-      grad += ob_ptr->get_exerted_gradient(location);
+      grad += ob_ptr->get_exerted_gradient(location, radius);
     }
     return grad;
   }

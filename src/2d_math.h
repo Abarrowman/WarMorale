@@ -10,6 +10,9 @@ public:
   static constexpr float pi() {
     return 3.14159265358979323846f;
   }
+  static constexpr float e() {
+    return 2.71828182845904523536f;
+  }
 };
 
 inline float angle_err(float const current_ang, float const target_ang) {

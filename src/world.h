@@ -27,11 +27,17 @@ inline world::world(GLFWwindow* win, static_resources& sr, int_keyed_resources& 
   
   {
     obstacle_layer = add_orphan(new obstacle_parent());
-    obstacle* ceres = obstacle_layer->add_orphan(new circular_obstacle(110, static_sprite_orphan(static_texture_id::ceres)));
-    ceres->trans.x = -200;
+    obstacle* ceres = obstacle_layer->add_orphan(new circular_obstacle(80, static_sprite_orphan(static_texture_id::ceres), &p_ctx));
+    ceres->trans.x = -300;
     ceres->trans.y = -200;
     ceres->trans.scale_x = 256;
     ceres->trans.scale_y = 256;
+
+    obstacle* ceres2 = obstacle_layer->add_orphan(new circular_obstacle(45, static_sprite_orphan(static_texture_id::ceres), &p_ctx));
+    ceres2->trans.x = 400;
+    ceres2->trans.y = -200;
+    ceres2->trans.scale_x = 140;
+    ceres2->trans.scale_y = 140;
   }
 
   teams_layer = add_orphan(new team_parent());
@@ -43,11 +49,11 @@ inline world::world(GLFWwindow* win, static_resources& sr, int_keyed_resources& 
   {
     legion& p_first = player_team->create_legion();
     player_first_legion = &p_first;
-    p_first.order.pos = { 100, 100 };
+    p_first.order.pos = { 100, 300 };
     for (int i = 0; i < 100; i++) {
       grunt* g = player_team->add_orphan(new grunt(*this, *player_team, &p_first));
-      g->trans.x = -300 + 100.0f * rand_centered_float(get_generator());
-      g->trans.y = 100.0f * rand_centered_float(get_generator());
+      g->trans.x = -100 + 100.0f * rand_centered_float(get_generator());
+      g->trans.y = 300.0f * rand_centered_float(get_generator());
     }
   }
 
