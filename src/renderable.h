@@ -130,3 +130,22 @@ public:
 
 using ordered_parent = renderable_parent<renderable, true>;
 using unordered_parent = renderable_parent<renderable, false>;
+
+
+inline void inner_variadic_render(matrix_3f const& parent_trans) {
+}
+
+template<typename T, typename... Args>
+inline void inner_variadic_render(matrix_3f const& parent_trans, T& first, Args&... remaining) {
+  first.render(parent_trans);
+  inner_variadic_render(parent_trans, remaining...);
+}
+
+template<typename P, typename... Args>
+inline void variadic_render(matrix_3f const& parent_trans, P const& parent, Args&... remaining) {
+  if (parent.visible) {
+    matrix_3f trans = parent_trans * parent.local_trans;
+    inner_variadic_render(trans, remaining...);
+  }
+}
+

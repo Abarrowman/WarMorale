@@ -9,13 +9,20 @@
 
 class grunt : public unit {
 private:
-  sprite* ship;
+  sprite ship;
+  sharing_polygon poly;
   std::vector<unit_reference> references;
 
 public:
-  grunt(world& w, team& t, legion* l) : unit(w, t, l, 10) {
-    ship = add_orphan(land.static_sprite_orphan(static_texture_id::grunt));
-    ship->local_trans = matrix_3f::transformation_matrix(32, 32);
+  grunt(world& w, team& t, legion* l) :
+      unit(w, t, l, 10),
+      poly(&(land.p_ctx), &(land.static_res.get_vertex_array(static_vertex_array_id::dodecagon))) {
+    ship = land.static_sprite(static_texture_id::grunt);
+    ship.local_trans = matrix_3f::transformation_matrix(32, 32);
+    poly.edge_width = 1.0f / pot_radius;
+    poly.local_trans = matrix_3f::transformation_matrix(pot_radius, pot_radius);
+    poly.edge_color = side.col;
+    poly.fill_color = color::black(0.0f);
   }
 
   bool take_point_threat(point_threat& pt) override {
@@ -31,10 +38,6 @@ public:
 
 protected:
   void living_update() override {
-
-   
-
-    
     vector_2f dest = group->order.pos;
     vector_2f position = trans.get_position();
     vector_2f diff = dest - position;
@@ -45,7 +48,7 @@ protected:
 
 
     //vector_2f grad = vector_2f::zero();
-    vector_2f grad = -0.1f *  quadratic_cone_gradient(dest, trans.get_position(), 100);
+    vector_2f grad = 0.1f *  quadratic_cone_gradient(dest, trans.get_position(), 100);
     for (unit_reference ref : references) {
       if (!ref.valid()) {
         continue;
@@ -56,30 +59,19 @@ protected:
       unit& close_unit = ref.ref();
 
       float intersection_radius = close_unit.pot_radius + pot_radius;
-      float std_dev = 0.5f * intersection_radius;
-
-      vector_2f personal_space_force = -1500.0f * std_dev * std_dev * gaussian_gradient(close_unit.trans.get_position(), position, std_dev);
-      vector_2f collision_avoidance_force = -10000.0f * obstacle_gradient(close_unit.trans.get_position(), position, intersection_radius);
-
-      grad += personal_space_force + collision_avoidance_force;
+      vector_2f gauss_force = 0.8f * normalized_gaussian_gradient(close_unit.trans.get_position(), position, 0.5f * intersection_radius);
+      vector_2f obs_force =  0.4f * normalized_fractional_obstacle_gradient(close_unit.trans.get_position(), position, intersection_radius);
+      grad += gauss_force + obs_force;
     }
 
-
-    grad += land.obstacle_layer->get_exerted_gradient(position);
+    vector_2f obs_force = land.obstacle_layer->get_exerted_gradient(position, pot_radius);
+    grad += obs_force;
 
     float mag = grad.magnitude();
-    float max_speed = 10.0f;
     if (mag != 0) {
-      vector_2f capped_gradient = (std::min(std::min(distance, max_speed), mag) / mag) * grad;
+      vector_2f capped_gradient = (std::min(max_speed, mag) / mag) * grad;
       trans.set_position(trans.get_position() + capped_gradient);
     }
-
-     /*// move
-    vector_2f e_pos = old_trans.translation_to(group->order.pos);
-    old_trans.set_position(position + e_pos * 0.1f);*/
-
-    // aim
-    //unit_reference closest_enemy_ref = find_closest_enemy(references);
     unit_reference closest_enemy_ref = find_closest_enemy();
     if (closest_enemy_ref.valid()) {
       unit& closest_enemy = closest_enemy_ref.ref();
@@ -92,7 +84,14 @@ protected:
   void death_action() override {
     vector_2f center = trans.get_position();
     matrix_3f parent_trans = trans.to_matrix();
-    land.over_effects_layer->add_orphan(explosion_effect::explode_sprite(&(land.pp_ctx), *ship, center, parent_trans, land.get_generator()));
+    land.over_effects_layer->add_orphan(explosion_effect::explode_sprite(&(land.pp_ctx), ship, center, parent_trans, land.get_generator()));
+  }
+
+  void render(matrix_3f const& parent_trans) override {
+    if (visible) {
+      matrix_3f matrix = parent_trans * trans.to_matrix();
+      inner_variadic_render(matrix, ship, poly);
+    }
   }
 };
 

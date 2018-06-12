@@ -1,6 +1,7 @@
 #pragma once
 
 #include "renderable.h"
+#include "color.h"
 
 class unit;
 
@@ -27,7 +28,11 @@ private:
   using super = renderable_parent<unit, true>;
   std::vector<std::unique_ptr<legion>> legions;
   std::vector<team*> enemy_teams;
+
 public:
+  color const col;
+
+  team(color c) : col(c) {};
 
   std::vector<team*> const& get_enemies();
 

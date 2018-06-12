@@ -15,7 +15,7 @@ enum unit_status {
 
 class unit_reference;
 
-class unit : public ordered_parent {
+class unit {
 private:
   unit_status status = unit_status::LIVING;
   vector_2f old_pos;
@@ -24,18 +24,23 @@ public:
   world& land;
   team& side;
   legion* group;
+  trans_state trans;
+  bool visible = true;
+
+
+  // refactor into class later
   int const max_health;
   int current_health;
-
   float pot_radius = 16.0f;
+  float max_speed = 10.0f;
 
-  trans_state trans;
 
   unit(world& w, team& t, legion* l, int max_hp);
   virtual ~unit(); // base class
-  bool update() override;
+  bool update();
   bool is_living();
 
+  virtual void render(matrix_3f const& parent_trans) = 0;
   virtual bool take_point_threat(point_threat& pt) = 0;
 
   unit_reference ref();

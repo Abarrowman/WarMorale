@@ -36,9 +36,7 @@ inline bool unit::update() {
       visible = false;
       status = unit_status::KILLED;
     } else {
-      ordered_parent::update();
       trans.clamp_angle();
-      local_trans = trans.to_matrix();
       land.unit_buckets.add_entry(trans.get_position(), ref());
       old_pos = trans.get_position();
     }

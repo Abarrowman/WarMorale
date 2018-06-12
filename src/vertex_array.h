@@ -64,6 +64,17 @@ public:
   }
 };
 
+
+template<size_t U>
+inline std::array<vector_2f, U> create_circle_verticies() {
+  std::array<vector_2f, U> circle_verts;
+  for (int i = 0; i < U; i++) {
+    float angle = i * math_consts::pi() * 2.0f / U;
+    circle_verts[i] = { cos(angle), sin(angle) };
+  }
+  return circle_verts;
+}
+
 class simple_vertex_array {
 private:
   simple_vertex_array(vertex_buffer vertex_buff, vertex_array vertex_arr, GLuint vertex_count) :
@@ -114,15 +125,9 @@ public:
     return create_verticies(reinterpret_cast<float const*>(verts.data()), U);
   }
 
-  static simple_vertex_array create_triangle() {
-    std::array<vector_2f, 3> tri_verts{ {
-        //   x, y
-        { 1, 0 },
-        { cos(math_consts::pi() * 2 / 3), sin(math_consts::pi() * 2 / 3)},
-        { cos(math_consts::pi() * 2 / 3), sin(math_consts::pi() * 4 / 3)}
-      } };
-
-    return create_verticies(tri_verts);
+  template<size_t U>
+  static simple_vertex_array create_circle() {
+    return create_verticies(create_circle_verticies<U>());
   }
 
   static simple_vertex_array create_sprite_vertex_array() {

@@ -20,30 +20,51 @@ inline world::world(GLFWwindow* win, static_resources& sr, int_keyed_resources& 
 
 
 
-  tri = add_orphan(new owning_polygon(&p_ctx, simple_vertex_array::create_triangle()));
+  tri = add_orphan(new owning_polygon(&p_ctx, simple_vertex_array::create_circle<3>()));
   tri->fill_color.floats = {0.0, 0.5f, 0.5f, 1.0f};
   tri->edge_color.floats = { 0.0, 0.2f, 0.2f, 1.0f };
   tri->edge_width = 0.3f;//0.1f;
   
+  obstacle_layer = add_orphan(new obstacle_parent());
   {
-    obstacle_layer = add_orphan(new obstacle_parent());
-    obstacle* ceres = obstacle_layer->add_orphan(new circular_obstacle(80, static_sprite_orphan(static_texture_id::ceres), &p_ctx));
+    sprite img = static_sprite(static_texture_id::ceres);
+    img.local_trans = matrix_3f::transformation_matrix(256, 256);
+    obstacle* ceres = obstacle_layer->add_orphan(new circular_obstacle(110.0f, std::move(img),
+      sharing_polygon(&p_ctx, &static_res.get_vertex_array(static_vertex_array_id::dodecagon))));
     ceres->trans.x = -300;
     ceres->trans.y = -200;
-    ceres->trans.scale_x = 256;
-    ceres->trans.scale_y = 256;
+  }
+  {
+    sprite img = static_sprite(static_texture_id::ceres);
+    img.local_trans = matrix_3f::transformation_matrix(140, 140);
+    obstacle* ceres = obstacle_layer->add_orphan(new circular_obstacle(60.0f, img,
+      sharing_polygon(&p_ctx, &static_res.get_vertex_array(static_vertex_array_id::dodecagon))));
+    ceres->trans.x = 400;
+    ceres->trans.y = -200;
+  }
 
-    obstacle* ceres2 = obstacle_layer->add_orphan(new circular_obstacle(45, static_sprite_orphan(static_texture_id::ceres), &p_ctx));
-    ceres2->trans.x = 400;
-    ceres2->trans.y = -200;
-    ceres2->trans.scale_x = 140;
-    ceres2->trans.scale_y = 140;
+  {
+    sprite img = static_sprite(static_texture_id::ceres);
+    img.local_trans = matrix_3f::transformation_matrix(90, 90);
+    obstacle* ceres = obstacle_layer->add_orphan(new circular_obstacle(40.0f, img,
+      sharing_polygon(&p_ctx, &static_res.get_vertex_array(static_vertex_array_id::dodecagon))));
+    ceres->trans.x = 400;
+    ceres->trans.y = 200;
+  }
+
+  {
+    sprite img = static_sprite(static_texture_id::ceres);
+    img.local_trans = matrix_3f::transformation_matrix(45, 45);
+    obstacle* ceres = obstacle_layer->add_orphan(new circular_obstacle(20.0f, img,
+      sharing_polygon(&p_ctx, &static_res.get_vertex_array(static_vertex_array_id::dodecagon))));
+    ceres->trans.x = 200;
+    ceres->trans.y = 200;
   }
 
   teams_layer = add_orphan(new team_parent());
     
-  player_team = teams_layer->add_orphan(new team());
-  enemy_team = teams_layer->add_orphan(new team());
+  player_team = teams_layer->add_orphan(new team(color::blue()));
+  enemy_team = teams_layer->add_orphan(new team(color::red()));
   enemy_team->establish_hostility(player_team);
 
   {
@@ -67,16 +88,15 @@ inline world::world(GLFWwindow* win, static_resources& sr, int_keyed_resources& 
     }
   }
 
-
-  threat_layer = add_orphan(new threat_parent());
-  sprite fire_sprite = static_sprite(static_texture_id::fire);
-  fire_sprite.local_trans = matrix_3f::transformation_matrix(32, 32);
-  point_threat* fire = threat_layer->add_orphan(new point_threat(fire_sprite, 10));
-  fire->trans.set_position({200, 200});
+  {
+    threat_layer = add_orphan(new threat_parent());
+    sprite fire_sprite = static_sprite(static_texture_id::fire);
+    fire_sprite.local_trans = matrix_3f::transformation_matrix(32, 32);
+    point_threat* fire = threat_layer->add_orphan(new point_threat(fire_sprite, 10));
+    fire->trans.set_position({ 250, 200 });
+  }
 
   over_effects_layer = add_orphan(new ordered_parent());
-  
-
   ui_layer = add_orphan(new ordered_parent());
 
   {
@@ -135,8 +155,7 @@ inline void world::mouse_button_callback(int button, int action, int mods) {
         // press started
         //printf("Press\n");
 
-        std::array<vector_2f, 4> square_arr{ {{1, 0}, {0, 1}, {-1, 0}, {0, -1}} };
-        tri->arr.set_veritices(square_arr);
+        tri->arr.set_veritices(create_circle_verticies<4>());
 
         /*std::array<vector_2f, 2> line_arr{{{ -1, 0 }, { 0, 1 }}};
         tri->arr.set_veritices(line_arr);*/
@@ -146,12 +165,7 @@ inline void world::mouse_button_callback(int button, int action, int mods) {
       if (mouse_down) {
         // release started
         //printf("Release\n");
-        std::array<vector_2f, 3> tri_arr{{
-          { 1, 0 },
-          { cos(math_consts::pi() * 2 / 3), sin(math_consts::pi() * 2 / 3) },
-          { cos(math_consts::pi() * 2 / 3), sin(math_consts::pi() * 4 / 3) }
-         }};
-        tri->arr.set_veritices(tri_arr);
+        tri->arr.set_veritices(create_circle_verticies<3>());
       }
       mouse_down = false;
     }

@@ -45,27 +45,46 @@ public:
   }
 };
 
-/*class sharing_polygon : public renderable {
+template<typename P>
+inline void render_polygon(P const& p, matrix_3f const& parent_trans, simple_vertex_array const& arr) {
+  if (!p.visible) {
+    return;
+  }
+  assert(context != nullptr);
+
+  matrix_3f full_trans = parent_trans * p.local_trans;
+
+  p.context->polygon_fill_shader->use();
+  glUniformMatrix3fv(p.context->fill_trans_mat_idx, 1, GL_TRUE, full_trans.values.data());
+  glUniform4fv(p.context->fill_color_idx, 1, p.fill_color.floats.data());
+  arr.draw(GL_POLYGON);
+
+  p.context->polygon_edge_shader->use();
+  glUniformMatrix3fv(p.context->edge_trans_mat_idx, 1, GL_TRUE, full_trans.values.data());
+  glUniform4fv(p.context->edge_color_idx, 1, p.edge_color.floats.data());
+  glUniform1f(p.context->edge_width_idx, p.edge_width);
+  glUniform1i(p.context->edge_cap_type_idx, 2);
+  arr.draw(GL_LINE_LOOP);
+}
+
+
+class sharing_polygon : public renderable {
 public:
   polygon_context* context;
-  simple_vertex_array* arr;
+  simple_vertex_array const* arr;
+
   color fill_color;
+  color edge_color;
+  float edge_width = 1;
+
+  sharing_polygon(polygon_context* ctx, simple_vertex_array* va) : context(ctx), arr(va) {
+  }
 
   void render(matrix_3f const& parent_trans) {
-    if (!visible) {
-      return;
-    }
-    assert(context != nullptr);
-
-    context->polygon_fill_shader->use();
-    matrix_3f full_trans = parent_trans * local_trans;
-    glUniformMatrix3fv(context->fill_trans_mat_idx, 1, GL_TRUE, full_trans.values.data());
-    glUniform4fv(context->fill_color_idx, 1, fill_color.floats.data());
-
     assert(arr != nullptr);
-    arr->draw();
+    render_polygon(*this, parent_trans, *arr);
   }
-};*/
+};
 
 class owning_polygon : public renderable {
 public:
@@ -80,23 +99,6 @@ public:
   }
 
   void render(matrix_3f const& parent_trans) {
-    if (!visible) {
-      return;
-    }
-    assert(context != nullptr);
-
-    matrix_3f full_trans = parent_trans * local_trans;
-
-    context->polygon_fill_shader->use();
-    glUniformMatrix3fv(context->fill_trans_mat_idx, 1, GL_TRUE, full_trans.values.data());
-    glUniform4fv(context->fill_color_idx, 1, fill_color.floats.data());
-    arr.draw(GL_POLYGON);
-
-    context->polygon_edge_shader->use();
-    glUniformMatrix3fv(context->edge_trans_mat_idx, 1, GL_TRUE, full_trans.values.data());
-    glUniform4fv(context->edge_color_idx, 1, edge_color.floats.data());
-    glUniform1f(context->edge_width_idx, edge_width);
-    glUniform1i(context->edge_cap_type_idx, 2);
-    arr.draw(GL_LINE_LOOP);
+    render_polygon(*this, parent_trans, arr);
   }
 };

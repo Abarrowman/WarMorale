@@ -30,6 +30,7 @@ enum class static_shader_id {
 
 enum class static_vertex_array_id {
   sprite,
+  dodecagon, // 12-sidded regular polygon basically a circle
   COUNT
 };
 
@@ -99,8 +100,10 @@ public:
     }
     
     {
-      simple_vertex_array sprite_vertex_array = simple_vertex_array::create_sprite_vertex_array();
-      vertex_arrays.push_back(std::move(sprite_vertex_array));
+      vertex_arrays.push_back(simple_vertex_array::create_sprite_vertex_array());
+    }
+    {
+      vertex_arrays.push_back(simple_vertex_array::create_circle<12>());
     }
 
     {
