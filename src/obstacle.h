@@ -62,9 +62,19 @@ struct polygon_edge_pt {
   bool inside;
 };
 
+struct edge {
+  vector_2f first;
+  vector_2f last;
+  vector_2f diff;
+  vector_2f normal;
+  float first_angle;
+  float last_angle;
+};
+
 class polygonal_obstacle : public obstacle {
 private:
   std::vector<vector_2f> verticies;
+  std::vector<edge> edges;
   sprite image;
   owning_polygon poly;
 public:
@@ -73,6 +83,18 @@ public:
     poly.edge_width = 1.0f;
     poly.edge_color = color::white();
     poly.fill_color = color::transparent_black();
+
+    edges.resize(verticies.size());
+    for (size_t i = 0; i < verticies.size(); i++) {
+      edge& ed = edges[i];
+      ed.first = verticies[i];
+      ed.last = verticies[(i + 1) % verticies.size()];
+      ed.diff = ed.last - ed.first;
+      ed.normal = ed.diff.perp();
+
+      ed.first_angle = positive_angle(ed.first.angle());
+      ed.last_angle = positive_angle(ed.last.angle());
+    }
   }
 
   // Returns the closest point on the surface and if the point is inside the polygon
@@ -82,54 +104,74 @@ public:
     vector_2f dir = diff.normalized();
     float angle = positive_angle(diff.angle());
 
-    vector_2f first;
-    vector_2f last;
-    vector_2f edge_normal;
-
-    for (size_t i = 0; i < verticies.size(); i++) {
-      first = verticies[i];
-      last = verticies[(i + 1) % verticies.size()];
-      edge_normal = (last - first).perp();
-      float first_angle = positive_angle(first.angle());
-      float last_angle = positive_angle(last.angle());
-
+    size_t edge_idx = edges.size();
+    edge ed;
+    for (size_t i = 0; i < edges.size(); i++) {
+      edge& cur_ed = edges[i];
       bool in_range = false;
-      if (last_angle > first_angle) {
-        in_range = (angle >= first_angle) && (angle < last_angle);
+      if (cur_ed.last_angle > cur_ed.first_angle) {
+        in_range = (angle >= cur_ed.first_angle) && (angle <cur_ed.last_angle);
       } else {
         // angle overflow case
         // last_angle is in the 1st quadrant
         // first_angle is in the 3rd or 4th quadrant
-        in_range = (angle < last_angle) || (angle > last_angle);
+        in_range = (angle < cur_ed.last_angle) || (angle > cur_ed.last_angle);
       }
       if (in_range) {
+        ed = cur_ed;
+        edge_idx = i;
         break;
       }
     }
+    assert(edge_idx != edges.size());
 
+    vector_2f effective_normal = ed.normal;
+    
+    float t = (ed.diff.dot(diff) - ed.diff.dot(ed.first)) / ed.diff.dot(ed.diff);
+    if (t > 1.0f) {
+      t = 1.0f;
+      effective_normal += edges[(edge_idx + 1) % edges.size()].normal;
+    } else if (t < 0.0f) {
+      t = 0.0f;
+      effective_normal -= edges[(edge_idx + edges.size() - 1) % edges.size()].normal;
+    }
+    vector_2f edge_pt = trans.get_position() + ed.first + t * ed.diff;
 
-    float dist = edge_normal.dot(first) / edge_normal.dot(dir);
-    vector_2f edge_pt = dist * dir;
+    float dist = ed.normal.dot(ed.first) / ed.normal.dot(dir);
 
-    return { edge_pt + trans.get_position(), edge_normal, dist > diff.magnitude() };
+    return { edge_pt, effective_normal, dist > diff.magnitude() };
   }
 
   vector_2f get_exerted_gradient(vector_2f location, float other_radius) override {
     polygon_edge_pt edge_pt = point_on_edge(location);
     float sign = edge_pt.inside ? -1.0f : 1.0f;
     
+
+    //vector_2f raw_gauss_force = sign * 4.0f * normalized_gaussian_gradient(edge_pt.pt, location, other_radius / 2.0f + 15.0f);
+
+    vector_2f gauss_force = sign * 2.0f * normalized_gaussian_gradient(edge_pt.pt, location, other_radius + 20.0f);
+    vector_2f obs_force = sign * 2.0f * normalized_fractional_obstacle_gradient(edge_pt.pt, location, other_radius + 20.0f);
+    vector_2f raw_gauss_force = gauss_force + obs_force;
+
     //vector_2f raw_gauss_force = sign * 3.5f * normalized_gaussian_gradient(edge_pt.pt, location, other_radius / 2.0f + 10.0f);
+    //vector_2f raw_gauss_force = sign * 0.8f * normalized_gaussian_gradient(edge_pt.pt, location, other_radius / 2.0f + 10.0f);
 
-    vector_2f edge_diff = edge_pt.pt - trans.get_position();
+
+    //vector_2f edge_diff = edge_pt.pt - trans.get_position();
+    //float edge_radius = edge_diff.magnitude();
+    //vector_2f raw_gauss_force = 3.5f * normalized_absolute_gaussian_gradient(trans.get_position(), location, other_radius / 2.0f + 20.0f, edge_radius - 40);
+
+    /*vector_2f edge_diff = edge_pt.pt - trans.get_position();
     float edge_radius = edge_diff.magnitude();
-    vector_2f raw_gauss_force = 3.5f * normalized_absolute_gaussian_gradient(trans.get_position(), location, other_radius / 2.0f + 20.0f, edge_radius - 40);
+    vector_2f raw_gauss_force = sign * 3.5f * normalized_absolute_gaussian_gradient(edge_pt.pt, location, other_radius / 2.0f + 20.0f, 0);*/
 
 
-    vector_2f gauss_force = raw_gauss_force;
-    //raw_gauss_force.proj(edge_pt.normal);
+    //vector_2f gauss_force = raw_gauss_force;
+    vector_2f final_force = raw_gauss_force.proj(edge_pt.normal);
 
     //vector_2f gauss_force = vector_2f::zero();
-    return gauss_force;
+    //return final_force;
+    return raw_gauss_force;
   }
 
   void render(matrix_3f const& parent_trans) override {

@@ -48,7 +48,8 @@ protected:
 
 
     //vector_2f grad = vector_2f::zero();
-    vector_2f grad = 0.1f *  quadratic_cone_gradient(dest, trans.get_position(), 100);
+    vector_2f goal_grad = 0.1f *  quadratic_cone_gradient(dest, trans.get_position(), 100);
+    vector_2f grad = goal_grad;
     for (unit_reference ref : references) {
       if (!ref.valid()) {
         continue;

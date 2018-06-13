@@ -124,14 +124,21 @@ inline world::world(GLFWwindow* win, static_resources& sr, int_keyed_resources& 
 
     /*for (int n = 0; n < 100; n++) {
       float ang = (n * math_consts::pi() * 2.0f) / 100;
-      vector_2f pt = mercury->trans.get_position() + vector_2f::create_polar(ang, 160);
-      vector_2f edge_pt = mercury->point_on_edge(pt);
+      vector_2f pt = mercury->trans.get_position() + vector_2f::create_polar(ang, 200);
+      polygon_edge_pt edge_pt = mercury->point_on_edge(pt);
 
-      sprite fire_sprite = static_sprite(static_texture_id::fire);
-      fire_sprite.local_trans = matrix_3f::transformation_matrix(32, 32);
-      point_threat* fire = threat_layer->add_orphan(new point_threat(fire_sprite, 10));
-      fire->trans.set_position(edge_pt);
+      //sprite fire_sprite = static_sprite(static_texture_id::fire);
+      //fire_sprite.local_trans = matrix_3f::transformation_matrix(32, 32);
+      //point_threat* fire = threat_layer->add_orphan(new point_threat(fire_sprite, 10));
+      //fire->trans.set_position(edge_pt.pt);
+
+      std::vector<vector_2f> line{ edge_pt.pt, pt };
+      over_effects_layer->add_orphan(new owning_polygon(&p_ctx, simple_vertex_array::create_verticies(std::move(line))))->edge_color = color::white();
     }*/
+  }
+  {
+    std::vector<vector_2f> line{ {-width / 2.0f, -310.0f}, {width/2.0f, -310.0f} };
+    over_effects_layer->add_orphan(new owning_polygon(&p_ctx, simple_vertex_array::create_verticies(std::move(line))))->edge_color = color::white();
   }
 }
 
