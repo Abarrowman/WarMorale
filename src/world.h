@@ -18,6 +18,7 @@ inline world::world(GLFWwindow* win, static_resources& sr, int_keyed_resources& 
   pp_ctx.init(&static_res.get_shader(static_shader_id::point_particle));
   bt_ctx.init(&static_res.get_shader(static_shader_id::fixed_width_bitmap_text), &static_res.get_shader(static_shader_id::variable_width_bitmap_text));
 
+  mouse_pos = { -width / 2.0f, height / 2.0f };
 
 
   tri = add_orphan(new owning_polygon(&p_ctx, simple_vertex_array::create_circle<3>()));
@@ -37,7 +38,7 @@ inline world::world(GLFWwindow* win, static_resources& sr, int_keyed_resources& 
   {
     sprite img = static_sprite(static_texture_id::ceres);
     img.local_trans = matrix_3f::transformation_matrix(140, 140);
-    obstacle* ceres = obstacle_layer->add_orphan(new circular_obstacle(60.0f, img,
+    obstacle* ceres = obstacle_layer->add_orphan(new circular_obstacle(60.0f, std::move(img),
       sharing_polygon(&p_ctx, &static_res.get_vertex_array(static_vertex_array_id::dodecagon))));
     ceres->trans.x = 400;
     ceres->trans.y = -200;
@@ -46,16 +47,15 @@ inline world::world(GLFWwindow* win, static_resources& sr, int_keyed_resources& 
   {
     sprite img = static_sprite(static_texture_id::ceres);
     img.local_trans = matrix_3f::transformation_matrix(90, 90);
-    obstacle* ceres = obstacle_layer->add_orphan(new circular_obstacle(40.0f, img,
+    obstacle* ceres = obstacle_layer->add_orphan(new circular_obstacle(40.0f, std::move(img),
       sharing_polygon(&p_ctx, &static_res.get_vertex_array(static_vertex_array_id::dodecagon))));
     ceres->trans.x = 400;
     ceres->trans.y = 200;
   }
-
   {
     sprite img = static_sprite(static_texture_id::ceres);
     img.local_trans = matrix_3f::transformation_matrix(45, 45);
-    obstacle* ceres = obstacle_layer->add_orphan(new circular_obstacle(20.0f, img,
+    obstacle* ceres = obstacle_layer->add_orphan(new circular_obstacle(20.0f, std::move(img),
       sharing_polygon(&p_ctx, &static_res.get_vertex_array(static_vertex_array_id::dodecagon))));
     ceres->trans.x = 200;
     ceres->trans.y = 200;
@@ -70,11 +70,11 @@ inline world::world(GLFWwindow* win, static_resources& sr, int_keyed_resources& 
   {
     legion& p_first = player_team->create_legion();
     player_first_legion = &p_first;
-    p_first.order.pos = { 100, 300 };
+    p_first.order.pos = { -width / 2.0f, height / 2.0f };
     for (int i = 0; i < 100; i++) {
       grunt* g = player_team->add_orphan(new grunt(*this, *player_team, &p_first));
-      g->trans.x = -100 + 100.0f * rand_centered_float(get_generator());
-      g->trans.y = 300.0f * rand_centered_float(get_generator());
+      g->trans.x = -100.0f + 100.0f * rand_centered_float(get_generator());
+      g->trans.y = 300.0f + 100.0f * rand_centered_float(get_generator());
     }
   }
 
@@ -112,6 +112,26 @@ inline world::world(GLFWwindow* win, static_resources& sr, int_keyed_resources& 
     log_text->local_trans = matrix_3f::transformation_matrix(1, 1, 0, trans.x, trans.y);
     log_text->text_color = { 0, 1, 1, 1 };
     
+  }
+
+  {
+    sprite img = static_sprite(static_texture_id::mercury_square);
+    img.local_trans = matrix_3f::transformation_matrix(256.0f, 256.0f);
+    std::vector<vector_2f> verts{ { 93.0f, 93.0f },{ -93.0f, 93.0f },{ -93.0f, -93.f },{ 93.0f, -93.0f } };
+    polygonal_obstacle* mercury = obstacle_layer->add_orphan(new polygonal_obstacle(std::move(verts), std::move(img), &p_ctx));
+    mercury->trans.x = 0;
+    mercury->trans.y = -200;
+
+    /*for (int n = 0; n < 100; n++) {
+      float ang = (n * math_consts::pi() * 2.0f) / 100;
+      vector_2f pt = mercury->trans.get_position() + vector_2f::create_polar(ang, 160);
+      vector_2f edge_pt = mercury->point_on_edge(pt);
+
+      sprite fire_sprite = static_sprite(static_texture_id::fire);
+      fire_sprite.local_trans = matrix_3f::transformation_matrix(32, 32);
+      point_threat* fire = threat_layer->add_orphan(new point_threat(fire_sprite, 10));
+      fire->trans.set_position(edge_pt);
+    }*/
   }
 }
 

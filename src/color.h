@@ -6,23 +6,31 @@ class color {
 public:
   std::array<float, 4> floats = { 1, 1, 1, 1 };
 
-  static color red(float alpha = 1.0f) {
-    return color({1.0f, 0.0f, 0.0f, alpha});
+  color with_alpha(float alpha) const {
+    return color({ floats[0], floats[1], floats[2], alpha });
   }
 
-  static color green(float alpha = 1.0f) {
-    return color({ 0.0f, 1.0f, 0.0f, alpha });
+  static color red() {
+    return color({1.0f, 0.0f, 0.0f, 1.0f});
   }
 
-  static color blue(float alpha = 1.0f) {
-    return color({ 0.0f, 0.0f, 1.0f, alpha });
+  static color green() {
+    return color({ 0.0f, 1.0f, 0.0f, 1.0f });
   }
 
-  static color white(float alpha = 1.0f) {
-    return color({ 1.0f, 1.0f, 1.0f, alpha });
+  static color blue() {
+    return color({ 0.0f, 0.0f, 1.0f, 1.0f });
   }
 
-  static color black (float alpha = 1.0f) {
-    return color({ 0.0f, 0.0f, 0.0f, alpha });
+  static color white() {
+    return color({ 1.0f, 1.0f, 1.0f, 1.0f });
+  }
+
+  static color black () {
+    return color({ 0.0f, 0.0f, 0.0f, 1.0f });
+  }
+
+  static color transparent_black() {
+    return color({ 0.0f, 0.0f, 0.0f, 0.0f });
   }
 };

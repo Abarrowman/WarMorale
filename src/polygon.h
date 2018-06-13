@@ -50,7 +50,7 @@ inline void render_polygon(P const& p, matrix_3f const& parent_trans, simple_ver
   if (!p.visible) {
     return;
   }
-  assert(context != nullptr);
+  assert(p.context != nullptr);
 
   matrix_3f full_trans = parent_trans * p.local_trans;
 

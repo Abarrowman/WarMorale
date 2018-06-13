@@ -21,8 +21,8 @@ public:
     ship.local_trans = matrix_3f::transformation_matrix(32, 32);
     poly.edge_width = 1.0f / pot_radius;
     poly.local_trans = matrix_3f::transformation_matrix(pot_radius, pot_radius);
-    poly.edge_color = side.col;
-    poly.fill_color = color::black(0.0f);
+    poly.edge_color = side.col.with_alpha(0.5);
+    poly.fill_color = color::transparent_black();
   }
 
   bool take_point_threat(point_threat& pt) override {

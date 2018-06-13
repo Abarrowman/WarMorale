@@ -126,3 +126,11 @@ inline vector_2f normalized_absolute_gaussian_gradient(vector_2f center, vector_
   float variance = std_dev * std_dev;
   return math_consts::pi() * math_consts::e() * variance * variance * absolute_gaussian_gradient(center, pos, std_dev, min_radius);
 }
+
+/*inline vector_2f gaussian_gradient(vector_2f center, vector_2f pos, vector_2f direction, float std_dev) {
+  vector_2f diff = pos - center;
+  vector_2f diff_sq = diff.element_squared();
+  float variance = std_dev * std_dev;
+  float common = (exp(-diff_sq.x / (4 * variance))*exp(-diff_sq.y / (4 * variance))) / (4 * variance * variance * math_consts::pi());
+  vector_2f unprojected = diff * common;
+}*/

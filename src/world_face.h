@@ -29,7 +29,7 @@ public:
   frame_rate_meter frm;
 
   long frame_count = 0;
-  vector_2f mouse_pos = { 0, 0 };
+  vector_2f mouse_pos;
   bool mouse_down = false;
 
   space_buckets<unit_reference> unit_buckets{100};

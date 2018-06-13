@@ -82,6 +82,7 @@ int main(void) {
 
   glfwMakeContextCurrent(window);
   //glfwSwapInterval(1); // enable vsync
+  //glfwSwapInterval(2); // enable vsync
 
   // start GLEW extension handler
   glewExperimental = GL_TRUE;

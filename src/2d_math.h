@@ -25,6 +25,11 @@ inline float angle_err(float const current_ang, float const target_ang) {
   return ang_err;
 }
 
+inline float roughly_equal(float left, float right, float epsilon = 0.0000001f) {
+  return (std::abs(left - right) < epsilon);
+}
+
+// Clamps an angle from -pi to pi
 inline float angle_clamp(float const angle) {
   if (angle > math_consts::pi()) {
     return -2 * math_consts::pi() + angle;
@@ -32,6 +37,31 @@ inline float angle_clamp(float const angle) {
     return 2 * math_consts::pi() + angle;
   } else {
     return angle;
+  }
+}
+
+inline float positive_angle(float const angle) {
+  if (angle < 0) {
+    return 2 * math_consts::pi() + angle;
+  } else {
+    return angle;
+  }
+}
+
+inline float positive_angle_err(float const current_ang, float const target_ang) {
+  float diff = target_ang - current_ang;
+  if (diff < 0) {
+    if (diff >= -math_consts::pi()) {
+      return diff;
+    } else {
+      return 2 * math_consts::pi() + diff;
+    }
+  } else {
+    if (diff <= math_consts::pi()) {
+      return diff;
+    } else {
+      return 2 * math_consts::pi() - diff;
+    }
   }
 }
 
@@ -62,7 +92,7 @@ public:
   }
 
   vector_2<T> normalized() const {
-    float scale = 1 / magnitude;
+    float scale = 1.0f / magnitude();
     return scale * (*this);
   }
 
@@ -108,6 +138,26 @@ public:
     return { x * x, y * y };
   }
 
+  vector_2<T> perp() const {
+    return { -y, x };
+  }
+
+  float dot(vector_2<T> const& other) const {
+    return x * other.x + y * other.y;
+  }
+
+  // Returns this vector projected onto the supplied vector.
+  vector_2<T> proj(vector_2<T> const& basis) const {
+    vector_2f norm_basis = basis.normalized();
+    float magnitude = dot(norm_basis);
+    return magnitude * norm_basis;
+  }
+
+  // Returns the rejection of this vector onto the supplied vector.
+  vector_2<T> rej(vector_2<T> const& basis) const {
+    return ((*this) - proj(basis));
+  }
+
   template<typename Y>
   vector_2<Y> cast() const {
     return { static_cast<Y>(x), static_cast<Y>(y) };
@@ -128,6 +178,7 @@ public:
   static vector_2<T> zero() {
     return vector_2<T>(0, 0);
   }
+
 };
 
 template<typename T>

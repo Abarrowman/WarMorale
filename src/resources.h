@@ -14,7 +14,9 @@ enum class static_texture_id {
   face,
   fire,
   grunt,
+  heavy,
   ceres,
+  mercury_square,
   COUNT
 };
 
@@ -65,7 +67,10 @@ public:
     textures.emplace_back("./assets/textures/sad.png");
     textures.emplace_back("./assets/textures/fire.png");
     textures.emplace_back("./assets/textures/grunt.png");
+    textures.emplace_back("./assets/textures/heavy.png");
     textures.emplace_back("./assets/textures/ceres.png");
+    textures.emplace_back("./assets/textures/mercury_square.png");
+
 
     {
       std::string const sprite_vertex_shader = read_file_to_string("./assets/shaders/sprite.vert");
