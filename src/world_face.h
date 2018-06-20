@@ -38,10 +38,14 @@ public:
   team* enemy_team;
   legion* player_first_legion;
   legion* enemy_first_legion;
+  owning_polygon* player_first_legion_formation;
+  owning_polygon* enemy_first_legion_formation;
+
 
 
   owning_polygon* tri;
 
+  ordered_parent* under_effects_layer; // A container for effects to render underneath the main game elements
   obstacle_parent* obstacle_layer;
   team_parent* teams_layer;
   threat_parent* threat_layer;

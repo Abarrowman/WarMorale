@@ -20,13 +20,19 @@ inline world::world(GLFWwindow* win, static_resources& sr, int_keyed_resources& 
 
   mouse_pos = { -width / 2.0f, height / 2.0f };
 
+  under_effects_layer = add_orphan(new ordered_parent());
+  obstacle_layer = add_orphan(new obstacle_parent());
+  teams_layer = add_orphan(new team_parent());
+  threat_layer = add_orphan(new threat_parent());
+  over_effects_layer = add_orphan(new ordered_parent());
+  ui_layer = add_orphan(new ordered_parent());
 
-  tri = add_orphan(new owning_polygon(&p_ctx, simple_vertex_array::create_circle<3>()));
+
+  tri = under_effects_layer->add_orphan(new owning_polygon(&p_ctx, simple_vertex_array::create_circle<3>()));
   tri->fill_color.floats = {0.0, 0.5f, 0.5f, 1.0f};
   tri->edge_color.floats = { 0.0, 0.2f, 0.2f, 1.0f };
   tri->edge_width = 0.3f;//0.1f;
   
-  obstacle_layer = add_orphan(new obstacle_parent());
   {
     sprite img = static_sprite(static_texture_id::ceres);
     img.local_trans = matrix_3f::transformation_matrix(256, 256);
@@ -60,8 +66,6 @@ inline world::world(GLFWwindow* win, static_resources& sr, int_keyed_resources& 
     ceres->trans.x = 200;
     ceres->trans.y = 200;
   }
-
-  teams_layer = add_orphan(new team_parent());
     
   player_team = teams_layer->add_orphan(new team(color::blue()));
   enemy_team = teams_layer->add_orphan(new team(color::red()));
@@ -71,6 +75,16 @@ inline world::world(GLFWwindow* win, static_resources& sr, int_keyed_resources& 
     legion& p_first = player_team->create_legion();
     player_first_legion = &p_first;
     p_first.order.pos = { -width / 2.0f, height / 2.0f };
+    p_first.order.formation = precalc_polygon({
+      {100.0f, 100.0f},
+      {-100.0f, 100.0f},
+      {-100.0f, -100.0f},
+      {100.0f, -100.0f}
+    });
+    player_first_legion_formation = over_effects_layer->add_orphan(new owning_polygon(&p_ctx, simple_vertex_array::create_verticies(p_first.order.formation.verticies)));
+    player_first_legion_formation->edge_color = player_team->col;
+    player_first_legion_formation->fill_color = player_team->col.with_alpha(0.1f);
+
     for (int i = 0; i < 100; i++) {
       grunt* g = player_team->add_orphan(new grunt(*this, *player_team, &p_first));
       g->trans.x = -100.0f + 100.0f * rand_centered_float(get_generator());
@@ -81,6 +95,17 @@ inline world::world(GLFWwindow* win, static_resources& sr, int_keyed_resources& 
   {
     legion& e_first = enemy_team->create_legion();
     enemy_first_legion = &e_first;
+
+    e_first.order.formation = precalc_polygon({
+      { 0.0f, 100.0f },
+      { -100.0f, -100.0f },
+      { 100.0f, -100.0f },
+      });
+    enemy_first_legion_formation = over_effects_layer->add_orphan(new owning_polygon(&p_ctx, simple_vertex_array::create_verticies(e_first.order.formation.verticies)));
+    enemy_first_legion_formation->edge_color = enemy_team->col;
+    enemy_first_legion_formation->fill_color = enemy_team->col.with_alpha(0.1f);
+
+    //enemy_first_legion_formation
     for (int i = 0; i < 100; i++) {
       grunt* g = enemy_team->add_orphan(new grunt(*this, *enemy_team, &e_first));
       g->trans.x = 100.0f * rand_centered_float(get_generator());
@@ -89,15 +114,12 @@ inline world::world(GLFWwindow* win, static_resources& sr, int_keyed_resources& 
   }
 
   {
-    threat_layer = add_orphan(new threat_parent());
     sprite fire_sprite = static_sprite(static_texture_id::fire);
     fire_sprite.local_trans = matrix_3f::transformation_matrix(32, 32);
     point_threat* fire = threat_layer->add_orphan(new point_threat(fire_sprite, 10));
     fire->trans.set_position({ 250, 200 });
   }
 
-  over_effects_layer = add_orphan(new ordered_parent());
-  ui_layer = add_orphan(new ordered_parent());
 
   {
     frame_rate_text = ui_layer->add_orphan(new fixed_width_bitmap_text(&bt_ctx, &(static_res.get_mono_font(static_mono_font_id::consolas_12))));
@@ -149,7 +171,11 @@ inline bool world::update() {
 
   float ang = frame_count / 100.0f;
   enemy_first_legion->order.pos = vector_2f::create_polar(ang, 100);
+  enemy_first_legion_formation->local_trans = matrix_3f::translation_matrix(enemy_first_legion->order.pos.x, enemy_first_legion->order.pos.y);
+
   player_first_legion->order.pos = mouse_pos;
+  player_first_legion_formation->local_trans = matrix_3f::translation_matrix(mouse_pos.x, mouse_pos.y);
+
   tri->local_trans = matrix_3f::transformation_matrix(100, 100, ang + math_consts::pi());
 
   stage::update(); //update children

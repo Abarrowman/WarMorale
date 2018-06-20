@@ -2,12 +2,16 @@
 
 #include "renderable.h"
 #include "color.h"
+#include "geom.h"
 
 class unit;
 
 class command {
 public:
   vector_2f pos{ 0, 0 };
+  precalc_polygon formation;
+
+  vector_2f get_potential_force(vector_2f location);
 };
 
 class legion {

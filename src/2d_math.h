@@ -213,6 +213,14 @@ public:
     return trans;
   }
 
+  static matrix_3f translation_matrix(float trans_x = 0.0f, float trans_y = 0.0f) {
+    return transformation_matrix(1.0f, 1.0f, 0.0f, trans_x, trans_y);
+  }
+
+  static matrix_3f rotation_matrix(float angle = 0.0f) {
+    return transformation_matrix(1.0f, 1.0f, angle);
+  }
+
   static matrix_3f orthographic_projection(float left, float right, float bottom, float top) {
     matrix_3f proj;
     proj.values = {

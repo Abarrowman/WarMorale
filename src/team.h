@@ -3,6 +3,20 @@
 #include "utils.h"
 #include "team_face.h"
 #include "unit_face.h"
+#include "potential_field.h"
+
+inline vector_2f command::get_potential_force(vector_2f location) {
+  if (formation.verticies.size() == 0) {
+    return 0.1f *  quadratic_cone_gradient(pos, location, 100);
+  } else {
+    polygon_edge_pt edge_pt = formation.point_on_edge(pos, location);
+    if (edge_pt.inside) {
+      return vector_2f::zero();
+    } else {
+      return 0.1f *  quadratic_cone_gradient(edge_pt.pt, location, 100);
+    }
+  }
+}
 
 inline void legion::add_unit(unit* member) {
   units.push_back(member);
