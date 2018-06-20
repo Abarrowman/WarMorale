@@ -42,11 +42,17 @@ public:
 
   vector_2f get_exerted_gradient(vector_2f location, float other_radius) override {
     vector_2f gauss_force;
-    if (radius >= 40.0f) {
+    /*if (radius >= 40.0f) {
       gauss_force = 3.5f * normalized_absolute_gaussian_gradient(trans.get_position(), location, other_radius / 2.0f + 20.0f, radius - 40.0f);
     } else {
       gauss_force = 3.5f * normalized_gaussian_gradient(trans.get_position(), location, (other_radius + radius) / 2.0f);
+    }*/
+    if (radius >= 40.0f) {
+      gauss_force = 3.0f * normalized_absolute_gaussian_gradient(trans.get_position(), location, other_radius / 2.0f + 20.0f, radius - 40.0f);
+    } else {
+      gauss_force = 1.5f * normalized_gaussian_gradient(trans.get_position(), location, (other_radius + radius) / 2.0f);
     }
+
     return gauss_force;
   }
 
@@ -73,8 +79,16 @@ public:
   vector_2f get_exerted_gradient(vector_2f location, float other_radius) override {
     polygon_edge_pt edge_pt = precalc.point_on_edge(trans.get_position(), location);
     float sign = edge_pt.inside ? -1.0f : 1.0f;
-    vector_2f gauss_force = sign * 2.0f * normalized_gaussian_gradient(edge_pt.pt, location, other_radius + 20.0f);
-    vector_2f obs_force = sign * 2.0f * normalized_fractional_obstacle_gradient(edge_pt.pt, location, other_radius + 20.0f);
+    //vector_2f gauss_force = sign * 2.0f * normalized_gaussian_gradient(edge_pt.pt, location, other_radius + 20.0f);
+    //vector_2f obs_force = sign * 2.0f * normalized_fractional_obstacle_gradient(edge_pt.pt, location, other_radius + 20.0f);
+
+    if (edge_pt.inside) {
+      sign = sign;
+    }
+
+    vector_2f gauss_force = sign * 1.5f * normalized_gaussian_gradient(edge_pt.pt, location, other_radius + 15.0f);
+    vector_2f obs_force = sign * 1.5f * normalized_fractional_obstacle_gradient(edge_pt.pt, location, other_radius + 15.0f);
+
     vector_2f raw_force = gauss_force + obs_force;
 
     vector_2f final_force = raw_force;

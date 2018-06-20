@@ -139,7 +139,7 @@ inline world::world(GLFWwindow* win, static_resources& sr, int_keyed_resources& 
   {
     sprite img = static_sprite(static_texture_id::mercury_square);
     img.local_trans = matrix_3f::transformation_matrix(256.0f, 256.0f);
-    std::vector<vector_2f> verts{ { 93.0f, 93.0f },{ -93.0f, 93.0f },{ -93.0f, -93.f },{ 93.0f, -93.0f } };
+    std::vector<vector_2f> verts{ { 73.0f, 73.0f },{ -73.0f, 73.0f },{ -73.0f, -73.f },{ 73.0f, -73.0f } };
     polygonal_obstacle* mercury = obstacle_layer->add_orphan(new polygonal_obstacle(std::move(verts), std::move(img), &p_ctx));
     mercury->trans.x = 0;
     mercury->trans.y = -200;
@@ -159,8 +159,8 @@ inline world::world(GLFWwindow* win, static_resources& sr, int_keyed_resources& 
     }*/
   }
   {
-    std::vector<vector_2f> line{ {-width / 2.0f, -310.0f}, {width/2.0f, -310.0f} };
-    over_effects_layer->add_orphan(new owning_polygon(&p_ctx, simple_vertex_array::create_verticies(std::move(line))))->edge_color = color::white();
+    //std::vector<vector_2f> line{ {-width / 2.0f, -310.0f}, {width/2.0f, -310.0f} };
+    //over_effects_layer->add_orphan(new owning_polygon(&p_ctx, simple_vertex_array::create_verticies(std::move(line))))->edge_color = color::white();
   }
 }
 
