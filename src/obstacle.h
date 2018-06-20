@@ -47,10 +47,12 @@ public:
     } else {
       gauss_force = 3.5f * normalized_gaussian_gradient(trans.get_position(), location, (other_radius + radius) / 2.0f);
     }*/
-    if (radius >= 40.0f) {
+    if (radius >= 80.0f) {
       gauss_force = 3.0f * normalized_absolute_gaussian_gradient(trans.get_position(), location, other_radius / 2.0f + 20.0f, radius - 40.0f);
+    } else if (radius >= 40.0f) {
+      gauss_force = 2.5f * normalized_absolute_gaussian_gradient(trans.get_position(), location, other_radius / 2.0f + 20.0f, radius - 40.0f);
     } else {
-      gauss_force = 1.5f * normalized_gaussian_gradient(trans.get_position(), location, (other_radius + radius) / 2.0f);
+      gauss_force = 2.5f * normalized_gaussian_gradient(trans.get_position(), location, (other_radius + radius) / 2.0f);
     }
 
     return gauss_force;
@@ -86,10 +88,9 @@ public:
       sign = sign;
     }
 
-    vector_2f gauss_force = sign * 1.5f * normalized_gaussian_gradient(edge_pt.pt, location, other_radius + 15.0f);
-    vector_2f obs_force = sign * 1.5f * normalized_fractional_obstacle_gradient(edge_pt.pt, location, other_radius + 15.0f);
+    vector_2f gauss_force = sign * 3.0f * normalized_absolute_gaussian_gradient(edge_pt.pt, location, other_radius / 2.0f + 20.0f, -30.0f);
 
-    vector_2f raw_force = gauss_force + obs_force;
+    vector_2f raw_force = gauss_force;
 
     vector_2f final_force = raw_force;
     //vector_2f final_force = raw_force.proj(edge_pt.normal);
