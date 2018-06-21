@@ -7,6 +7,12 @@ class team;
 class legion;
 class world;
 
+struct unit_archetype {
+  int const max_health;
+  float const potential_radius;
+  float const max_speed;
+};
+
 enum unit_status {
   LIVING,
   KILLED,
@@ -19,36 +25,37 @@ class unit {
 private:
   unit_status status = unit_status::LIVING;
   vector_2f old_pos;
+
+  std::vector<unit_reference> references;
+
   void take_threats();
 public:
-  world& land;
-  team& side;
-  legion* group;
+  world& world_ref;
+  team& team_ref;
+  unit_archetype const& type;
+  legion* legion_ptr;
+
   trans_state trans;
   bool visible = true;
 
-
-  // refactor into class later
-  int const max_health;
+  // refactor into class maybe
   int current_health;
-  float pot_radius = 16.0f;
-  float max_speed = 10.0f;
 
 
-  unit(world& w, team& t, legion* l, int max_hp);
+  unit(world& w, team& t, legion* l, unit_archetype const& ty);
   virtual ~unit(); // base class
   bool update();
   bool is_living();
 
   virtual void render(matrix_3f const& parent_trans) = 0;
-  virtual bool take_point_threat(point_threat& pt) = 0;
+  virtual bool take_point_threat(point_threat& pt);
 
   unit_reference ref();
 protected:
   /*
   Updates the unit.
   */
-  virtual void living_update() = 0;
+  virtual void living_update();
   virtual void death_action() {}
 
   // Find the closest enemy of all enemies
@@ -76,3 +83,8 @@ public:
   unit& ref();
   bool operator==(unit_reference const& other) const;
 };
+
+template<typename T>
+inline T* create_unit(world& w, team& t, legion* l) {
+  return t.add_orphan(new T(w, t, l));
+}

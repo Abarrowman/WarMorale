@@ -8,12 +8,12 @@
 #include "../potential_field.h"
 
 
-class grunt : public unit {
+class heavy : public unit {
 public:
   static unit_archetype const& get_archetype() {
     static unit_archetype const archetype{
-      10,
-      16.0f,
+      40,
+      32.0f,
       10.0f
     };
     return archetype;
@@ -24,11 +24,11 @@ private:
   sharing_polygon poly;
 
 public:
-  grunt(world& w, team& t, legion* l) :
-      unit(w, t, l, get_archetype()),
-      poly(&(world_ref.p_ctx), &(world_ref.static_res.get_vertex_array(static_vertex_array_id::dodecagon))) {
-    ship = world_ref.static_sprite(static_texture_id::grunt);
-    ship.local_trans = matrix_3f::transformation_matrix(32, 32);
+  heavy(world& w, team& t, legion* l) :
+    unit(w, t, l, get_archetype()),
+    poly(&(world_ref.p_ctx), &(world_ref.static_res.get_vertex_array(static_vertex_array_id::dodecagon))) {
+    ship = world_ref.static_sprite(static_texture_id::heavy);
+    ship.local_trans = matrix_3f::transformation_matrix(64, 64);
     poly.edge_width = 1.0f / type.potential_radius;
     poly.local_trans = matrix_3f::transformation_matrix(type.potential_radius, type.potential_radius);
     poly.edge_color = team_ref.col.with_alpha(0.5);

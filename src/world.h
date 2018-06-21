@@ -4,6 +4,7 @@
 #include "unit.h"
 #include "team.h"
 #include "units/grunt.h"
+#include "units/heavy.h"
 #include "space_buckets.h"
 
 
@@ -86,10 +87,12 @@ inline world::world(GLFWwindow* win, static_resources& sr, int_keyed_resources& 
     player_first_legion_formation->fill_color = player_team->col.with_alpha(0.1f);
 
     for (int i = 0; i < 100; i++) {
-      grunt* g = player_team->add_orphan(new grunt(*this, *player_team, &p_first));
+      grunt* g = create_unit<grunt>(*this, *player_team, &p_first);
       g->trans.x = -100.0f + 100.0f * rand_centered_float(get_generator());
       g->trans.y = 300.0f + 100.0f * rand_centered_float(get_generator());
     }
+    heavy* h = create_unit<heavy>(*this, *player_team, &p_first);
+
   }
 
   {
@@ -107,7 +110,8 @@ inline world::world(GLFWwindow* win, static_resources& sr, int_keyed_resources& 
 
     //enemy_first_legion_formation
     for (int i = 0; i < 100; i++) {
-      grunt* g = enemy_team->add_orphan(new grunt(*this, *enemy_team, &e_first));
+      grunt* g = create_unit<grunt>(*this, *enemy_team, &e_first);
+
       g->trans.x = 100.0f * rand_centered_float(get_generator());
       g->trans.y = 100.0f * rand_centered_float(get_generator());
     }

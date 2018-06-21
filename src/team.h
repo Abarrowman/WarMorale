@@ -34,7 +34,7 @@ inline void legion::remove_unit(unit* member) {
 
 inline legion::~legion() {
   for (unit* u : units) {
-    u->group = nullptr;
+    u->legion_ptr = nullptr;
   }
   //fprintf(stderr, "Legion Destructor\n");
 }
