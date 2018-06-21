@@ -87,12 +87,16 @@ inline world::world(GLFWwindow* win, static_resources& sr, int_keyed_resources& 
     player_first_legion_formation->fill_color = player_team->col.with_alpha(0.1f);
 
     for (int i = 0; i < 100; i++) {
-      grunt* g = create_unit<grunt>(*this, *player_team, &p_first);
+      unit* g;
+      if ((i % 4) == 0) {
+        g = create_unit<heavy>(*this, *player_team, &p_first);
+      } else {
+        g = create_unit<grunt>(*this, *player_team, &p_first);
+
+      }
       g->trans.x = -100.0f + 100.0f * rand_centered_float(get_generator());
       g->trans.y = 300.0f + 100.0f * rand_centered_float(get_generator());
     }
-    heavy* h = create_unit<heavy>(*this, *player_team, &p_first);
-
   }
 
   {

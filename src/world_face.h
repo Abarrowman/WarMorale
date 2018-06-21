@@ -32,7 +32,10 @@ public:
   vector_2f mouse_pos;
   bool mouse_down = false;
 
-  space_buckets<unit_reference> unit_buckets{100};
+  /*
+  If buckets aretoo small big units potential fields do not propogate far enough.
+  */
+  space_buckets<unit_reference> unit_buckets{200};
 
   team* player_team;
   team* enemy_team;
