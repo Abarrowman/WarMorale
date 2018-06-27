@@ -7,6 +7,11 @@
 
 class math_consts {
 public:
+
+  static constexpr float half_pi() {
+    return 0.5f * pi();
+  }
+
   static constexpr float pi() {
     return 3.14159265358979323846f;
   }

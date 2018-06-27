@@ -4,6 +4,7 @@
 #include "utils.h"
 #include "unit_face.h"
 #include "team_face.h"
+#include "space_buckets.h"
 
 class threat {
 public:
@@ -69,4 +70,29 @@ public:
   virtual ~point_threat() {} // this is a base clase
 };
 
-using threat_parent = renderable_parent<threat, true>;
+//using threat_parent = renderable_parent<threat, true>;
+
+class threat_parent : public renderable_parent<threat, true> {
+private:
+  using parent_type = renderable_parent<threat, true>;
+  space_buckets<threat*> buckets{ 50 };
+
+public:
+
+  bool update() override {
+    for (int i = child_count() - 1; i >= 0; i--) {
+      threat& ob = child_at(i);
+      buckets.remove_entry(ob.trans.get_position(), &ob);
+      if (ob.update()) {
+        remove_child_at(i);
+      } else {
+        buckets.add_entry(ob.trans.get_position(), &ob);
+      }
+    }
+    return false;
+  }
+
+  std::vector<threat*> get_nearby_threats(vector_2f location) {
+    return buckets.find_nearby_buckets(location);
+  }
+};

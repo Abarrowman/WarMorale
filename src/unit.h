@@ -6,9 +6,8 @@
 #include <limits>
 
 inline void unit::take_threats() {
-  int threat_count = world_ref.threat_layer->child_count();
-  for (int n = 0; n < threat_count; n++) {
-    world_ref.threat_layer->child_at(n).hurt(*this);
+  for (threat* t : world_ref.threat_layer->get_nearby_threats(trans.get_position())) {
+    t->hurt(*this);
   }
 }
 

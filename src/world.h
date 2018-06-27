@@ -118,6 +118,7 @@ inline world::world(GLFWwindow* win, static_resources& sr, int_keyed_resources& 
 
       g->trans.x = 100.0f * rand_centered_float(get_generator());
       g->trans.y = 100.0f * rand_centered_float(get_generator());
+      g->trans.angle = math_consts::half_pi();
     }
   }
 
