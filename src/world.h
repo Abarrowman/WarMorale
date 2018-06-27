@@ -3,6 +3,7 @@
 #include "world_face.h"
 #include "unit.h"
 #include "team.h"
+#include "threat.h"
 #include "units/grunt.h"
 #include "units/heavy.h"
 #include "space_buckets.h"
@@ -177,6 +178,7 @@ inline bool world::update() {
   frm.count_frame();
   frame_count += 1;
   frame_rate_text->text = string_format("FPS:%3.1f", frm.average_frame_rate());
+  log_text->text = string_format("threat_layer->child_count() :%d", threat_layer->child_count());
 
   float ang = frame_count / 100.0f;
   enemy_first_legion->order.pos = vector_2f::create_polar(ang, 100);

@@ -12,6 +12,7 @@ struct unit_archetype {
   float const potential_radius;
   float const max_speed;
   float const max_turn_speed;
+  int const max_reload;
 };
 
 enum unit_status {
@@ -27,8 +28,6 @@ private:
   unit_status status = unit_status::LIVING;
   vector_2f old_pos;
 
-  std::vector<unit_reference> references;
-
   void take_threats();
 public:
   world& world_ref;
@@ -41,7 +40,7 @@ public:
 
   // refactor into class maybe
   int current_health;
-
+  int current_reload = 0;
 
   unit(world& w, team& t, legion* l, unit_archetype const& ty);
   virtual ~unit(); // base class

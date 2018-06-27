@@ -126,10 +126,16 @@ public:
   }
 
   vector_2f get_exerted_gradient(vector_2f location, float radius) {
-    std::vector<obstacle*> nearby = buckets.find_nearby_buckets(location);
     vector_2f grad = vector_2f::zero();
-    for (obstacle* ob_ptr : nearby) {
-      grad += ob_ptr->get_exerted_gradient(location, radius);
+    std::array<std::vector<obstacle*>*, 9> obstacle_vec_arr = buckets.find_nearby_buckets(location);
+    for (std::vector<obstacle*>* obstacle_vec_ptr : obstacle_vec_arr) {
+      if (obstacle_vec_ptr == nullptr) {
+        continue;
+      }
+      std::vector<obstacle*>& nearby = *obstacle_vec_ptr;
+      for (obstacle* ob_ptr : nearby) {
+        grad += ob_ptr->get_exerted_gradient(location, radius);
+      }
     }
     return grad;
   }

@@ -8,7 +8,7 @@ class world;
 #include "sprite.h"
 #include "polygon.h"
 #include "2d_math.h"
-#include "threat.h"
+#include "threat_face.h"
 #include "explosion_effect.h"
 #include "bitmap_text.h"
 #include "running_average.h"

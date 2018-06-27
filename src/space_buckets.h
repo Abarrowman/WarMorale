@@ -1,43 +1,57 @@
 #pragma once
 
+#include <array>
+#include <tuple>
 #include <unordered_map>
+#include <vector>
 #include <2d_math.h>
 
 template <typename T>
 class space_buckets {
 private:
   int cell_size;
-  std::unordered_multimap<vector_2i, T> map;
+  std::unordered_map<vector_2i, std::vector<T>> map;
   using map_type = decltype(map);
-  using const_iterator = typename map_type::const_iterator;
-public:
-  using const_range = std::pair<const_iterator, const_iterator>;
-
+  using iterator = typename map_type::iterator;
 private:
 
-  const_range find_local_bucket(vector_2i const& bucket) const {
-    return map.equal_range(bucket);
+  std::vector<T>* find_local_bucket(vector_2i const& bucket) {
+    iterator it = map.find(bucket);
+    if (it == map.end()) {
+      return nullptr;
+    } else {
+      std::vector<T>& vec = it->second;
+      return &vec;
+    }
   }
 
-  void find_nearby_buckets(vector_2i const& bucket, std::vector<T>& vec) const {
-    for (int ix = -1; ix < 2; ix++) {
-      for (int iy = -1; iy < 2; iy++) {
-        auto range = find_local_bucket(bucket + vector_2i(ix, iy));
-        for (auto it = range.first; it != range.second; ++it) {
-          vec.push_back(it->second);
-        }
+  std::array<std::vector<T>*, 9> find_nearby_buckets(vector_2i const& bucket) {
+    std::array<std::vector<T>*, 9> arr;
+    for (int iy = -1; iy < 2; iy++) {
+      for (int ix = -1; ix < 2; ix++) {
+        int idx = ix + 1 + (iy + 1) * 3;
+        arr[idx] = find_local_bucket(bucket + vector_2i(ix, iy));
       }
     }
+    return arr;
   }
 
   bool contains(vector_2i const& bucket, T const& entry) {
-    auto range = find_local_bucket(bucket);
-    for (auto it = range.first; it != range.second; ++it) {
-      if (it->second == entry) {
-        return true;
-      }
+    std::vector<T>* vec_ptr = find_local_bucket(bucket);
+    if (vec_ptr == nullptr) {
+      return false;
     }
-    return false;
+    std::vector<T>& vec = *vec_ptr;
+    auto it = std::find(vec.begin(), vec.end(), entry);
+    if (it == vec.end()) {
+      return false;
+    } else {
+      return true;
+    }
+  }
+
+  vector_2i compute_bucket(vector_2f const& pos) const {
+    return ((1.0f / cell_size) * pos).round().cast<int>();
   }
 
 public:
@@ -46,39 +60,44 @@ public:
     return contains(compute_bucket(pos), entry);
   }
 
-  vector_2i compute_bucket(vector_2f const& pos) const {
-    return ((1.0f / cell_size) * pos).round().cast<int>();
-  }
-
   space_buckets(int cs) : cell_size(cs) {}
 
   void add_entry(vector_2f const& pos, T const& entry) {
-    map.emplace(compute_bucket(pos), entry);
+    vector_2i const& ibucket = compute_bucket(pos);
+    iterator map_it = map.find(ibucket);
+    if (map_it == map.end()) {
+      std::tie(map_it, std::ignore) = map.emplace( ibucket, std::vector<T>());
+    }
+    std::vector<T>& vec = map_it->second;
+    vec.push_back(entry);
   }
 
-  const_range find_local_bucket(vector_2f const& pos) const {
+  std::vector<T>* find_local_bucket(vector_2f const& pos) {
     return find_local_bucket(compute_bucket(pos));
   }
 
-  std::vector<T> find_nearby_buckets(vector_2f const& pos) const {
-    std::vector<T> vec;
-    find_nearby_buckets(compute_bucket(pos), vec);
-    return vec;
-  }
-
-  std::vector<T>& find_nearby_buckets(vector_2f const& pos, std::vector<T>& vec) const {
-    find_nearby_buckets(compute_bucket(pos), vec);
-    return vec;
+  std::array<std::vector<T>*, 9> find_nearby_buckets(vector_2f const& pos) {
+    return find_nearby_buckets(compute_bucket(pos));
   }
 
   void remove_entry(vector_2f const& pos, T const& entry) {
-    const_range range = find_local_bucket(pos);
-    for (auto it = range.first; it != range.second; ++it) {
-      if (it->second == entry) {
-        map.erase(it);
-        return;
-      }
+    vector_2i const& ibucket = compute_bucket(pos);
+
+    iterator map_it = map.find(ibucket);
+    if (map_it == map.cend()) {
+      return;
     }
+
+    std::vector<T>& vec = map_it->second;
+    auto vec_it = std::find_if(vec.begin(), vec.end(), [&entry](T& elem) { return elem == entry; });
+    if (vec_it != vec.end()) {
+      vec.erase(vec_it);
+    }
+    // TODO keep "leaking" for now
+    /*// what if the bucket is now empty
+    if (vec.size() == 0) {
+      map.erase(map_it);
+    }*/
   }
 
   void move_entry(vector_2f const& old_pos, vector_2f const& new_pos, T const& entry) {
@@ -86,4 +105,3 @@ public:
     add_entry(new_pos, entry);
   }
 };
-
