@@ -17,6 +17,7 @@ enum class static_texture_id {
   heavy,
   ceres,
   mercury_square,
+  shot,
   COUNT
 };
 
@@ -70,6 +71,8 @@ public:
     textures.emplace_back("./assets/textures/heavy.png");
     textures.emplace_back("./assets/textures/ceres.png");
     textures.emplace_back("./assets/textures/mercury_square.png");
+    textures.emplace_back("./assets/textures/shot.png");
+
 
 
     {

@@ -68,8 +68,8 @@ inline world::world(GLFWwindow* win, static_resources& sr, int_keyed_resources& 
     ceres->trans.y = 200;
   }
     
-  player_team = teams_layer->add_orphan(new team(color::blue()));
-  enemy_team = teams_layer->add_orphan(new team(color::red()));
+  player_team = teams_layer->add_orphan(new team("blew", color::blue()));
+  enemy_team = teams_layer->add_orphan(new team("read", color::red()));
   enemy_team->establish_hostility(player_team);
 
   {
@@ -124,7 +124,7 @@ inline world::world(GLFWwindow* win, static_resources& sr, int_keyed_resources& 
   {
     sprite fire_sprite = static_sprite(static_texture_id::fire);
     fire_sprite.local_trans = matrix_3f::transformation_matrix(32, 32);
-    point_threat* fire = threat_layer->add_orphan(new point_threat(fire_sprite, 10));
+    point_threat* fire = threat_layer->add_orphan(new point_threat(fire_sprite, 10, vector_2f::zero(), -1, nullptr));
     fire->trans.set_position({ 250, 200 });
   }
 

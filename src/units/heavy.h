@@ -12,9 +12,10 @@ class heavy : public unit {
 public:
   static unit_archetype const& get_archetype() {
     static unit_archetype const archetype{
-      40,
-      32.0f,
-      10.0f
+      40, // max_health
+      32.0f, // potential_radius
+      10.0f, // max_speed
+      0.025f // max_turn_speed
     };
     return archetype;
   };

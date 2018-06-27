@@ -59,9 +59,9 @@ public:
   }
 
   void render(matrix_3f const& parent_trans) override {
-    //variadic_render(parent_trans, *this, poly, image);
-    //variadic_render(parent_trans, *this, poly);
-    variadic_render(parent_trans, *this, image, poly);
+    //variadic_local_render(parent_trans, *this, poly, image);
+    //variadic_local_render(parent_trans, *this, poly);
+    variadic_local_render(parent_trans, *this, image, poly);
   }
 };
 
@@ -98,9 +98,9 @@ public:
   }
 
   void render(matrix_3f const& parent_trans) override {
-    //variadic_render(parent_trans, *this, poly, image);
-    //variadic_render(parent_trans, *this, poly);
-    variadic_render(parent_trans, *this, image, poly);
+    //variadic_local_render(parent_trans, *this, poly, image);
+    //variadic_local_render(parent_trans, *this, poly);
+    variadic_local_render(parent_trans, *this, image, poly);
   }
 };
 

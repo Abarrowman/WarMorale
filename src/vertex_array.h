@@ -69,7 +69,7 @@ template<size_t U>
 inline std::array<vector_2f, U> create_circle_verticies() {
   std::array<vector_2f, U> circle_verts;
   for (int i = 0; i < U; i++) {
-    float angle = i * math_consts::pi() * 2.0f / U;
+    float angle = i * math_consts::tau() / U;
     circle_verts[i] = { cos(angle), sin(angle) };
   }
   return circle_verts;

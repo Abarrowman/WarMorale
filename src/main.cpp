@@ -112,5 +112,7 @@ int main(void) {
   }
 
   glfwTerminate();
+
+  //getchar();
   return 0;
 }

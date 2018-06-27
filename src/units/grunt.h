@@ -12,9 +12,10 @@ class grunt : public unit {
 public:
   static unit_archetype const& get_archetype() {
     static unit_archetype const archetype{
-      10,
-      16.0f,
-      10.0f
+      10, // max_health
+      16.0f, // potential_radius
+      10.0f, // max_speed
+      0.05f // max_turn_speed
     };
     return archetype;
   };

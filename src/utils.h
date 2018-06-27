@@ -72,3 +72,12 @@ template<typename T>
 inline float value_clamp(T min, T max, T value) {
   return std::min(max, std::max(value, min));
 }
+
+template<typename T>
+inline float absolute_value_clamp(T abs_max, T value) {
+  if (value > 0) {
+    return std::min(abs_max, value);
+  } else {
+    return std::max(-abs_max, value);
+  }
+}

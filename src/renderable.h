@@ -142,9 +142,17 @@ inline void inner_variadic_render(matrix_3f const& parent_trans, T& first, Args&
 }
 
 template<typename P, typename... Args>
-inline void variadic_render(matrix_3f const& parent_trans, P const& parent, Args&... remaining) {
+inline void variadic_local_render(matrix_3f const& parent_trans, P const& parent, Args&... remaining) {
   if (parent.visible) {
     matrix_3f trans = parent_trans * parent.local_trans;
+    inner_variadic_render(trans, remaining...);
+  }
+}
+
+template<typename P, typename... Args>
+inline void variadic_trans_render(matrix_3f const& parent_trans, P const& parent, Args&... remaining) {
+  if (parent.visible) {
+    matrix_3f trans = parent_trans * parent.trans.to_matrix();
     inner_variadic_render(trans, remaining...);
   }
 }

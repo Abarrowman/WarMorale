@@ -3,13 +3,18 @@
 #include "sprite.h"
 #include "utils.h"
 #include "unit_face.h"
+#include "team_face.h"
 
-class threat : public renderable {
+class threat {
 public:
-  int damage;
+  trans_state trans;
+  bool visible = true;
+  int damage; // TODO maybe this should be const
 
   threat(int dp) : damage(dp) {}
 
+  virtual bool update() = 0;
+  virtual void render(matrix_3f const& parent_trans) = 0;
   virtual void hurt(unit& target) = 0;
   virtual ~threat() {} // this is a base clase
 };
@@ -18,32 +23,47 @@ class point_threat : public threat {
 protected:
   sprite image;
   bool destroyed = false;
+  vector_2f velocity;
+
+  // How many frames the point_threat should last for.
+  // When negative the point_threat will last forever.
+  int lifetime;
+
+  team* allegiance;
 
 public:
-  trans_state trans;
-  point_threat(sprite img, int dp) : image(img), threat(dp) {}
+
+  point_threat(sprite img, int damage_points, vector_2f vel, int life, team* ally) :
+    image(img), threat(damage_points), velocity(vel), lifetime(life), allegiance(ally) {
+    assert(!velocity.isnan());
+  }
+
 
   void hurt(unit& target) override {
     if (destroyed) {
       return;
     }
+    if (&(target.team_ref) == allegiance) {
+      return;
+    }
     if (target.take_point_threat(*this)) {
-      // TOOD make threats that don't destroy themselves when used
+      // TODO make threats that don't destroy themselves when used
       destroyed = true;
     }
   }
 
-  bool update() {
-    local_trans = trans.to_matrix();
+  bool update() override {
+    trans.set_position(trans.get_position() + velocity);
+    if (lifetime > 0) {
+      lifetime--;
+    } else if (lifetime == 0) {
+      return true;
+    }
     return destroyed;
   }
 
   void render(matrix_3f const& parent_trans) override {
-    if (!visible) {
-      return;
-    }
-    matrix_3f trans = parent_trans * local_trans;
-    image.render(trans);
+    variadic_trans_render(parent_trans, *this, image);
   }
 
   virtual ~point_threat() {} // this is a base clase

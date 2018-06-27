@@ -73,8 +73,28 @@ inline void unit::living_update() {
   unit_reference closest_enemy_ref = find_closest_enemy();
   if (closest_enemy_ref.valid()) {
     unit& closest_enemy = closest_enemy_ref.ref();
-    float e_angle = angle_err(trans.angle, trans.translation_to(closest_enemy.trans).angle());
-    trans.angle += 0.1f * e_angle;
+
+    vector_2f diff = trans.translation_to(closest_enemy.trans);
+    float e_angle = angle_err(trans.angle, diff.angle());
+    //float angle_diff += 0.1f * e_angle;
+    float angle_diff = absolute_value_clamp(type.max_turn_speed, e_angle);
+    trans.angle += angle_diff;
+
+    float rem_angle_err = e_angle - angle_diff;
+
+    vector_2f dir = vector_2f::create_polar(trans.angle);
+    vector_2f closest_point = trans.get_position() + diff.dot(dir) * dir;
+    float distance = (closest_point - closest_enemy.trans.get_position()).magnitude();
+
+    if ((std::abs(rem_angle_err) < math_consts::pi() * 0.25) && (distance < closest_enemy.type.potential_radius)) {
+      //fire
+      sprite bullet_sprite = world_ref.static_sprite(static_texture_id::shot);
+      bullet_sprite.local_trans = matrix_3f::transformation_matrix(16, 16, trans.angle);
+      point_threat* bullet = world_ref.threat_layer->add_orphan(new point_threat(bullet_sprite, 10, dir * 5.0f, 100, &team_ref));
+      bullet->trans.set_position(trans.get_position() + dir * type.potential_radius);
+    }
+    //
+    //float cross_err = diff.magnitude() * std::sin(rem_angle_err);
   }
 }
 

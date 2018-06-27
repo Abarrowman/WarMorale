@@ -10,6 +10,9 @@ public:
   static constexpr float pi() {
     return 3.14159265358979323846f;
   }
+  static constexpr float tau() {
+    return 2.0f * pi();
+  }
   static constexpr float e() {
     return 2.71828182845904523536f;
   }
@@ -18,9 +21,9 @@ public:
 inline float angle_err(float const current_ang, float const target_ang) {
   float ang_err = target_ang - current_ang;
   if (ang_err > math_consts::pi()) {
-    ang_err = -2 * math_consts::pi() + ang_err;
+    ang_err = -math_consts::tau() + ang_err;
   } else if (ang_err < -math_consts::pi()) {
-    ang_err = 2 * math_consts::pi() + ang_err;
+    ang_err = math_consts::tau() + ang_err;
   }
   return ang_err;
 }
@@ -32,9 +35,9 @@ inline float roughly_equal(float left, float right, float epsilon = 0.0000001f) 
 // Clamps an angle from -pi to pi
 inline float angle_clamp(float const angle) {
   if (angle > math_consts::pi()) {
-    return -2 * math_consts::pi() + angle;
+    return -math_consts::tau() + angle;
   } else if (angle < -math_consts::pi()) {
-    return 2 * math_consts::pi() + angle;
+    return math_consts::tau() + angle;
   } else {
     return angle;
   }
@@ -42,7 +45,7 @@ inline float angle_clamp(float const angle) {
 
 inline float positive_angle(float const angle) {
   if (angle < 0) {
-    return 2 * math_consts::pi() + angle;
+    return math_consts::tau() + angle;
   } else {
     return angle;
   }
@@ -54,13 +57,13 @@ inline float positive_angle_err(float const current_ang, float const target_ang)
     if (diff >= -math_consts::pi()) {
       return diff;
     } else {
-      return 2 * math_consts::pi() + diff;
+      return math_consts::tau() + diff;
     }
   } else {
     if (diff <= math_consts::pi()) {
       return diff;
     } else {
-      return 2 * math_consts::pi() - diff;
+      return math_consts::tau() - diff;
     }
   }
 }
@@ -167,6 +170,10 @@ public:
     return (x == other.x) && (y == other.y);
   }
 
+  bool isnan() {
+    return std::isnan(x) || std::isnan(y);
+  }
+
   static vector_2<T> create_polar(T ang) {
     return { std::cos(ang), std::sin(ang) };
   }
@@ -178,7 +185,6 @@ public:
   static vector_2<T> zero() {
     return vector_2<T>(0, 0);
   }
-
 };
 
 template<typename T>
@@ -295,7 +301,7 @@ public:
   float x = 0.0f;
   float y = 0.0f;
   
-  matrix_3f to_matrix() {
+  matrix_3f to_matrix() const {
     return matrix_3f::transformation_matrix(scale_x, scale_y, angle, x, y);
   }
 

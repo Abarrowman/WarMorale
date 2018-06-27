@@ -3,6 +3,7 @@
 #include "renderable.h"
 #include "color.h"
 #include "geom.h"
+#include<string>
 
 class unit;
 
@@ -32,11 +33,11 @@ private:
   using super = renderable_parent<unit, true>;
   std::vector<std::unique_ptr<legion>> legions;
   std::vector<team*> enemy_teams;
-
 public:
+  std::string const name;
   color const col;
 
-  team(color c) : col(c) {};
+  team(std::string n, color c) : name(std::move(n)), col(c) {};
 
   std::vector<team*> const& get_enemies();
 

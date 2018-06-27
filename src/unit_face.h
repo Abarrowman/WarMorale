@@ -11,6 +11,7 @@ struct unit_archetype {
   int const max_health;
   float const potential_radius;
   float const max_speed;
+  float const max_turn_speed;
 };
 
 enum unit_status {
