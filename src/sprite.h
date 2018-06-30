@@ -18,6 +18,7 @@ public:
   GLint shader_frame_height_idx;
   GLint shader_frame_col_idx;
   GLint shader_frame_row_idx;
+  GLint shader_alpha;
 
   void init(shader* s_shader, simple_vertex_array* s_vertex_array) {
     sprite_shader = s_shader;
@@ -28,6 +29,8 @@ public:
     shader_frame_height_idx = sprite_shader->get_uniform_location("frame_height");
     shader_frame_col_idx = sprite_shader->get_uniform_location("frame_col");
     shader_frame_row_idx = sprite_shader->get_uniform_location("frame_row");
+    shader_alpha = sprite_shader->get_uniform_location("alpha");
+
 
   }
 
@@ -49,6 +52,7 @@ public:
   int frame_height = 1;
   int frame_col = 0;
   int frame_row = 0;
+  float alpha = 1.0f;
 
   sprite() {
     context = nullptr;
@@ -80,6 +84,7 @@ public:
     glUniform1i(context->shader_frame_height_idx, frame_height);
     glUniform1i(context->shader_frame_col_idx, frame_col);
     glUniform1i(context->shader_frame_row_idx, frame_row);
+    glUniform1f(context->shader_alpha, alpha);
 
     context->sprite_vertex_array->draw(GL_TRIANGLES);
   }

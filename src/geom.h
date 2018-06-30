@@ -52,7 +52,7 @@ public:
   }
 
   // Returns the closest point on the surface and if the point is inside the polygon
-  polygon_edge_pt point_on_edge(vector_2f center, vector_2f location) {
+  polygon_edge_pt point_on_edge(vector_2f center, vector_2f location, float inside_tolerance = 0) {
 
     vector_2f diff = location - center;
     vector_2f dir = diff.normalized();
@@ -79,16 +79,6 @@ public:
     }
     assert(edge_idx != edges.size());
 
-    /*vector_2f effective_normal = ed.normal;
-    float t = (ed.diff.dot(diff) - ed.diff.dot(ed.first)) / ed.diff.dot(ed.diff);
-    if (t > 1.0f) {
-    t = 1.0f;
-    effective_normal += edges[(edge_idx + 1) % edges.size()].normal;
-    } else if (t < 0.0f) {
-    t = 0.0f;
-    effective_normal -= edges[(edge_idx + edges.size() - 1) % edges.size()].normal;
-    }*/
-
     float t = (ed.diff.dot(diff) - ed.diff.dot(ed.first)) / ed.diff.dot(ed.diff);
     if (t > 1.0f) {
       t = 1.0f;
@@ -99,7 +89,7 @@ public:
     vector_2f edge_pt = center + ed.first + t * ed.diff;
 
     float proj_distance_to_edge = ed.normal.dot(ed.first) / ed.normal.dot(dir);
-    bool inside = proj_distance_to_edge > diff.magnitude();
+    bool inside = proj_distance_to_edge > (diff.magnitude() - inside_tolerance);
 
     return { edge_pt, ed.normal, inside };
   }

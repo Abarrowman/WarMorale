@@ -25,7 +25,7 @@ inline world::world(GLFWwindow* win, static_resources& sr, int_keyed_resources& 
   under_effects_layer = add_orphan(new ordered_parent());
   obstacle_layer = add_orphan(new obstacle_parent());
   teams_layer = add_orphan(new team_parent());
-  threat_layer = add_orphan(new threat_parent());
+  threat_layer = add_orphan(new threat_parent(*this));
   over_effects_layer = add_orphan(new ordered_parent());
   ui_layer = add_orphan(new ordered_parent());
 
@@ -87,13 +87,13 @@ inline world::world(GLFWwindow* win, static_resources& sr, int_keyed_resources& 
     player_first_legion_formation->edge_color = player_team->col;
     player_first_legion_formation->fill_color = player_team->col.with_alpha(0.1f);
 
+    bool allow_big = true;
     for (int i = 0; i < 100; i++) {
       unit* g;
-      if ((i % 4) == 0) {
+      if (allow_big && ((i % 4) == 0)) {
         g = create_unit<heavy>(*this, *player_team, &p_first);
       } else {
         g = create_unit<grunt>(*this, *player_team, &p_first);
-
       }
       g->trans.x = -100.0f + 100.0f * rand_centered_float(get_generator());
       g->trans.y = 300.0f + 100.0f * rand_centered_float(get_generator());
@@ -149,7 +149,7 @@ inline world::world(GLFWwindow* win, static_resources& sr, int_keyed_resources& 
   {
     sprite img = static_sprite(static_texture_id::mercury_square);
     img.local_trans = matrix_3f::transformation_matrix(256.0f, 256.0f);
-    std::vector<vector_2f> verts{ { 73.0f, 73.0f },{ -73.0f, 73.0f },{ -73.0f, -73.f },{ 73.0f, -73.0f } };
+    std::vector<vector_2f> verts{ { 93.0f, 93.0f },{ -93.0f, 93.0f },{ -93.0f, -93.f },{ 93.0f, -93.0f } };
     polygonal_obstacle* mercury = obstacle_layer->add_orphan(new polygonal_obstacle(std::move(verts), std::move(img), &p_ctx));
     mercury->trans.x = 0;
     mercury->trans.y = -200;
@@ -175,10 +175,8 @@ inline world::world(GLFWwindow* win, static_resources& sr, int_keyed_resources& 
 }
 
 inline bool world::update() { 
-  frm.count_frame();
-  frame_count += 1;
-  frame_rate_text->text = string_format("FPS:%3.1f", frm.average_frame_rate());
-  log_text->text = string_format("threat_layer->child_count() :%d", threat_layer->child_count());
+  update_times.begin();
+  
 
   float ang = frame_count / 100.0f;
   enemy_first_legion->order.pos = vector_2f::create_polar(ang, 100);
@@ -198,6 +196,21 @@ inline bool world::update() {
   p_ctx.update_projection(proj);
   pp_ctx.update_projection(proj);
   bt_ctx.update_projection(proj);
+
+  frm.count_frame();
+  frame_count += 1;
+  update_times.end();
+
+
+  frame_rate_text->text = string_format(
+    "FPS:%3.1f\n"
+    "Update:%dms\n"
+    "Other:%dms",
+    frm.average_frame_rate(),
+    static_cast<int>(std::round(update_times.average())),
+    static_cast<int>(std::round(frm.average_frame_time() - update_times.average())));
+  log_text->text = string_format("%d", threat_layer->child_count());
+
   return false;
 }
 

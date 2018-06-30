@@ -22,7 +22,8 @@ public:
     return false;
   }
 
-  virtual vector_2f get_exerted_gradient(vector_2f effected_location, float other_radius) = 0;
+  virtual bool is_occupied(vector_2f location, float other_radius) = 0;
+  virtual vector_2f get_exerted_gradient(vector_2f location, float other_radius) = 0;
   virtual ~obstacle() {} // base class
 };
 
@@ -38,6 +39,11 @@ public:
     poly.local_trans = matrix_3f::transformation_matrix(radius, radius);
     poly.edge_color = color::white();
     poly.fill_color = color::transparent_black();
+  }
+
+  bool is_occupied(vector_2f location, float other_radius) override {
+    vector_2f diff = trans.translation_to(location);
+    return (diff.magnitude() < (radius + other_radius));
   }
 
   vector_2f get_exerted_gradient(vector_2f location, float other_radius) override {
@@ -88,13 +94,17 @@ public:
       sign = sign;
     }
 
-    vector_2f gauss_force = sign * 3.0f * normalized_absolute_gaussian_gradient(edge_pt.pt, location, other_radius / 2.0f + 20.0f, -30.0f);
+    vector_2f gauss_force = sign * 3.0f * normalized_absolute_gaussian_gradient(edge_pt.pt, location, other_radius / 2.0f + 20.0f, -20.0f);
 
     vector_2f raw_force = gauss_force;
 
     vector_2f final_force = raw_force;
     //vector_2f final_force = raw_force.proj(edge_pt.normal);
     return final_force;
+  }
+
+  bool is_occupied(vector_2f location, float other_radius) override {
+    return precalc.point_on_edge(trans.get_position(), location, other_radius).inside;
   }
 
   void render(matrix_3f const& parent_trans) override {
@@ -138,5 +148,21 @@ public:
       }
     }
     return grad;
+  }
+
+  bool is_occupied(vector_2f location, float other_radius) {
+    std::array<std::vector<obstacle*>*, 9> obstacle_vec_arr = buckets.find_nearby_buckets(location);
+    for (std::vector<obstacle*>* obstacle_vec_ptr : obstacle_vec_arr) {
+      if (obstacle_vec_ptr == nullptr) {
+        continue;
+      }
+      std::vector<obstacle*>& nearby = *obstacle_vec_ptr;
+      for (obstacle* ob_ptr : nearby) {
+        if (ob_ptr->is_occupied(location, other_radius)) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 };

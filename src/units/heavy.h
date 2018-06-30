@@ -4,7 +4,7 @@
 #include "../world_face.h"
 #include "../team_face.h"
 #include "../unit_face.h"
-#include "../threat.h"
+#include "../threat_face.h"
 #include "../potential_field.h"
 
 
@@ -12,10 +12,11 @@ class heavy : public unit {
 public:
   static unit_archetype const& get_archetype() {
     static unit_archetype const archetype{
-      40, // max_health
+      80, // max_health
       32.0f, // potential_radius
       10.0f, // max_speed
-      0.025f // max_turn_speed
+      0.025f, // max_turn_speed
+      5 // max_reload
     };
     return archetype;
   };

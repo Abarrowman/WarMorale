@@ -8,6 +8,8 @@ uniform int frame_width;
 uniform int frame_height;
 uniform int frame_col;
 uniform int frame_row;
+uniform float alpha;
+
 
 out vec4 f_color;
 
@@ -18,5 +20,5 @@ void main() {
   vec2 target_tex = norm_tex + offset_tex;
 
   vec4 tex_value = texture(tex_unit, target_tex);
-  f_color = tex_value;
+  f_color = vec4(tex_value.rgb, tex_value.a * alpha);
 }

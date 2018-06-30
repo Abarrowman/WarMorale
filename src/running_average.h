@@ -87,6 +87,10 @@ public:
     }
   }
 
+  float average_frame_time() const {
+    return swap_times.average();
+  }
+
   float instantaneous_frame_rate() const {
     float latest = swap_times.latest();
     if (latest == 0) {
@@ -98,5 +102,25 @@ public:
 
   float last_time() const {
     return swap_times.latest();
+  }
+};
+
+class averaging_timer {
+private:
+  running_average<float, 10> times;
+  typedef std::chrono::high_resolution_clock clock;
+  clock::time_point begin_time;
+public:
+  void begin() {
+    begin_time = clock::now();
+  }
+  void end() {
+    clock::time_point end_time = clock::now();
+    std::chrono::duration<float, std::milli> dur = end_time - begin_time;
+    times.insert(dur.count());
+  }
+
+  float average() const {
+    return times.average();
   }
 };

@@ -4,7 +4,7 @@
 #include "../world_face.h"
 #include "../team_face.h"
 #include "../unit_face.h"
-#include "../threat.h"
+#include "../threat_face.h"
 #include "../potential_field.h"
 
 
@@ -15,7 +15,8 @@ public:
       10, // max_health
       16.0f, // potential_radius
       10.0f, // max_speed
-      0.05f // max_turn_speed
+      0.05f, // max_turn_speed
+      10 // max_reload
     };
     return archetype;
   };

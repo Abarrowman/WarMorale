@@ -64,7 +64,7 @@ public:
     return new explosion_effect(ctx, particle_count, 100, std::move(positions), std::move(colors), std::move(velocities));
   }
 
-  static explosion_effect* explode_sprite(point_particle_context* ctx,  sprite& spr, vector_2f center, matrix_3f const& parent_trans, generator_type& gen) {
+  static explosion_effect* explode_sprite(point_particle_context* ctx,  sprite& spr, vector_2f center, matrix_3f const& parent_trans, generator_type& gen, int duration=60) {
     assert(spr.tex != nullptr);
 
     int const image_width = spr.tex->width;
@@ -106,7 +106,7 @@ public:
     }
     int particle_count = positions.size();
 
-    return new explosion_effect(ctx, particle_count, 20, std::move(positions), std::move(colors), std::move(velocities));
+    return new explosion_effect(ctx, particle_count, duration, std::move(positions), std::move(colors), std::move(velocities));
   }
 
   explosion_effect(point_particle_context* ctx, int count, int dur, std::vector<vector_2f> pos,

@@ -51,7 +51,6 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 }
 
 int main(void) {
-
   /* Initialize the library */
   glfwSetErrorCallback(error_callback);
   if (!glfwInit()) {
@@ -81,8 +80,12 @@ int main(void) {
   glfwSetMouseButtonCallback(window, mouse_button_callback);
 
   glfwMakeContextCurrent(window);
-  //glfwSwapInterval(1); // enable vsync
-  //glfwSwapInterval(2); // enable vsync
+
+  //glfwSwapInterval(-1); // adaptive v-sync seems to work best
+  //glfwSwapInterval(0); // swap as fast as frames can be rendered
+  //glfwSwapInterval(1); // [default] enable regular vsync for 60fps
+  //glfwSwapInterval(2); // sync with every other frame 30fps
+  //glfwSwapInterval(3); // sync with every other frame 20fps
 
   // start GLEW extension handler
   glewExperimental = GL_TRUE;
@@ -102,13 +105,16 @@ int main(void) {
   global_stage = &w;
   matrix_3f global_trans = matrix_3f::identity();
 
+
+
   while (!glfwWindowShouldClose(window)){
+    glfwPollEvents();
     global_stage->update();
+   
     glClear(GL_COLOR_BUFFER_BIT);
     global_stage->render(global_trans);
     glfwSwapBuffers(window);
-    glfwPollEvents();
-    check_gl_errors();
+    //check_gl_errors();
   }
 
   glfwTerminate();

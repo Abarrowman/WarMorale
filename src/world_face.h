@@ -27,6 +27,7 @@ public:
 
 
   frame_rate_meter frm;
+  averaging_timer update_times;
 
   long frame_count = 0;
   vector_2f mouse_pos;

@@ -18,7 +18,9 @@ public:
 
   threat(int dp) : damage(dp) {}
 
-  virtual bool update() = 0;
+  bool update() { return false; } // unused
+
+  virtual bool update(world& world_ref) = 0;
   virtual void render(matrix_3f const& parent_trans) = 0;
   virtual void hurt(unit& target) = 0;
   virtual ~threat() {} // this is a base clase
@@ -32,14 +34,16 @@ class threat_parent : public renderable_parent<threat, true> {
 private:
   using parent_type = renderable_parent<threat, true>;
   space_buckets<threat*> buckets{ 50 };
-
+  world& world_ref;
 public:
+
+  threat_parent(world& w) : world_ref(w) {}
 
   bool update() override {
     for (int i = child_count() - 1; i >= 0; i--) {
       threat& ob = child_at(i);
       buckets.remove_entry(ob.trans.get_position(), &ob);
-      if (ob.update()) {
+      if (ob.update(world_ref)) {
         remove_child_at(i);
       } else {
         buckets.add_entry(ob.trans.get_position(), &ob);
@@ -73,7 +77,7 @@ public:
   }
 
   void hurt(unit& target) override;
-  bool update() override;
+  bool update(world& world_ref) override;
   void render(matrix_3f const& parent_trans) override;
 
   virtual ~point_threat() {} // this is a base clase
