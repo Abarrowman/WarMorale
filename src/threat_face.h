@@ -52,7 +52,7 @@ public:
     return false;
   }
 
-  std::array<std::vector<threat*>*, 9>  get_nearby_threats(vector_2f location) {
+  nearby_buckets<threat*>  get_nearby_threats(vector_2f location) {
     return buckets.find_nearby_buckets(location);
   }
 };

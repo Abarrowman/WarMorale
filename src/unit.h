@@ -6,16 +6,8 @@
 #include <limits>
 
 inline void unit::take_threats() {
-
-  std::array<std::vector<threat*>*, 9> threat_vec_arr = world_ref.threat_layer->get_nearby_threats(trans.get_position());
-  for (std::vector<threat*>* threat_vec_ptr : threat_vec_arr) {
-    if (threat_vec_ptr == nullptr) {
-      continue;
-    }
-    std::vector<threat*>& threat_vec = *threat_vec_ptr;
-    for (threat* t : threat_vec) {
-      t->hurt(*this);
-    }
+  for (threat* t : world_ref.threat_layer->get_nearby_threats(trans.get_position())) {
+    t->hurt(*this);
   }
 }
 
@@ -29,7 +21,8 @@ inline bool unit::take_point_threat(point_threat& pt) {
   }
 }
 
-inline unit::unit(world& w, team& t, legion* l, unit_archetype const& ty) : world_ref(w), team_ref(t), legion_ptr(l), type(ty) {
+inline unit::unit(world& w, team& t, legion* l, unit_archetype const& ty) :
+    world_ref(w), team_ref(t), legion_ptr(l), type(ty) {
   legion_ptr->add_unit(this);
   current_health = type.max_health;
 }
@@ -47,31 +40,23 @@ inline void unit::living_update() {
   vector_2f diff = dest - position;
   float distance = diff.magnitude();
 
-  std::array<std::vector<unit_reference>*, 9> ref_arr = world_ref.unit_buckets.find_nearby_buckets(position);
-
 
   //vector_2f grad = vector_2f::zero();
   vector_2f goal_grad = legion_ptr->order.get_potential_force(trans.get_position());// *(type.potential_radius / 16.0f);
   vector_2f grad = goal_grad;
-  for (std::vector<unit_reference>* ref_vec_ptr : ref_arr) {
-    if (ref_vec_ptr == nullptr) {
+  for (unit_reference ref : world_ref.unit_buckets.find_nearby_buckets(position)) {
+    if (!ref.valid()) {
       continue;
     }
-    std::vector<unit_reference>& ref_vec = *ref_vec_ptr;
-    for (unit_reference ref : ref_vec) {
-      if (!ref.valid()) {
-        continue;
-      }
-      if (ref.ptr() == this) {
-        continue;
-      }
-      unit& close_unit = ref.ref();
-
-      float intersection_radius = close_unit.type.potential_radius + type.potential_radius;
-      vector_2f gauss_force = 0.8f * normalized_gaussian_gradient(close_unit.trans.get_position(), position, 0.5f * intersection_radius);
-      vector_2f obs_force = 0.4f * normalized_fractional_obstacle_gradient(close_unit.trans.get_position(), position, intersection_radius);
-      grad += gauss_force + obs_force;
+    if (ref.ptr() == this) {
+      continue;
     }
+    unit& close_unit = ref.ref();
+
+    float intersection_radius = close_unit.type.potential_radius + type.potential_radius;
+    vector_2f gauss_force = 0.8f * normalized_gaussian_gradient(close_unit.trans.get_position(), position, 0.5f * intersection_radius);
+    vector_2f obs_force = 0.4f * normalized_fractional_obstacle_gradient(close_unit.trans.get_position(), position, intersection_radius);
+    grad += gauss_force + obs_force;
   }
 
   vector_2f obs_force = world_ref.obstacle_layer->get_exerted_gradient(position, type.potential_radius);
@@ -115,9 +100,6 @@ inline void unit::living_update() {
       }
     }
 
-    
-    //
-    //float cross_err = diff.magnitude() * std::sin(rem_angle_err);
   }
 }
 
