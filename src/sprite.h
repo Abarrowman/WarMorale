@@ -4,6 +4,7 @@
 #include "texture.h"
 #include "shader.h"
 #include "vertex_array.h"
+#include "color.h"
 #include <functional>
 
 class sprite;
@@ -12,31 +13,26 @@ class sprite_context {
 public:
   shader* sprite_shader;
   simple_vertex_array* sprite_vertex_array;
-  GLint shader_trans_mat_idx;
-  GLint shader_proj_mat_idx;
-  GLint shader_frame_width_idx;
-  GLint shader_frame_height_idx;
-  GLint shader_frame_col_idx;
-  GLint shader_frame_row_idx;
-  GLint shader_alpha;
+  GLint trans_mat_idx;
+  GLint proj_mat_idx;
+  GLint frames_idx;
+  GLint current_frame_idx;
+  GLint mask_color;
+
 
   void init(shader* s_shader, simple_vertex_array* s_vertex_array) {
     sprite_shader = s_shader;
     sprite_vertex_array = s_vertex_array;
-    shader_trans_mat_idx = sprite_shader->get_uniform_location("trans_mat");
-    shader_proj_mat_idx = sprite_shader->get_uniform_location("proj_mat");
-    shader_frame_width_idx = sprite_shader->get_uniform_location("frame_width");
-    shader_frame_height_idx = sprite_shader->get_uniform_location("frame_height");
-    shader_frame_col_idx = sprite_shader->get_uniform_location("frame_col");
-    shader_frame_row_idx = sprite_shader->get_uniform_location("frame_row");
-    shader_alpha = sprite_shader->get_uniform_location("alpha");
-
-
+    trans_mat_idx = sprite_shader->get_uniform_location("trans_mat");
+    proj_mat_idx = sprite_shader->get_uniform_location("proj_mat");
+    frames_idx = sprite_shader->get_uniform_location("frames");
+    current_frame_idx = sprite_shader->get_uniform_location("current_frame");
+    mask_color = sprite_shader->get_uniform_location("mask_color");
   }
 
   void update_projection(matrix_3f const& proj_mat) {
     sprite_shader->use();
-    glUniformMatrix3fv(shader_proj_mat_idx, 1, GL_TRUE, proj_mat.values.data());
+    glUniformMatrix3fv(proj_mat_idx, 1, GL_TRUE, proj_mat.values.data());
   }
 
   sprite* create_orphan(texture* t);
@@ -48,11 +44,12 @@ public:
 
   sprite_context* context;
   texture* tex;
-  int frame_width = 1;
-  int frame_height = 1;
-  int frame_col = 0;
-  int frame_row = 0;
-  float alpha = 1.0f;
+
+
+  vector_2i frames{ 1, 1 };
+  vector_2i current_frame{ 0, 0 };
+
+  color_rgba mask_color;
 
   sprite() {
     context = nullptr;
@@ -78,13 +75,10 @@ public:
     assert(tex != nullptr);
     tex->activate_bind(GL_TEXTURE0);
     matrix_3f full_trans = parent_trans * local_trans;
-    glUniformMatrix3fv(context->shader_trans_mat_idx, 1, GL_TRUE, full_trans.values.data());
-
-    glUniform1i(context->shader_frame_width_idx, frame_width);
-    glUniform1i(context->shader_frame_height_idx, frame_height);
-    glUniform1i(context->shader_frame_col_idx, frame_col);
-    glUniform1i(context->shader_frame_row_idx, frame_row);
-    glUniform1f(context->shader_alpha, alpha);
+    glUniformMatrix3fv(context->trans_mat_idx, 1, GL_TRUE, full_trans.values.data());
+    glUniform2i(context->frames_idx, frames.x, frames.y);
+    glUniform2i(context->current_frame_idx, current_frame.x, current_frame.y);
+    glUniform4fv(context->mask_color, 1, mask_color.values.data());
 
     context->sprite_vertex_array->draw(GL_TRIANGLES);
   }

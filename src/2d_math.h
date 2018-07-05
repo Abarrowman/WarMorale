@@ -134,6 +134,26 @@ public:
     return *this;
   }
 
+  vector_2<T> operator*(vector_2<T> const& other) const {
+    return { x * other.x, y * other.y };
+  }
+
+  vector_2<T> operator*=(vector_2<T> const& other) {
+    x *= other.x;
+    y *= other.y;
+    return *this;
+  }
+
+  vector_2<T> operator/(vector_2<T> const& other) const {
+    return { x / other.x, y / other.y };
+  }
+
+  vector_2<T> operator/=(vector_2<T> const& other) {
+    x /= other.x;
+    y /= other.y;
+    return *this;
+  }
+
   vector_2<T> floor() const {
     return { static_cast<T>(std::floor(x)), static_cast<T>(std::floor(y)) };
   }

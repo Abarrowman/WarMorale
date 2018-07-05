@@ -12,6 +12,7 @@
 #include <vector>
 #include <memory>
 #include <random>
+#include <limits>
 
 using generator_type = std::minstd_rand;
 
@@ -23,6 +24,9 @@ float rand_centered_float(generator_type& gen) {
   return std::uniform_real_distribution<float>{-1.0, 1.0f}(gen);
 }
 
+bool rand_bool(generator_type& gen) {
+  return (rand_float(gen) > 0.5f);
+}
 
 inline void check_gl_errors() {
   GLenum err;

@@ -37,8 +37,8 @@ public:
     assert(radius > 0.0f);
     poly.edge_width = 1.0f / radius;
     poly.local_trans = matrix_3f::transformation_matrix(radius, radius);
-    poly.edge_color = color::white();
-    poly.fill_color = color::transparent_black();
+    poly.edge_color = color_rgba::white();
+    poly.fill_color = color_rgba::transparent_black();
   }
 
   bool is_occupied(vector_2f location, float other_radius) override {
@@ -80,8 +80,8 @@ public:
   polygonal_obstacle(std::vector<vector_2f> verts, sprite img, polygon_context* p_ctx) :
     precalc(std::move(verts)), image(std::move(img)), poly(p_ctx, simple_vertex_array::create_verticies(precalc.verticies)) {
     poly.edge_width = 1.0f;
-    poly.edge_color = color::white();
-    poly.fill_color = color::transparent_black();
+    poly.edge_color = color_rgba::white();
+    poly.fill_color = color_rgba::transparent_black();
   }
 
   vector_2f get_exerted_gradient(vector_2f location, float other_radius) override {

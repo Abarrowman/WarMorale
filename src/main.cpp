@@ -85,7 +85,7 @@ int main(void) {
   //glfwSwapInterval(0); // swap as fast as frames can be rendered
   //glfwSwapInterval(1); // [default] enable regular vsync for 60fps
   //glfwSwapInterval(2); // sync with every other frame 30fps
-  //glfwSwapInterval(3); // sync with every other frame 20fps
+  //glfwSwapInterval(4); // sync with every thrid frame 15fps
 
   // start GLEW extension handler
   glewExperimental = GL_TRUE;

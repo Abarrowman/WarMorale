@@ -3,6 +3,7 @@
 #include "renderable.h"
 #include "color.h"
 #include "geom.h"
+#include "sprite.h"
 #include<string>
 
 class unit;
@@ -35,14 +36,12 @@ private:
   std::vector<team*> enemy_teams;
 public:
   std::string const name;
-  color const col;
+  color_rgb const col;
 
-  team(std::string n, color c) : name(std::move(n)), col(c) {};
+  team(std::string n, color_rgb c) : name(std::move(n)), col(c) {};
 
   std::vector<team*> const& get_enemies();
-
   void establish_hostility(team* enemy);
-
   bool is_hositle(team* enemy);
 
   bool update() override;

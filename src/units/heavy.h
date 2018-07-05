@@ -23,6 +23,7 @@ public:
 
 private:
   sprite ship;
+  sprite highlights;
   sharing_polygon poly;
 
 public:
@@ -31,10 +32,17 @@ public:
     poly(&(world_ref.p_ctx), &(world_ref.static_res.get_vertex_array(static_vertex_array_id::dodecagon))) {
     ship = world_ref.static_sprite(static_texture_id::heavy);
     ship.local_trans = matrix_3f::transformation_matrix(64, 64);
+    ship.frames = { 2, 2 };
+    ship.current_frame = { 1, 0 };
+
+    highlights = ship;
+    highlights.current_frame = { 0, 1 };
+    highlights.mask_color = team_ref.col.with_alpha(1.0f);
+
     poly.edge_width = 1.0f / type.potential_radius;
     poly.local_trans = matrix_3f::transformation_matrix(type.potential_radius, type.potential_radius);
     poly.edge_color = team_ref.col.with_alpha(0.5);
-    poly.fill_color = color::transparent_black();
+    poly.fill_color = color_rgba::transparent_black();
   }
 
 protected:
@@ -47,7 +55,7 @@ protected:
   void render(matrix_3f const& parent_trans) override {
     if (visible) {
       matrix_3f matrix = parent_trans * trans.to_matrix();
-      inner_variadic_render(matrix, ship, poly);
+      inner_variadic_render(matrix, ship, highlights, poly);
     }
   }
 };

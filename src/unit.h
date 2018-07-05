@@ -107,7 +107,7 @@ inline void unit::living_update() {
       if ((std::abs(rem_angle_err) < math_consts::pi() * 0.25) && (distance < closest_enemy.type.potential_radius)) {
         //fire
         sprite bullet_sprite = world_ref.static_sprite(static_texture_id::shot);
-        bullet_sprite.alpha = 0.5f;
+        bullet_sprite.mask_color = team_ref.col.with_alpha(0.3f);
         bullet_sprite.local_trans = matrix_3f::transformation_matrix(16, 16, trans.angle);
         point_threat* bullet = world_ref.threat_layer->add_orphan(new point_threat(bullet_sprite, 1, dir * 5.0f, 100, &team_ref));
         bullet->trans.set_position(trans.get_position() + dir * type.potential_radius);

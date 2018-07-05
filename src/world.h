@@ -31,8 +31,8 @@ inline world::world(GLFWwindow* win, static_resources& sr, int_keyed_resources& 
 
 
   tri = under_effects_layer->add_orphan(new owning_polygon(&p_ctx, simple_vertex_array::create_circle<3>()));
-  tri->fill_color.floats = {0.0, 0.5f, 0.5f, 1.0f};
-  tri->edge_color.floats = { 0.0, 0.2f, 0.2f, 1.0f };
+  tri->fill_color.values = {0.0, 0.5f, 0.5f, 1.0f};
+  tri->edge_color.values = { 0.0, 0.2f, 0.2f, 1.0f };
   tri->edge_width = 0.3f;//0.1f;
   
   {
@@ -69,8 +69,8 @@ inline world::world(GLFWwindow* win, static_resources& sr, int_keyed_resources& 
     ceres->trans.y = 200;
   }
     
-  player_team = teams_layer->add_orphan(new team("blew", color::blue()));
-  enemy_team = teams_layer->add_orphan(new team("read", color::red()));
+  player_team = teams_layer->add_orphan(new team("blew", color_rgb::blue()));
+  enemy_team = teams_layer->add_orphan(new team("read", color_rgb::red()));
   enemy_team->establish_hostility(player_team);
 
   {
@@ -84,7 +84,7 @@ inline world::world(GLFWwindow* win, static_resources& sr, int_keyed_resources& 
       {100.0f, -100.0f}
     });
     player_first_legion_formation = over_effects_layer->add_orphan(new owning_polygon(&p_ctx, simple_vertex_array::create_verticies(p_first.order.formation.verticies)));
-    player_first_legion_formation->edge_color = player_team->col;
+    player_first_legion_formation->edge_color = player_team->col.with_alpha();
     player_first_legion_formation->fill_color = player_team->col.with_alpha(0.1f);
 
     bool allow_big = true;
@@ -110,7 +110,7 @@ inline world::world(GLFWwindow* win, static_resources& sr, int_keyed_resources& 
       { 100.0f, -100.0f },
       });
     enemy_first_legion_formation = over_effects_layer->add_orphan(new owning_polygon(&p_ctx, simple_vertex_array::create_verticies(e_first.order.formation.verticies)));
-    enemy_first_legion_formation->edge_color = enemy_team->col;
+    enemy_first_legion_formation->edge_color = enemy_team->col.with_alpha();
     enemy_first_legion_formation->fill_color = enemy_team->col.with_alpha(0.1f);
 
     //enemy_first_legion_formation
@@ -165,12 +165,12 @@ inline world::world(GLFWwindow* win, static_resources& sr, int_keyed_resources& 
       //fire->trans.set_position(edge_pt.pt);
 
       std::vector<vector_2f> line{ edge_pt.pt, pt };
-      over_effects_layer->add_orphan(new owning_polygon(&p_ctx, simple_vertex_array::create_verticies(std::move(line))))->edge_color = color::white();
+      over_effects_layer->add_orphan(new owning_polygon(&p_ctx, simple_vertex_array::create_verticies(std::move(line))))->edge_color = color_rgba::white();
     }*/
   }
   {
     //std::vector<vector_2f> line{ {-width / 2.0f, -310.0f}, {width/2.0f, -310.0f} };
-    //over_effects_layer->add_orphan(new owning_polygon(&p_ctx, simple_vertex_array::create_verticies(std::move(line))))->edge_color = color::white();
+    //over_effects_layer->add_orphan(new owning_polygon(&p_ctx, simple_vertex_array::create_verticies(std::move(line))))->edge_color = color_rgba::white();
   }
 }
 

@@ -32,7 +32,7 @@ private:
   int particle_count;
   int duration;
   std::vector<vector_2f> positions;
-  std::vector<color> colors;
+  std::vector<color_rgba> colors;
   std::vector<vector_2f> velocities;
 
   vertex_buffer position_buffer;
@@ -44,7 +44,7 @@ public:
   static explosion_effect* create_example_orphan(point_particle_context* ctx, vector_2f center) {
     int particle_count = 10000;
     std::vector<vector_2f> positions;
-    std::vector<color> colors;
+    std::vector<color_rgba> colors;
     std::vector<vector_2f> velocities;
     positions.resize(particle_count);
     colors.resize(particle_count);
@@ -61,7 +61,7 @@ public:
       colors[i] = { x_frac, y_frac, 0.0f, 1.0f };
       velocities[i] = { x_cen, y_cen };
     }
-    return new explosion_effect(ctx, particle_count, 100, std::move(positions), std::move(colors), std::move(velocities));
+    return new explosion_effect(ctx, particle_count, 100, std::move(positions), std::move(colors), std::move(velocities), 0.01f);
   }
 
   static explosion_effect* explode_sprite(point_particle_context* ctx,  sprite& spr, vector_2f center, matrix_3f const& parent_trans, generator_type& gen, int duration=60) {
@@ -77,7 +77,7 @@ public:
     int max_particle_count = image_height * image_width;
     vector_2f image_center = { static_cast<float>(image_width - 1) / 2.0f, static_cast<float>(image_height - 1) / 2.0f };
     std::vector<vector_2f> positions;
-    std::vector<color> colors;
+    std::vector<color_rgba> colors;
     std::vector<vector_2f> velocities;
     positions.reserve(max_particle_count);
     colors.reserve(max_particle_count);
@@ -85,17 +85,29 @@ public:
 
     matrix_3f total_trans = parent_trans * spr.local_trans;
 
-    for (int x = 0; x < image_width; x++) {
-      for (int y = 0; y < image_height; y++) {
-        unsigned char a_val = pixel_data[(y * image_width + x) * 4 + 3];
-        if (a_val != 0) {
-          unsigned char r_val = pixel_data[(y * image_width + x) * 4 + 0];
-          unsigned char g_val = pixel_data[(y * image_width + x) * 4 + 1];
-          unsigned char b_val = pixel_data[(y * image_width + x) * 4 + 2];
 
-          color p_col = { r_val / 255.0f, g_val / 255.0f, b_val / 255.0f, a_val / 255.0f };
+
+    vector_2i frame_size{ image_width, image_height };
+    frame_size /= spr.frames;
+
+    vector_2i offset = frame_size * spr.current_frame;
+
+    for (int x = 0; x < frame_size.x; x++) {
+      for (int y = 0; y < frame_size.y; y++) {
+
+        int tx = x + offset.x;
+        int ty = y + offset.y;
+        unsigned char a_val = pixel_data[(ty * image_width + tx) * 4 + 3];
+        if (a_val != 0) {
+          unsigned char r_val = pixel_data[(ty * image_width + tx) * 4 + 0];
+          unsigned char g_val = pixel_data[(ty * image_width + tx) * 4 + 1];
+          unsigned char b_val = pixel_data[(ty * image_width + tx) * 4 + 2];
+
+          color_rgba p_col = { r_val / 255.0f, g_val / 255.0f, b_val / 255.0f, a_val / 255.0f };
+          p_col *= spr.mask_color;
+
           //TODO add to p_col to make explosions look better
-          vector_2f pos = vector_2f(static_cast<float>(x) / (image_width - 1) - 0.5f, static_cast<float>(y) / (image_height - 1) - 0.5f);
+          vector_2f pos = vector_2f(static_cast<float>(x) / (frame_size.x - 1) - 0.5f, static_cast<float>(y) / (frame_size.y - 1) - 0.5f);
           vector_2f trans_pos = total_trans * pos;
 
           positions.push_back(trans_pos);
@@ -106,18 +118,17 @@ public:
     }
     int particle_count = positions.size();
 
-    return new explosion_effect(ctx, particle_count, duration, std::move(positions), std::move(colors), std::move(velocities));
+    return new explosion_effect(ctx, particle_count, duration, std::move(positions), std::move(colors), std::move(velocities), spr.mask_color.values[3] / duration);
   }
 
   explosion_effect(point_particle_context* ctx, int count, int dur, std::vector<vector_2f> pos,
-      std::vector<color> cols, std::vector<vector_2f> vels) : context(ctx), particle_count(count),
-      duration(dur), positions(std::move(pos)), colors(std::move(cols)), velocities(std::move(vels)) {
+      std::vector<color_rgba> cols, std::vector<vector_2f> vels, float al_step) : context(ctx), particle_count(count),
+      duration(dur), positions(std::move(pos)), colors(std::move(cols)), velocities(std::move(vels)), alpha_step(al_step) {
 
     assert(positions.size() == particle_count);
     assert(colors.size() == particle_count);
     assert(velocities.size() == particle_count);
 
-    alpha_step = 1.0f / duration;
 
     va.bind();
 
@@ -138,7 +149,7 @@ public:
     for (int i = 0; i < particle_count; i++) {
       positions[i] += velocities[i];
       velocities[i] *= 0.9f;
-      colors[i].floats[3] -= alpha_step;
+      colors[i].values[3] -= alpha_step;
     }
     duration--;
     return (duration < 0);

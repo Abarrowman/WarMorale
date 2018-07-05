@@ -63,7 +63,7 @@ public:
   bitmap_text_context* context;
   fixed_width_bitmap_font* font;
   std::string text;
-  color text_color;
+  color_rgba text_color;
 
   fixed_width_bitmap_text(bitmap_text_context* ctx, fixed_width_bitmap_font* fo, std::string tex = ""): context(ctx), font(fo), text(std::move(tex)) {
     va.bind();
@@ -118,7 +118,7 @@ public:
     glUniform1i(context->mono_char_height, font->char_height);
     glUniform1i(context->mono_texture_width, font->tex.width);
     glUniform1i(context->mono_texture_height, font->tex.height);
-    glUniform4fv(context->mono_color, 1, text_color.floats.data());
+    glUniform4fv(context->mono_color, 1, text_color.values.data());
 
     va.bind();
     font->tex.activate_bind(GL_TEXTURE0);
@@ -137,7 +137,7 @@ public:
   bitmap_text_context* context;
   variable_width_bitmap_font* font;
   std::string text;
-  color text_color;
+  color_rgba text_color;
 
   variable_width_bitmap_text(bitmap_text_context* ctx, variable_width_bitmap_font* fo, std::string tex = "") : context(ctx), font(fo), text(std::move(tex)) {
     va.bind();
@@ -199,7 +199,7 @@ public:
     glUniform1i(context->prop_char_height, font->char_height());
     glUniform1i(context->prop_texture_width, font->tex.width);
     glUniform1i(context->prop_texture_height, font->tex.height);
-    glUniform4fv(context->prop_color, 1, text_color.floats.data());
+    glUniform4fv(context->prop_color, 1, text_color.values.data());
 
     va.bind();
     font->tex.activate_bind(GL_TEXTURE0);

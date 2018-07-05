@@ -56,12 +56,12 @@ inline void render_polygon(P const& p, matrix_3f const& parent_trans, simple_ver
 
   p.context->polygon_fill_shader->use();
   glUniformMatrix3fv(p.context->fill_trans_mat_idx, 1, GL_TRUE, full_trans.values.data());
-  glUniform4fv(p.context->fill_color_idx, 1, p.fill_color.floats.data());
+  glUniform4fv(p.context->fill_color_idx, 1, p.fill_color.values.data());
   arr.draw(GL_POLYGON);
 
   p.context->polygon_edge_shader->use();
   glUniformMatrix3fv(p.context->edge_trans_mat_idx, 1, GL_TRUE, full_trans.values.data());
-  glUniform4fv(p.context->edge_color_idx, 1, p.edge_color.floats.data());
+  glUniform4fv(p.context->edge_color_idx, 1, p.edge_color.values.data());
   glUniform1f(p.context->edge_width_idx, p.edge_width);
   glUniform1i(p.context->edge_cap_type_idx, 2);
   arr.draw(GL_LINE_LOOP);
@@ -73,8 +73,8 @@ public:
   polygon_context* context;
   simple_vertex_array const* arr;
 
-  color fill_color;
-  color edge_color;
+  color_rgba fill_color;
+  color_rgba edge_color;
   float edge_width = 1;
 
   sharing_polygon(polygon_context* ctx, simple_vertex_array* va) : context(ctx), arr(va) {
@@ -91,8 +91,8 @@ public:
   polygon_context* context;
   simple_vertex_array arr;
 
-  color fill_color;
-  color edge_color;
+  color_rgba fill_color;
+  color_rgba edge_color;
   float edge_width = 1;
 
   owning_polygon(polygon_context* ctx, simple_vertex_array va) : context(ctx), arr(std::move(va)) {
