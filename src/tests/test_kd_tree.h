@@ -1,9 +1,43 @@
 #pragma once
+#include <catch.hpp>
 #include "../kd_tree.h"
-
+#include "../utils.h"
+#include <cmath>
 // TODO integrate a unit testing framework
 
-inline void test_kd_tree() {
+
+inline void kd_tree_find_closest_check(kd_node<char>* close) {
+  REQUIRE(close != nullptr);
+  REQUIRE(close->value == 'f');
+}
+
+inline void kd_tree_find_closest_count_check(std::vector<kd_node_dist<char>> closest) {
+  REQUIRE(closest.size() == 3);
+  REQUIRE(closest[0].ptr->value == 'f');
+  REQUIRE(closest[0].dist == Approx(1.0f));
+  REQUIRE(closest[1].dist == Approx(std::sqrt(5.0f)));
+  REQUIRE(closest[2].dist == Approx(std::sqrt(5.0f)));
+  if (closest[1].ptr->value == 'b') {
+    REQUIRE(closest[1].ptr->value == 'b');
+    REQUIRE(closest[2].ptr->value == 'e');
+  } else {
+    REQUIRE(closest[1].ptr->value == 'e');
+    REQUIRE(closest[2].ptr->value == 'b');
+  }
+}
+
+inline void kd_tree_find_within_check(std::vector<kd_node_dist<char>> within) {
+  REQUIRE(within.size() == 3);
+  REQUIRE(within[0].ptr->value == 'a');
+  REQUIRE(within[0].dist == Approx(std::sqrt(2.0f)));
+  REQUIRE(within[1].ptr->value == 'b');
+  REQUIRE(within[1].dist == Approx(2.0f));
+  REQUIRE(within[2].ptr->value == 'd');
+  REQUIRE(within[2].dist == Approx(std::sqrt(10.0f)));
+}
+
+
+TEST_CASE("kd_tree can be built and searched", "[kd_tree]") {
   kd_tree<char> kd{ {
     { { 2, 3 }, 'a' },
   { { 5, 4 }, 'b' },
@@ -13,12 +47,42 @@ inline void test_kd_tree() {
   { { 7, 2 }, 'f' },
     } };
 
-  /*std::vector<kd_node<char>> nodes;
+  SECTION("find_closest_brute find the closest node") {
+    kd_tree_find_closest_check(kd.find_closest_brute({ 6, 1 }));
+  }
+  SECTION("find_closest_recursive find the closest node") {
+    kd_tree_find_closest_check(kd.find_closest_recursive({ 6, 1 }));
+  }
+  SECTION("find_closest_iterative find the closest node") {
+    kd_tree_find_closest_check(kd.find_closest_iterative({ 6, 1 }));
+  }
+  SECTION("find_count_closest_brute find the closest nodes") {
+    kd_tree_find_closest_count_check(kd.find_count_closest_brute({ 6, 2 }, 3));
+  }
+  SECTION("find_count_closest_recursive find the closest nodes") {
+    kd_tree_find_closest_count_check(kd.find_count_closest_recursive({ 6, 2 }, 3));
+  }
+  SECTION("find_count_closest_iterative find the closest nodes") {
+    kd_tree_find_closest_count_check(kd.find_count_closest_iterative({ 6, 2 }, 3));
+  }
+  SECTION("find_within_brute find the nodes within") {
+    kd_tree_find_within_check(kd.find_within_brute({ 3, 4 }, 4.0f));
+  }
+  SECTION("find_within_recursive find the nodes within") {
+    kd_tree_find_within_check(kd.find_within_recursive({ 3, 4 }, 4.0f));
+  }
+  SECTION("find_within_iterative find the nodes within") {
+    kd_tree_find_within_check(kd.find_within_iterative({ 3, 4 }, 4.0f));
+  }
+}
+
+/*inline void test_kd_tree() {
+  std::vector<kd_node<char>> nodes;
   int node_count = 1000;
   for (int n = 0; n < node_count; n++) {
   nodes.push_back({{ rand_float(gen) * 10.0f , rand_float(gen)  * 10.0f }, static_cast<char>(n)});
   }
-  kd_tree<char> kd{ std::move(nodes) };*/
+  kd_tree<char> kd{ std::move(nodes) };
 
   for (float x = -1; x < 11; x += 0.1f) {
     for (float y = -1; y < 11; y += 0.1f) {
@@ -117,5 +181,4 @@ inline void test_kd_tree() {
       }
     }
   }
-
-}
+}*/

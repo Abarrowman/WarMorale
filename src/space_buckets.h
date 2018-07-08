@@ -16,10 +16,16 @@ public:
     size_t array_idx;
     size_t vector_idx;
   public:
+    using difference_type = std::ptrdiff_t;
+    using value_type = T;
+    using reference = T&;
+    using pointer = T*;
+    using iterator_category = std::input_iterator_tag;
+  public:
 
     iterator(nearby_buckets<T> const& con, size_t ai, size_t vi) : container(con), array_idx(ai), vector_idx(vi) {}
 
-    iterator& operator++() {
+    iterator& operator++() { // pre-increment
       std::vector<T>& vec = *(container.values[array_idx]);
       if ((vector_idx + 1) < vec.size()) { // advance within current vector
         vector_idx++;
@@ -38,8 +44,17 @@ public:
       return *this;
     }
 
-    T& operator*() {
+    iterator operator++(int) { // post-increment
+      iterator other = this;
+      operator++();
+      return other;
+    }
+
+    reference operator*() const {
       return (*container.values[array_idx])[vector_idx];
+    }
+    pointer operator->() const {
+      return &((*container.values[array_idx])[vector_idx]);
     }
 
     bool operator==(iterator const& other) const {
@@ -95,14 +110,14 @@ private:
   }
 
   nearby_buckets<T> find_nearby_buckets(vector_2i const& bucket) {
-    nearby_buckets<T> near;
+    nearby_buckets<T> nearby;
     for (int iy = -1; iy < 2; iy++) {
       for (int ix = -1; ix < 2; ix++) {
         int idx = ix + 1 + (iy + 1) * 3;
-        near.values[idx] = find_local_bucket(bucket + vector_2i(ix, iy));
+        nearby.values[idx] = find_local_bucket(bucket + vector_2i(ix, iy));
       }
     }
-    return near;
+    return nearby;
   }
 
   bool contains(vector_2i const& bucket, T const& entry) {
