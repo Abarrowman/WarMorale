@@ -1,6 +1,6 @@
 #pragma once
 
-#include "stb_image.h"
+#include "3rd_party/stb_image.h"
 
 class texture {
 public:
