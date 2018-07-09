@@ -17,7 +17,7 @@ void point_threat::hurt(unit& target) {
 
 bool point_threat::update(world& world_ref) {
   trans.set_position(trans.get_position() + velocity);
-  if (world_ref.obstacle_layer->is_occupied(trans.get_position(), 0)) {
+  if (world_ref.obstacle_layer->is_point_occupied(trans.get_position(), 0)) {
     destroyed = true;
   }
   if (lifetime > 0) {

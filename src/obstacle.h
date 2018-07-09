@@ -22,7 +22,8 @@ public:
     return false;
   }
 
-  virtual bool is_occupied(vector_2f location, float other_radius) = 0;
+  virtual bool is_segment_occupied(precalc_segment segment, float other_radius) = 0;
+  virtual bool is_point_occupied(vector_2f location, float other_radius) = 0;
   virtual vector_2f get_exerted_gradient(vector_2f location, float other_radius) = 0;
   virtual ~obstacle() {} // base class
 };
@@ -41,9 +42,13 @@ public:
     poly.fill_color = color_rgba::transparent_black();
   }
 
-  bool is_occupied(vector_2f location, float other_radius) override {
+  bool is_point_occupied(vector_2f location, float other_radius) override {
     vector_2f diff = trans.translation_to(location);
     return (diff.magnitude() < (radius + other_radius));
+  }
+
+  bool is_segment_occupied(precalc_segment segment, float other_radius) override {
+    return (point_to_segment_distance(trans.get_position(), segment) < (radius + other_radius));
   }
 
   vector_2f get_exerted_gradient(vector_2f location, float other_radius) override {
@@ -85,26 +90,24 @@ public:
   }
 
   vector_2f get_exerted_gradient(vector_2f location, float other_radius) override {
-    polygon_edge_pt edge_pt = precalc.point_on_edge(trans.get_position(), location);
-    float sign = edge_pt.inside ? -1.0f : 1.0f;
-    //vector_2f gauss_force = sign * 2.0f * normalized_gaussian_gradient(edge_pt.pt, location, other_radius + 20.0f);
-    //vector_2f obs_force = sign * 2.0f * normalized_fractional_obstacle_gradient(edge_pt.pt, location, other_radius + 20.0f);
+    polygon_edge_pt edge_pt = precalc.point_on_edge(trans.translation_to(location));
+    vector_2f global_edge_pt = edge_pt.pt + trans.get_position();
 
-    if (edge_pt.inside) {
+    float sign = edge_pt.contains ? -1.0f : 1.0f;
+    if (edge_pt.contains) {
       sign = sign;
     }
 
-    vector_2f gauss_force = sign * 3.0f * normalized_absolute_gaussian_gradient(edge_pt.pt, location, other_radius / 2.0f + 20.0f, -20.0f);
-
-    vector_2f raw_force = gauss_force;
-
-    vector_2f final_force = raw_force;
-    //vector_2f final_force = raw_force.proj(edge_pt.normal);
-    return final_force;
+    vector_2f gauss_force = sign * 3.0f * normalized_absolute_gaussian_gradient(global_edge_pt, location, other_radius / 2.0f + 20.0f, -20.0f);
+    return gauss_force;
   }
 
-  bool is_occupied(vector_2f location, float other_radius) override {
-    return precalc.point_on_edge(trans.get_position(), location, other_radius).inside;
+  bool is_point_occupied(vector_2f location, float other_radius) override {
+    return precalc.point_on_edge(trans.translation_to(location), other_radius).contains;
+  }
+
+  bool is_segment_occupied(precalc_segment segment, float other_radius) override {
+    return precalc.is_segment_occupied(segment - trans.get_position(), other_radius);
   }
 
   void render(matrix_3f const& parent_trans) override {
@@ -143,12 +146,22 @@ public:
     return grad;
   }
 
-  bool is_occupied(vector_2f location, float other_radius) {
+  bool is_point_occupied(vector_2f location, float other_radius) {
     for (obstacle* ob_ptr : buckets.find_nearby_buckets(location)) {
-      if (ob_ptr->is_occupied(location, other_radius)) {
+      if (ob_ptr->is_point_occupied(location, other_radius)) {
         return true;
       }
     }
+    return false;
+  }
+
+  bool is_segment_occupied(precalc_segment segment, float other_radius) {
+    // TODO finish
+    /*for (obstacle* ob_ptr : buckets.find_nearby_buckets(location)) {
+      if (ob_ptr->is_segment_occupied(location, other_radius)) {
+        return true;
+      }
+    }*/
     return false;
   }
 };

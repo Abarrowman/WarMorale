@@ -73,6 +73,15 @@ inline void push_unique(std::vector<T>& vec, T const& val) {
 }
 
 template<typename T>
+inline bool equal_with_tolerance(T left, T right, T tolerance) {
+  return (std::abs(left - right) < tolerance);
+}
+
+inline bool float_equal(float left, float right, float tolerance = 0.00001) {
+  return equal_with_tolerance(left, right, tolerance);
+}
+
+template<typename T>
 inline float value_clamp(T min, T max, T value) {
   return std::min(max, std::max(value, min));
 }

@@ -230,6 +230,67 @@ namespace std {
 using vector_2f = vector_2<float>;
 using vector_2i = vector_2<int>;
 
+class matrix_2f {
+public:
+  std::array<float, 4> values;
+
+  float det() const {
+    return values[0] * values[3] - values[1] * values[2];
+  }
+
+  matrix_2f adjugate() const {
+    return matrix_2f{ { values[3], -values[1], -values[2], values[0] } };
+  }
+
+  matrix_2f inverse() const;
+
+  matrix_2f operator*(float other) const {
+    return matrix_2f{ {values[0] * other, values[1] * other, values[2] * other, values[3] * other } };
+  }
+
+  float get(int row, int col) const {
+    return values[row * 2 + col];
+  }
+
+  float& operator()(int row, int col) {
+    return values[row * 2 + col];
+  }
+
+  void set(int row, int col, float value) {
+    values[row * 2 + col] = value;
+  }
+
+  matrix_2f operator*(matrix_2f other) const {
+    matrix_2f result;
+    for (int row = 0; row < 2; row++) {
+      for (int col = 0; col < 2; col++) {
+        float sum = 0;
+        for (int idx = 0; idx < 2; idx++) {
+          sum += get(row, idx) * other.get(idx, col);
+        }
+        result.set(row, col, sum);
+      }
+    }
+
+    return result;
+  }
+
+  vector_2f operator*(vector_2f const& c) const;
+};
+
+inline matrix_2f operator*(float left, matrix_2f const& right) {
+  return right * left;
+}
+
+inline vector_2f matrix_2f::operator*(vector_2f const& c) const {
+  return { values[0] * c.x + values[1] * c.y, values[2] * c.x + values[3] * c.y };
+}
+
+inline matrix_2f matrix_2f::inverse() const {
+  return (1.0f / det()) * adjugate();
+}
+
+
 class matrix_3f {
 public:
   std::array<float, 9> values;
@@ -287,7 +348,7 @@ public:
   vector_2f operator*(vector_2f const& c) const;
 
   matrix_3f operator*(matrix_3f const& c) const {
-    matrix_3f result = *this;
+    matrix_3f result;
     for (int row = 0; row < 3; row++) {
       for (int col = 0; col < 3; col++) {
         float sum = 0;
