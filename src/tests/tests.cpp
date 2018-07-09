@@ -3,6 +3,7 @@
 
 #include "test_kd_tree.h"
 #include "test_space_buckets.h"
+#include "test_geom.h"
 
 unsigned int Factorial( unsigned int number ) {
     return number <= 1 ? 1 : Factorial(number-1)*number;

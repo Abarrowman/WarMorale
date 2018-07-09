@@ -1,6 +1,7 @@
 #pragma once
 
 #include "2d_math.h"
+#include "utils.h"
 #include <vector>
 
 struct polygon_edge_pt {
@@ -16,6 +17,16 @@ struct edge {
   vector_2f normal;
   float first_angle;
   float last_angle;
+
+  edge() {}
+  edge(vector_2f fir, vector_2f las) :
+    first(fir),
+    last(las),
+    diff(last - first),
+    normal(diff.perp()),
+    first_angle(positive_angle(first.angle())),
+    last_angle(positive_angle(last.angle())) {}
+
 };
 
 
@@ -40,14 +51,7 @@ public:
   precalc_polygon(std::vector<vector_2f> verts) : verticies(std::move(verts)) {
     edges.resize(verticies.size());
     for (size_t i = 0; i < verticies.size(); i++) {
-      edge& ed = edges[i];
-      ed.first = verticies[i];
-      ed.last = verticies[(i + 1) % verticies.size()];
-      ed.diff = ed.last - ed.first;
-      ed.normal = ed.diff.perp();
-
-      ed.first_angle = positive_angle(ed.first.angle());
-      ed.last_angle = positive_angle(ed.last.angle());
+      edges[i] = edge(verticies[i], verticies[(i + 1) % verticies.size()]);
     }
   }
 
@@ -94,4 +98,14 @@ public:
     return { edge_pt, ed.normal, inside };
   }
 
+
+
 };
+
+inline float point_to_segment_distance(vector_2f pt, vector_2f start, vector_2f finish) {
+  vector_2f diff = pt - start;
+  vector_2f dir = finish - start;
+  float t = value_clamp(0.0f, 1.0f, diff.dot(dir) / dir.dot(dir));
+  vector_2f closest_point_on_segment = start + t * dir;
+  return (pt - closest_point_on_segment).magnitude();
+}
