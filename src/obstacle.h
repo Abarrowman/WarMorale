@@ -7,6 +7,7 @@
 #include "polygon.h"
 #include "geom.h"
 #include <array>
+#include <cassert>
 
 class obstacle_parent;
 

@@ -7,7 +7,7 @@
 #include "units/grunt.h"
 #include "units/heavy.h"
 #include "space_buckets.h"
-
+#include "utils.h"
 
 inline world::world(GLFWwindow* win, static_resources& sr, int_keyed_resources& dr) : stage(win, sr, dr) {
   std::array<unsigned int, 4> seed = world::get_seed();

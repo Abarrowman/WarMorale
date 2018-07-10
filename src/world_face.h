@@ -12,7 +12,7 @@ class world;
 #include "explosion_effect.h"
 #include "bitmap_text.h"
 #include "running_average.h"
-#include "utils.h"
+#include "gl_includes.h"
 #include "space_buckets.h"
 #include "obstacle.h"
 

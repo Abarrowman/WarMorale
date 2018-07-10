@@ -1,6 +1,6 @@
 #pragma once
 
-#include "utils.h"
+#include "gl_includes.h"
 #include "sprite.h"
 #include "resources.h"
 

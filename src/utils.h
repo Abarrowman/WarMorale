@@ -1,10 +1,6 @@
 #pragma once
 #include <cmath>
 
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
-
-#include <cassert>
 #include <cstdio>
 #include <string>
 #include <fstream>
@@ -26,23 +22,6 @@ float rand_centered_float(generator_type& gen) {
 
 bool rand_bool(generator_type& gen) {
   return (rand_float(gen) > 0.5f);
-}
-
-inline void check_gl_errors() {
-  GLenum err;
-  while ((err = glGetError()) != GL_NO_ERROR) {
-    fprintf(stderr, "Polled Error %#010x ", err);
-    switch (err) {
-    case GL_INVALID_ENUM:
-      fprintf(stderr, "GL_INVALID_ENUM\n");
-      break;
-    case GL_INVALID_OPERATION:
-      fprintf(stderr, "GL_INVALID_OPERATION\n");
-      break;
-    default:
-      fprintf(stderr, "UNKNOWN\n");
-    }
-  }
 }
 
 template<typename ... Args>

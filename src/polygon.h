@@ -1,10 +1,11 @@
 #pragma once
 
-#include "utils.h"
+#include "gl_includes.h"
 #include "renderable.h"
 #include "shader.h"
 #include "vertex_array.h"
 #include "color.h"
+#include <cassert>
 
 class polygon_context {
 public:

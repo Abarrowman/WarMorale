@@ -9,6 +9,7 @@
 #include <unordered_map>
 #include <string>
 #include <memory>
+#include <cassert>
 
 enum class static_texture_id {
   face,

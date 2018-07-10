@@ -6,6 +6,7 @@
 #include "color.h"
 #include "sprite.h"
 #include <vector>
+#include <cassert>
 
 class point_particle_context {
 public:

@@ -3,6 +3,7 @@
 #include "texture.h"
 #include "csv.h"
 #include <unordered_map>
+#include <cassert>
 
 class variable_width_bitmap_font {
 private:

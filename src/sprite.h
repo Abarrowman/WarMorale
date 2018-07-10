@@ -6,6 +6,7 @@
 #include "vertex_array.h"
 #include "color.h"
 #include <functional>
+#include <cassert>
 
 class sprite;
 

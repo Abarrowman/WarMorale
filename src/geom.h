@@ -3,6 +3,7 @@
 #include "2d_math.h"
 #include "utils.h"
 #include <vector>
+#include <cassert>
 
 enum class geom_orientation {
   colinear,

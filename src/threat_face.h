@@ -3,7 +3,7 @@
 #pragma once
 #include "renderable.h"
 #include "sprite.h"
-#include "utils.h"
+#include "gl_includes.h"
 #include "unit_face.h"
 #include "team_face.h"
 #include "space_buckets.h"

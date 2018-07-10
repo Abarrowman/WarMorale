@@ -1,9 +1,10 @@
 #pragma once
 
-#include "utils.h"
+#include "gl_includes.h"
 #include "team_face.h"
 #include "unit_face.h"
 #include "potential_field.h"
+#include <cassert>
 
 inline vector_2f command::get_potential_force(vector_2f location) {
   if (formation.verticies.size() == 0) {

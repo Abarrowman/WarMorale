@@ -1,12 +1,13 @@
 #pragma once
 
-#include "utils.h"
+#include "gl_includes.h"
 #include<vector>
 #include<string>
 #include<fstream>
 #include<cstdlib>
 #include<cstring>
 #include<array>
+#include <cassert>
 
 // this is basically an under-powered C++17 string_view
 class buffer_view {

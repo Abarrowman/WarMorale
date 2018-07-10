@@ -1,4 +1,4 @@
-#include "utils.h"
+#include "gl_includes.h"
 
 #include <cmath>
 #include <cstdio>
@@ -7,7 +7,7 @@
 
 #include "shader.h"
 #include "vertex_array.h"
-#include "utils.h"
+#include "gl_includes.h"
 #include "texture.h"
 #include "2d_math.h"
 #include "renderable.h"

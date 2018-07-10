@@ -4,6 +4,8 @@
 #include "team_face.h"
 #include "unit_face.h"
 #include <limits>
+#include <cassert>
+#include "utils.h"
 
 inline void unit::take_threats() {
   for (threat* t : world_ref.threat_layer->get_nearby_threats(trans.get_position())) {

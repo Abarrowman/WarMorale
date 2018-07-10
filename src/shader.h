@@ -2,7 +2,7 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <vector>
-#include "utils.h"
+#include "gl_includes.h"
 
 class shader {
 private:

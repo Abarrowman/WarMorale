@@ -1,7 +1,6 @@
 #pragma once
 #include <catch.hpp>
 #include "../kd_tree.h"
-#include "../utils.h"
 #include <cmath>
 // TODO integrate a unit testing framework
 

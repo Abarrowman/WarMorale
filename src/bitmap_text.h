@@ -1,10 +1,11 @@
 #pragma once
 
-#include "utils.h"
+#include "gl_includes.h"
 #include "renderable.h"
 #include "fixed_width_bitmap_font.h"
 #include "color.h"
 #include <vector>
+#include <cassert>
 
 class bitmap_text_context {
 public:
