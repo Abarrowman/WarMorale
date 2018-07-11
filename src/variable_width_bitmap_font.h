@@ -4,6 +4,7 @@
 #include "csv.h"
 #include <unordered_map>
 #include <cassert>
+#include <charconv>
 
 class variable_width_bitmap_font {
 private:
@@ -13,22 +14,21 @@ private:
 public:
   texture tex;
 
-
-
-
   variable_width_bitmap_font(texture t, csv info) : tex(std::move(t)) {
     assert(info.cols() == 2);
-    std::unordered_map<buffer_view, int> info_pairs;
-    for (std::vector<buffer_view> const& row : info.values) {
-      info_pairs[row[0]] = row[1].int_value();
-      buffer_view key = row[0];
-      buffer_view value = row[1];
+    std::unordered_map<std::string_view, int> info_pairs;
+    for (std::vector<std::string_view> const& row : info.values) {
+
+      int value;
+      std::string_view value_string = row[1];
+      std::from_chars(value_string.data(), value_string.data() + value_string.size(), value);
+      info_pairs[row[0]] = value;
     }
     char_high = info_pairs["Cell Height"];
     char_wide = info_pairs["Cell Width"];
     std::array<char, 20> base_width_name_buffer;
     for (int i = ' '; i <= '~'; i++) {
-      int len = snprintf(base_width_name_buffer.data(), base_width_name_buffer.size(), "Char %d Base Width", i);
+      size_t len = snprintf(base_width_name_buffer.data(), base_width_name_buffer.size(), "Char %d Base Width", i);
       int char_width = info_pairs[{base_width_name_buffer.data(), len}];
       char_widths[i - ' '] = char_width;
     }
