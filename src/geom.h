@@ -4,6 +4,7 @@
 #include "utils.h"
 #include <vector>
 #include <cassert>
+#include <algorithm>
 
 enum class geom_orientation {
   colinear,
@@ -105,7 +106,7 @@ inline geom_orientation triangle_orientation(vector_2f p, vector_2f q, vector_2f
 
 inline float point_to_segment_distance(vector_2f pt, precalc_segment segment) {
   vector_2f diff = pt - segment.first;
-  float t = value_clamp(0.0f, 1.0f, diff.dot(segment.dir) / segment.dir.dot(segment.dir));
+  float t = std::clamp(diff.dot(segment.dir) / segment.dir.dot(segment.dir), 0.0f, 1.0f);
   vector_2f closest_point_on_segment = segment.first + t * segment.dir;
   return (pt - closest_point_on_segment).magnitude();
 }
