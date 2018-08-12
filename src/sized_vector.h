@@ -1,12 +1,14 @@
 #pragma once
 
 #include <memory>
-#include <array>
-#include <optional>
 #include <type_traits>
 #include <algorithm>
 #include <cassert>
 
+// sized_vector is across between a std::vector and a std::array .
+// Unlike a std::vector it has a compile time fixed capacity and can be stack allocated.
+// Unlike a std::array it has the semantics of a resizable array,
+// and can be default constructed even if its elements do not have default constructors.
 template<typename T, size_t N>
 class sized_vector final {
 private:
@@ -47,12 +49,14 @@ public:
   sized_vector(sized_vector<T, N>&& other) {
     _size = other._size;
     std::move(other.cbegin(), other.cend(), begin());
+    other._size = 0; // leave other empty after having been moved from
   }
 
   // copy assignment operator
   sized_vector<T, N>& operator= (sized_vector<T, N> const& other) {
     if (this != (&other)) {
-      size = other._size;
+      clear();
+      _size = other._size;
       std::copy(other.cbegin(), other.cend(), begin());
     }
     return *this;
@@ -61,8 +65,10 @@ public:
   // move assignment operator
   sized_vector<T, N>& operator= (sized_vector<T, N>&& other) {
     if (this != (&other)) {
-      size = other._size;
+      clear();
+      _size = other._size;
       std::move(other.cbegin(), other.cend(), begin());
+      other._size = 0;  // leave other empty after having been moved from
     }
     return *this;
   }
@@ -72,7 +78,7 @@ public:
   }
 
   iterator erase(const_iterator pos) {
-    assert(pos < cback());
+    assert(pos < cend());
     std::destroy_at(pos);
     if (pos == (end() - 1)) {
       _size--;
@@ -86,7 +92,7 @@ public:
 
   iterator erase(const_iterator first, const_iterator last) {
     assert(first <= last);
-    assert(last < cback());
+    assert(last <= cend());
     std::destroy(first, last);
 
     if (last == end()) {
@@ -136,9 +142,12 @@ public:
   }
 
   void swap(sized_vector<T, N>& other) noexcept {
-    std::swap_ranges(begin(), end(), other.begin());
-    if (other._size > _size) {
+    if (other._size >= _size) {
+      std::swap_ranges(begin(), end(), other.begin());
       std::move(other.begin() + _size, other.end(), end());
+    } else {
+      std::swap_ranges(other.begin(), other.end(), begin());
+      std::move(begin() + _size, end(), other.end());
     }
     std::swap(_size, other._size);
   }

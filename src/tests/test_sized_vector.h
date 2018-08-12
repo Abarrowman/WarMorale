@@ -125,7 +125,8 @@ TEST_CASE("Tests sized_vector", "[sized_vector]") {
     REQUIRE(s[4] == 6);
   }
   SECTION("assignment copy constructor") {
-    sized_vector<int, 10> other = s;
+    sized_vector<int, 10> other;
+    other = s;
     REQUIRE(other.size() == 3);
     REQUIRE(other[0] == 1);
     REQUIRE(other[1] == 2);
@@ -133,11 +134,13 @@ TEST_CASE("Tests sized_vector", "[sized_vector]") {
   }
 
   SECTION("assignment move constructor") {
-    sized_vector<int, 10> other = std::move(s);
+    sized_vector<int, 10> other;
+    other = std::move(s);
     REQUIRE(other.size() == 3);
     REQUIRE(other[0] == 1);
     REQUIRE(other[1] == 2);
     REQUIRE(other[2] == 4);
+    REQUIRE(s.size() == 0);
   }
 
   SECTION("copy constructor") {
@@ -154,6 +157,7 @@ TEST_CASE("Tests sized_vector", "[sized_vector]") {
     REQUIRE(other[0] == 1);
     REQUIRE(other[1] == 2);
     REQUIRE(other[2] == 4);
+    REQUIRE(s.size() == 0);
   }
 
   SECTION("swap") {
