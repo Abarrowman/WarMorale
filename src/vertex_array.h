@@ -17,14 +17,16 @@ public:
 
   vertex_buffer(GLuint vertex_buffer_idx) :vbo(vertex_buffer_idx) {}
 
-  // do not copy or assign
+  // do not copy or copy assign
   vertex_buffer(vertex_buffer&) = delete;
   vertex_buffer& operator=(const vertex_buffer&) = delete;
 
-  //moving is ok
+  // moving is ok
   vertex_buffer(vertex_buffer&& old) : vbo(old.vbo) {
     old.vbo = 0;
   }
+  // move assigning is not ok
+  vertex_buffer& operator= (vertex_buffer&& other) = delete;
 
   void bind() {
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
@@ -32,6 +34,7 @@ public:
 
   ~vertex_buffer() {
     glDeleteBuffers(1, &vbo);
+    vbo = 0;
   }
 };
 
@@ -46,7 +49,7 @@ public:
 
   vertex_array(GLuint vertex_array_idx) :vao(vertex_array_idx) {}
 
-  // do not copy or assign
+  // do not copy or copy assign
   vertex_array(vertex_array&) = delete;
   vertex_array& operator=(const vertex_array&) = delete;
 
@@ -54,6 +57,8 @@ public:
   vertex_array(vertex_array&& old) : vao(old.vao) {
     old.vao = 0;
   }
+  // move assigning is not ok
+  vertex_array& operator= (vertex_array&& other) = delete;
 
   void bind() const {
     glBindVertexArray(vao);
@@ -61,6 +66,7 @@ public:
 
   ~vertex_array() {
     glDeleteVertexArrays(1, &vao);
+    vao = 0;
   }
 };
 
@@ -164,13 +170,15 @@ public:
 
 
 
-  // do not copy or assign
+  // do not copy or copy assign
   simple_vertex_array(simple_vertex_array&) = delete;
   simple_vertex_array& operator=(const simple_vertex_array&) = delete;
 
   //moving is ok
   simple_vertex_array(simple_vertex_array&& old) : vb(std::move(old.vb)), va(std::move(old.va)), size(old.size) {
   }
+  // move assinging is not ok
+  simple_vertex_array& operator= (simple_vertex_array&& other) = delete;
 
   void draw(GLenum mode) const {
     va.bind();

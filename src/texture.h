@@ -53,6 +53,8 @@ public:
   texture(texture&& old) : tex(old.tex), width(old.width), height(old.height) {
     old.tex = 0;
   }
+  // move assinging is not ok
+  texture& operator= (texture&& old) = delete;
 
   ~texture() {
     glDeleteTextures(1, &tex);

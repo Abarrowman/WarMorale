@@ -92,12 +92,18 @@ public:
     old.gs = 0;
     old.fs = 0;
   }
+  // move assinging is not ok
+  shader& operator= (shader&& old) = delete;
 
   ~shader() {
     glDeleteProgram(program);
     glDeleteShader(fs);
     glDeleteShader(gs);
     glDeleteShader(vs);
+    program = 0;
+    fs = 0;
+    gs = 0;
+    vs = 0;
   }
 
   void use() const {
