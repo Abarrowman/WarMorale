@@ -141,16 +141,20 @@ public:
 
   vector_2f get_exerted_gradient(vector_2f location, float radius) {
     vector_2f grad = vector_2f::zero();
-    for (obstacle* ob_ptr : buckets.find_nearby_buckets(location)) {
-      grad += ob_ptr->get_exerted_gradient(location, radius);
+    for (auto&& vec_ptr : buckets.find_nearby_buckets(location)) {
+      for (obstacle* ob_ptr : *vec_ptr) {
+        grad += ob_ptr->get_exerted_gradient(location, radius);
+      }
     }
     return grad;
   }
 
   bool is_point_occupied(vector_2f location, float other_radius) {
-    for (obstacle* ob_ptr : buckets.find_nearby_buckets(location)) {
-      if (ob_ptr->is_point_occupied(location, other_radius)) {
-        return true;
+    for (auto&& vec_ptr : buckets.find_nearby_buckets(location)) {
+      for (obstacle* ob_ptr : *vec_ptr) {
+        if (ob_ptr->is_point_occupied(location, other_radius)) {
+          return true;
+        }
       }
     }
     return false;

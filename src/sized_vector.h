@@ -13,8 +13,15 @@ private:
   // used so that complex types can avoid being default initialized
   char _untyped_data[sizeof(T) * N];
 
-  T* const _typed_data = reinterpret_cast<T* const>(_untyped_data);
   size_t _size;
+
+  T const* const _typed_data() const {
+    return reinterpret_cast<T const* const>(_untyped_data);
+  }
+
+  T* const _typed_data() {
+    return reinterpret_cast<T* const>(_untyped_data);
+  }
 
 public:
   using value_type = T;
@@ -25,7 +32,6 @@ public:
   using pointer = T*;
   using const_pointer = T const*;
   using size_type = size_t;
-public:
 
   sized_vector() {
     _size = 0;
@@ -44,7 +50,7 @@ public:
   }
 
   // copy assignment operator
-  sized_vector<T, N>& operator= (const sized_vector<T, N>& other) {
+  sized_vector<T, N>& operator= (sized_vector<T, N> const& other) {
     if (this != (&other)) {
       size = other._size;
       std::copy(other.cbegin(), other.cend(), begin());
@@ -97,7 +103,7 @@ public:
   void pop_back() {
     assert(_size > 0);
     _size--;
-    std::destroy_at(_typed_data + _size);
+    std::destroy_at(_typed_data() + _size);
   }
 
   void clear() noexcept {
@@ -112,9 +118,9 @@ public:
   void resize(size_type count) {
     assert(count < capacity());
     if (count > _size) {
-      std::uninitialized_default_construct(_typed_data + _size, _typed_data + count);
+      std::uninitialized_default_construct(_typed_data() + _size, _typed_data() + count);
     } else if (count < _size) {
-      std::destroy(_typed_data + count, _typed_data + _size);
+      std::destroy(_typed_data() + count, _typed_data() + _size);
     }
     _size = count;
   }
@@ -122,9 +128,9 @@ public:
   void resize(size_type count, T const& value) {
     assert(count < capacity());
     if (count > _size) {
-      std::uninitialized_fill(_typed_data + _size, _typed_data + count, value);
+      std::uninitialized_fill(_typed_data() + _size, _typed_data() + count, value);
     } else if (count < _size) {
-      std::destroy(_typed_data + count, _typed_data + _size);
+      std::destroy(_typed_data() + count, _typed_data() + _size);
     }
     _size = count;
   }
@@ -138,41 +144,41 @@ public:
   }
 
   pointer data() noexcept {
-    return _typed_data;
+    return _typed_data();
   }
 
   const_pointer data() const noexcept {
-    return _typed_data;
+    return _typed_data();
   }
 
   reference operator[](size_type pos) {
     assert(pos < _size);
-    return _typed_data[pos];
+    return _typed_data()[pos];
   }
 
   const_reference operator[](size_type pos) const {
     assert(pos < _size);
-    return _typed_data[pos];
+    return _typed_data()[pos];
   }
 
   reference front() {
     assert(_size > 0);
-    return _typed_data[0];
+    return _typed_data()[0];
   }
 
   const_reference front() const {
     assert(_size > 0);
-    return _typed_data[0];
+    return _typed_data()[0];
   }
 
   reference back() {
     assert(_size > 0);
-    return _typed_data[_size - 1];
+    return _typed_data()[_size - 1];
   }
 
   const_reference back() const {
     assert(_size > 0);
-    return _typed_data[_size - 1];
+    return _typed_data()[_size - 1];
   }
 
   size_t size() const {
@@ -186,36 +192,36 @@ public:
   template<typename... Args>
   reference emplace_back(Args&&... args) {
     assert(_size < capacity());
-    T* value = new (_typed_data + _size)T(std::forward<Args>(args)...);
+    T* value = new (_typed_data() + _size)T(std::forward<Args>(args)...);
     _size++;
     return *value;
   }
 
-  void push_back(const T& value) {
+  void push_back(T const& value) {
     assert(_size < capacity());
-    _typed_data[_size] = value;
+    _typed_data()[_size] = value;
     _size++;
   }
 
   void push_back(T&& value) {
     assert(_size < capacity());
-    _typed_data[_size] = value;
+    _typed_data()[_size] = value;
     _size++;
   }
 
   const_iterator cbegin() const {
-    return _typed_data;
+    return _typed_data();
   }
 
   const_iterator cend() const {
-    return _typed_data + _size;
+    return _typed_data() + _size;
   }
 
   iterator begin() {
-    return _typed_data;
+    return _typed_data();
   }
 
   iterator end() {
-    return _typed_data + _size;
+    return _typed_data() + _size;
   }
 };

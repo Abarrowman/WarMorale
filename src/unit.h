@@ -8,8 +8,10 @@
 #include "utils.h"
 
 inline void unit::take_threats() {
-  for (threat* t : world_ref.threat_layer->get_nearby_threats(trans.get_position())) {
-    t->hurt(*this);
+  for (auto&& vec_ptr : world_ref.threat_layer->get_nearby_threats(trans.get_position())) {
+    for (threat* t : *vec_ptr) {
+      t->hurt(*this);
+    }
   }
 }
 
@@ -46,19 +48,21 @@ inline void unit::living_update() {
   //vector_2f grad = vector_2f::zero();
   vector_2f goal_grad = legion_ptr->order.get_potential_force(trans.get_position());// *(type.potential_radius / 16.0f);
   vector_2f grad = goal_grad;
-  for (unit_reference ref : world_ref.unit_buckets.find_nearby_buckets(position)) {
-    if (!ref.valid()) {
-      continue;
-    }
-    if (ref.ptr() == this) {
-      continue;
-    }
-    unit& close_unit = ref.ref();
+  for (auto&& vec_ptr : world_ref.unit_buckets.find_nearby_buckets(position)) {
+    for (unit_reference ref : *vec_ptr) {
+      if (!ref.valid()) {
+        continue;
+      }
+      if (ref.ptr() == this) {
+        continue;
+      }
+      unit& close_unit = ref.ref();
 
-    float intersection_radius = close_unit.type.potential_radius + type.potential_radius;
-    vector_2f gauss_force = 0.8f * normalized_gaussian_gradient(close_unit.trans.get_position(), position, 0.5f * intersection_radius);
-    vector_2f obs_force = 0.4f * normalized_fractional_obstacle_gradient(close_unit.trans.get_position(), position, intersection_radius);
-    grad += gauss_force + obs_force;
+      float intersection_radius = close_unit.type.potential_radius + type.potential_radius;
+      vector_2f gauss_force = 0.8f * normalized_gaussian_gradient(close_unit.trans.get_position(), position, 0.5f * intersection_radius);
+      vector_2f obs_force = 0.4f * normalized_fractional_obstacle_gradient(close_unit.trans.get_position(), position, intersection_radius);
+      grad += gauss_force + obs_force;
+    }
   }
 
   vector_2f obs_force = world_ref.obstacle_layer->get_exerted_gradient(position, type.potential_radius);
@@ -92,6 +96,10 @@ inline void unit::living_update() {
       float distance = (closest_point - closest_enemy.trans.get_position()).magnitude();
 
       if ((std::abs(rem_angle_err) < math_consts::pi() * 0.25) && (distance < closest_enemy.type.potential_radius)) {
+
+        //TODO check if path is free
+        //if (!world_ref.obstacle_layer->is_segment_occupied({ trans.get_position() , closest_point}, closest_enemy.type.potential_radius)) {
+
         //fire
         sprite bullet_sprite = world_ref.static_sprite(static_texture_id::shot);
         bullet_sprite.mask_color = team_ref.col.with_alpha(0.3f);
@@ -99,7 +107,9 @@ inline void unit::living_update() {
         point_threat* bullet = world_ref.threat_layer->add_orphan(new point_threat(bullet_sprite, 1, dir * 5.0f, 100, &team_ref));
         bullet->trans.set_position(trans.get_position() + dir * type.potential_radius);
         current_reload = type.max_reload;
-      }
+
+        //}
+      } 
     }
 
   }

@@ -30,10 +30,16 @@ TEST_CASE("space_buckets can be built and searched", "[space_buckets]") {
   }
 
   SECTION("find_nearby_buckets finds the values in the nearby buckets") {
-    nearby_buckets<int> found = buckets.find_nearby_buckets(search_loc);
-    REQUIRE(std::distance(found.begin(), found.end()) == 3);
+    sized_vector<std::vector<int>*, 9> found = buckets.find_nearby_buckets(search_loc);
+    REQUIRE(std::distance(found.begin(), found.end()) == 2);
+
     std::vector<int> found_vec;
-    std::copy(found.begin(), found.end(), std::back_inserter(found_vec));
+    for (auto&& vec_ptr : found) {
+      for (int val : *vec_ptr) {
+        found_vec.push_back(val);
+      }
+    }
+
     REQUIRE(found_vec.size() == 3);
     REQUIRE(found_vec[0] == 0);
     REQUIRE(found_vec[1] == 1);
@@ -49,10 +55,15 @@ TEST_CASE("space_buckets can be built and searched", "[space_buckets]") {
     REQUIRE(after_ref[0] == 3);
     REQUIRE(after_ref[1] == 0);
 
-    nearby_buckets<int> found = buckets.find_nearby_buckets(search_loc);
+    sized_vector<std::vector<int>*, 9> found = buckets.find_nearby_buckets(search_loc);
     REQUIRE(std::distance(found.begin(), found.end()) == 2);
+
     std::vector<int> found_vec;
-    std::copy(found.begin(), found.end(), std::back_inserter(found_vec));
+    for (auto&& vec_ptr : found) {
+      for (int val : *vec_ptr) {
+        found_vec.push_back(val);
+      }
+    }
     REQUIRE(found_vec.size() == 2);
     REQUIRE(found_vec[0] == 1);
     REQUIRE(found_vec[1] == 2);
