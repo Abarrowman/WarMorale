@@ -24,6 +24,11 @@ public:
     proj = matrix_3f::orthographic_projection(x_min, x_max, y_min, y_max);
   }
 
+  void render() {
+    matrix_3f projected = proj * local_trans;
+    ordered_parent::render(projected);
+  }
+
   virtual void key_callback(int key, int scancode, int action, int mods) {}
 
   virtual void cursor_position_callback(double xpos, double ypos) {}

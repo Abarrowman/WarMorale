@@ -12,14 +12,13 @@ out geom_data {
 } geom_out;
 
 uniform mat3 trans_mat;
-uniform mat3 proj_mat;
 uniform int char_width;
 uniform int char_height;
 uniform int texture_width;
 uniform int texture_height;
 
 vec4 apply_projection(vec2 input) {
-  vec3 homo_vec = proj_mat * trans_mat * vec3(input, 1.0);
+  vec3 homo_vec = trans_mat * vec3(input, 1.0);
   return vec4(homo_vec.xy, 0, 1);
 }
 

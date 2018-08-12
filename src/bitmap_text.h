@@ -11,7 +11,6 @@ class bitmap_text_context {
 public:
   shader* mono_shader;
   GLint mono_trans_mat_idx;
-  GLint mono_proj_mat_idx;
   GLint mono_char_width;
   GLint mono_char_height;
   GLint mono_texture_width;
@@ -20,7 +19,6 @@ public:
 
   shader* prop_shader;
   GLint prop_trans_mat_idx;
-  GLint prop_proj_mat_idx;
   GLint prop_char_max_width;
   GLint prop_char_height;
   GLint prop_texture_width;
@@ -30,7 +28,6 @@ public:
   void init(shader* m_shader, shader* p_shader) {
     mono_shader = m_shader;
     mono_trans_mat_idx = mono_shader->get_uniform_location("trans_mat");
-    mono_proj_mat_idx = mono_shader->get_uniform_location("proj_mat");
     mono_char_width = mono_shader->get_uniform_location("char_width");
     mono_char_height = mono_shader->get_uniform_location("char_height");
     mono_texture_width = mono_shader->get_uniform_location("texture_width");
@@ -39,19 +36,11 @@ public:
 
     prop_shader = p_shader;
     prop_trans_mat_idx = prop_shader->get_uniform_location("trans_mat");
-    prop_proj_mat_idx = prop_shader->get_uniform_location("proj_mat");
     prop_char_max_width = prop_shader->get_uniform_location("char_max_width");
     prop_char_height = prop_shader->get_uniform_location("char_height");
     prop_texture_width = prop_shader->get_uniform_location("texture_width");
     prop_texture_height = prop_shader->get_uniform_location("texture_height");
     prop_color = prop_shader->get_uniform_location("color");
-  }
-
-  void update_projection(matrix_3f const& proj_mat) {
-    mono_shader->use();
-    glUniformMatrix3fv(mono_proj_mat_idx, 1, GL_TRUE, proj_mat.values.data());
-    prop_shader->use();
-    glUniformMatrix3fv(prop_proj_mat_idx, 1, GL_TRUE, proj_mat.values.data());
   }
 };
 

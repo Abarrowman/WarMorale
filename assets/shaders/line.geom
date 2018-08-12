@@ -9,7 +9,6 @@ layout(lines) in;
 layout(triangle_strip, max_vertices = 14) out;
 
 uniform mat3 trans_mat;
-uniform mat3 proj_mat;
 uniform float width;
 
 uniform int cap_type;
@@ -25,7 +24,7 @@ const int round_segments_ceil = round_segments - round_segments_floor;
 const float PI_F = 3.1415926535897932384626433832795;
 
 vec4 apply_projection(vec2 input) {
-  vec3 homo_vec = proj_mat * trans_mat * vec3(input, 1.0);
+  vec3 homo_vec = trans_mat * vec3(input, 1.0);
   return vec4(homo_vec.xy, 0, 1);
 }
 

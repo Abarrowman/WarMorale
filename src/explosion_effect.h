@@ -12,18 +12,11 @@ class point_particle_context {
 public:
   shader* point_particle_shader;
   GLint shader_trans_mat_idx;
-  GLint shader_proj_mat_idx;
 
   void init(shader* p_shader) {
     point_particle_shader = p_shader;
     shader_trans_mat_idx = point_particle_shader->get_uniform_location("trans_mat");
-    shader_proj_mat_idx = point_particle_shader->get_uniform_location("proj_mat");
 
-  }
-
-  void update_projection(matrix_3f const& proj_mat) {
-    point_particle_shader->use();
-    glUniformMatrix3fv(shader_proj_mat_idx, 1, GL_TRUE, proj_mat.values.data());
   }
 };
 

@@ -189,14 +189,6 @@ inline bool world::update() {
 
   stage::update(); //update children
 
-
-
-  // after children update
-  s_ctx.update_projection(proj);
-  p_ctx.update_projection(proj);
-  pp_ctx.update_projection(proj);
-  bt_ctx.update_projection(proj);
-
   frm.count_frame();
   frame_count += 1;
   update_times.end();

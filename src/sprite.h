@@ -25,15 +25,9 @@ public:
     sprite_shader = s_shader;
     sprite_vertex_array = s_vertex_array;
     trans_mat_idx = sprite_shader->get_uniform_location("trans_mat");
-    proj_mat_idx = sprite_shader->get_uniform_location("proj_mat");
     frames_idx = sprite_shader->get_uniform_location("frames");
     current_frame_idx = sprite_shader->get_uniform_location("current_frame");
     mask_color = sprite_shader->get_uniform_location("mask_color");
-  }
-
-  void update_projection(matrix_3f const& proj_mat) {
-    sprite_shader->use();
-    glUniformMatrix3fv(proj_mat_idx, 1, GL_TRUE, proj_mat.values.data());
   }
 
   sprite* create_orphan(texture* t);

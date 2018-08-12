@@ -103,7 +103,6 @@ int main(void) {
   int_keyed_resources dr;
   world w(window, sr, dr);
   global_stage = &w;
-  matrix_3f global_trans = matrix_3f::identity();
 
 
 
@@ -112,7 +111,7 @@ int main(void) {
     global_stage->update();
    
     glClear(GL_COLOR_BUFFER_BIT);
-    global_stage->render(global_trans);
+    global_stage->render();
     glfwSwapBuffers(window);
     //check_gl_errors();
   }
