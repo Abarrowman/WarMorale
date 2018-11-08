@@ -5,6 +5,8 @@
 #include "test_space_buckets.h"
 #include "test_geom.h"
 #include "test_sized_vector.h"
+#include "test_fast_bitset.h"
+#include "test_sparse_container.h"
 
 unsigned int Factorial( unsigned int number ) {
     return number <= 1 ? 1 : Factorial(number-1)*number;

@@ -13,7 +13,7 @@ template<typename T, size_t N>
 class sized_vector final {
 private:
   // used so that complex types can avoid being default initialized
-  char _untyped_data[sizeof(T) * N];
+  alignas(T) char _untyped_data[sizeof(T) * N];
 
   size_t _size;
 
