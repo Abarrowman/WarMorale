@@ -208,13 +208,13 @@ public:
 
   void push_back(T const& value) {
     assert(_size < capacity());
-    _typed_data()[_size] = value;
+    new (_typed_data() + _size) T(value);
     _size++;
   }
 
   void push_back(T&& value) {
     assert(_size < capacity());
-    _typed_data()[_size] = value;
+    new (_typed_data() + _size) T(std::move(value));
     _size++;
   }
 

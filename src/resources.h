@@ -4,6 +4,8 @@
 #include "shader.h"
 #include "vertex_array.h"
 #include "text/bitmap_font.h"
+#include "sized_vector.h"
+
 #include <vector>
 #include <unordered_map>
 #include <string>
@@ -49,21 +51,14 @@ enum class static_prop_font_id {
 
 class static_resources {
 private:
-  std::vector<texture> textures;
-  std::vector<shader> shaders;
-  std::vector<simple_vertex_array> vertex_arrays;
-  std::vector<mono_bitmap_font> mono_fonts;
-  std::vector<prop_bitmap_font> prop_fonts;
+  sized_vector<texture, static_cast<size_t>(static_texture_id::COUNT)> textures;
+  sized_vector<shader, static_cast<size_t>(static_shader_id::COUNT)> shaders;
+  sized_vector<simple_vertex_array, static_cast<size_t>(static_vertex_array_id::COUNT)> vertex_arrays;
+  sized_vector<mono_bitmap_font, static_cast<size_t>(static_mono_font_id::COUNT)> mono_fonts;
+  sized_vector<prop_bitmap_font, static_cast<size_t>(static_prop_font_id::COUNT)> prop_fonts;
 
 public:
   static_resources() {
-    // pre-allocate to avoid pointers to avoid reference invalidation
-    textures.reserve(static_cast<int>(static_texture_id::COUNT));
-    shaders.reserve(static_cast<int>(static_shader_id::COUNT));
-    vertex_arrays.reserve(static_cast<int>(static_vertex_array_id::COUNT));
-    mono_fonts.reserve(static_cast<int>(static_mono_font_id::COUNT));
-    prop_fonts.reserve(static_cast<int>(static_prop_font_id::COUNT));
-
     textures.emplace_back("./assets/textures/sad.png");
     textures.emplace_back("./assets/textures/fire.png");
     textures.emplace_back("./assets/textures/grunt.png");
@@ -71,8 +66,6 @@ public:
     textures.emplace_back("./assets/textures/ceres.png");
     textures.emplace_back("./assets/textures/mercury_square.png");
     textures.emplace_back("./assets/textures/shot.png");
-
-
 
     {
       std::string const vertex_shader = read_file_to_string("./assets/shaders/sprite.vert");

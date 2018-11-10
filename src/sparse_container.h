@@ -261,12 +261,12 @@ public:
     assert(_size < capacity());
 #ifdef USE_FAST_BITSET
     size_t _idx = _occupied.first_false();
-    _typed_data()[_idx] = value;
+    new (_typed_data() + _idx) T(value);
     _occupied.set(_idx);
 #else
     for (size_t _idx = 0; _idx < capacity(); _idx++) {
       if (!_occupied[_idx]) {
-        _typed_data()[_idx] = value;
+        new (_typed_data() + _idx) T(value);
         _occupied.set(_idx);
         break;
       }
@@ -281,12 +281,12 @@ public:
 
 #ifdef USE_FAST_BITSET
     size_t _idx = _occupied.first_false();
-    _typed_data()[_idx] = value;
+    new (_typed_data() + _idx) T(std::move(value));
     _occupied.set(_idx);
 #else
     for (size_t _idx = 0; _idx < capacity(); _idx++) {
       if (!_occupied[_idx]) {
-        _typed_data()[_idx] = value;
+        new (_typed_data() + _idx) T(std::move(value));
         _occupied.set(_idx);
         break;
       }
