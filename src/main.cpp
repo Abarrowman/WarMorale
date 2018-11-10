@@ -88,7 +88,7 @@ int main(void) {
   //glfwSwapInterval(4); // sync with every thrid frame 15fps
 
   // start GLEW extension handler
-  glewExperimental = GL_TRUE;
+  glewExperimental = GL_TRUE; 
   glewInit();
 
   GLubyte const* renderer = glGetString(GL_RENDERER);

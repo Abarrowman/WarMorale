@@ -10,7 +10,7 @@ class world;
 #include "2d_math.h"
 #include "threat_face.h"
 #include "explosion_effect.h"
-#include "bitmap_text.h"
+#include "text/bitmap_text.h"
 #include "running_average.h"
 #include "gl_includes.h"
 #include "space_buckets.h"
@@ -56,8 +56,8 @@ public:
   ordered_parent* over_effects_layer; // A container for effects to render over-top the main game elements
   ordered_parent* ui_layer;
 
-  fixed_width_bitmap_text* frame_rate_text;
-  variable_width_bitmap_text* log_text;
+  mono_bitmap_text* frame_rate_text;
+  prop_bitmap_text* log_text;
 
 
   world(GLFWwindow* win, static_resources& sr, int_keyed_resources& dr);

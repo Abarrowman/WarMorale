@@ -18,7 +18,7 @@ inline world::world(GLFWwindow* win, static_resources& sr, int_keyed_resources& 
   s_ctx.init(&static_res.get_shader(static_shader_id::sprite), &static_res.get_vertex_array(static_vertex_array_id::sprite));
   p_ctx.init(&static_res.get_shader(static_shader_id::polygon_fill), &static_res.get_shader(static_shader_id::line));
   pp_ctx.init(&static_res.get_shader(static_shader_id::point_particle));
-  bt_ctx.init(&static_res.get_shader(static_shader_id::fixed_width_bitmap_text), &static_res.get_shader(static_shader_id::variable_width_bitmap_text));
+  bt_ctx.init(&static_res.get_shader(static_shader_id::bitmap_text));
 
   mouse_pos = { -width / 2.0f, height / 2.0f };
 
@@ -90,11 +90,11 @@ inline world::world(GLFWwindow* win, static_resources& sr, int_keyed_resources& 
     bool allow_big = true;
     for (int i = 0; i < 100; i++) {
       unit* g;
-      if (allow_big && ((i % 4) == 0)) {
+      /*if (allow_big && ((i % 4) == 0)) {
         g = create_unit<heavy>(*this, *player_team, &p_first);
-      } else {
+      } else {*/
         g = create_unit<grunt>(*this, *player_team, &p_first);
-      }
+      //}
       g->trans.x = -100.0f + 100.0f * rand_centered_float(get_generator());
       g->trans.y = 300.0f + 100.0f * rand_centered_float(get_generator());
     }
@@ -132,18 +132,17 @@ inline world::world(GLFWwindow* win, static_resources& sr, int_keyed_resources& 
 
 
   {
-    frame_rate_text = ui_layer->add_orphan(new fixed_width_bitmap_text(&bt_ctx, &(static_res.get_mono_font(static_mono_font_id::consolas_12))));
+    frame_rate_text = ui_layer->add_orphan(new mono_bitmap_text(&bt_ctx, &(static_res.get_mono_font(static_mono_font_id::consolas_12))));
     vector_2f trans = window_to_world(0, 0);
     frame_rate_text->local_trans = matrix_3f::transformation_matrix(1, 1, 0, trans.x, trans.y);
     frame_rate_text->text_color = { 1, 1, 0, 1 };
   }
 
   {
-    log_text = ui_layer->add_orphan(new variable_width_bitmap_text(&bt_ctx, &(static_res.get_prop_font(static_prop_font_id::impact_24)), "Hello World!"));
+    log_text = ui_layer->add_orphan(new prop_bitmap_text(&bt_ctx, &(static_res.get_prop_font(static_prop_font_id::impact_24)), "Hello World!"));
     vector_2f trans = window_to_world(0, height - log_text->font->char_height());
     log_text->local_trans = matrix_3f::transformation_matrix(1, 1, 0, trans.x, trans.y);
     log_text->text_color = { 0, 1, 1, 1 };
-    
   }
 
   {
@@ -201,6 +200,7 @@ inline bool world::update() {
     frm.average_frame_rate(),
     static_cast<int>(std::round(update_times.average())),
     static_cast<int>(std::round(frm.average_frame_time() - update_times.average())));
+
   log_text->text = string_format("%d", threat_layer->child_count());
 
   return false;

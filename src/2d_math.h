@@ -81,7 +81,9 @@ public:
 
   vector_2() {};
   vector_2(T vx, T vy) : x(vx), y(vy)  {};
-
+  
+  //template<typename Y>
+  //vector_2(vector_2<Y> other) : x(other.x), y(other.y) {};
 
   T magnitude() const {
     return std::sqrt(magnitude_squared());

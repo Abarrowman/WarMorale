@@ -6,6 +6,12 @@
 #include <vector>
 #include <cstdio>
 
+struct textured_vertex {
+  vector_2f vert;
+  vector_2f tex;
+
+  textured_vertex(vector_2f v, vector_2f t) : vert(std::move(v)), tex(std::move(t)) {}
+};
 
 class vertex_buffer {
 public:

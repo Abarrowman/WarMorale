@@ -3,8 +3,7 @@
 #include "texture.h"
 #include "shader.h"
 #include "vertex_array.h"
-#include "fixed_width_bitmap_font.h"
-#include "variable_width_bitmap_font.h"
+#include "text/bitmap_font.h"
 #include <vector>
 #include <unordered_map>
 #include <string>
@@ -24,11 +23,10 @@ enum class static_texture_id {
 
 enum class static_shader_id {
   sprite,
+  bitmap_text,
   polygon_fill,
   line,
   point_particle,
-  fixed_width_bitmap_text,
-  variable_width_bitmap_text,
   COUNT
 };
 
@@ -54,8 +52,8 @@ private:
   std::vector<texture> textures;
   std::vector<shader> shaders;
   std::vector<simple_vertex_array> vertex_arrays;
-  std::vector<fixed_width_bitmap_font> mono_fonts;
-  std::vector<variable_width_bitmap_font> prop_fonts;
+  std::vector<mono_bitmap_font> mono_fonts;
+  std::vector<prop_bitmap_font> prop_fonts;
 
 public:
   static_resources() {
@@ -77,9 +75,12 @@ public:
 
 
     {
-      std::string const sprite_vertex_shader = read_file_to_string("./assets/shaders/sprite.vert");
+      std::string const vertex_shader = read_file_to_string("./assets/shaders/sprite.vert");
       std::string const sprite_fragment_shader = read_file_to_string("./assets/shaders/sprite.frag");
-      shaders.emplace_back(sprite_vertex_shader.c_str(), sprite_fragment_shader.c_str());
+      shaders.emplace_back(vertex_shader.c_str(), sprite_fragment_shader.c_str());
+
+      std::string const text_fragment_shader = read_file_to_string("./assets/shaders/bitmap_text.frag");
+      shaders.emplace_back(vertex_shader.c_str(), text_fragment_shader.c_str());
     }
     {
       std::string const polygon_vertex_shader = read_file_to_string("./assets/shaders/polygon.vert");
@@ -97,17 +98,7 @@ public:
       std::string const vertex_interp_fragment_shader = read_file_to_string("./assets/shaders/vertex_interp.frag");
       shaders.emplace_back(pt_particle_vertex_shader.c_str(), vertex_interp_fragment_shader.c_str());
     }
-    {
-      std::string const mono_vertex_shader = read_file_to_string("./assets/shaders/fixed_width_bitmap_text.vert");
-      std::string const mono_geometry_shader = read_file_to_string("./assets/shaders/fixed_width_bitmap_text.geom");
-      std::string const fragment_shader = read_file_to_string("./assets/shaders/bitmap_text.frag");
-      shaders.emplace_back(mono_vertex_shader.c_str(), mono_geometry_shader.c_str(), fragment_shader.c_str());
 
-      std::string const prop_vertex_shader = read_file_to_string("./assets/shaders/variable_width_bitmap_text.vert");
-      std::string const prop_geometry_shader = read_file_to_string("./assets/shaders/variable_width_bitmap_text.geom");
-      shaders.emplace_back(prop_vertex_shader.c_str(), prop_geometry_shader.c_str(), fragment_shader.c_str());
-    }
-    
     {
       vertex_arrays.push_back(simple_vertex_array::create_sprite_vertex_array());
     }
@@ -162,7 +153,7 @@ public:
   Return the statically mapped mono-spaced font associated with the id.
   O(1)
   */
-  fixed_width_bitmap_font& get_mono_font(static_mono_font_id id) {
+  mono_bitmap_font& get_mono_font(static_mono_font_id id) {
     return mono_fonts[static_cast<int>(id)];
   }
 
@@ -170,7 +161,7 @@ public:
   Return the statically  mapped proportionally-spaced font associated with the id.
   O(1)
   */
-  variable_width_bitmap_font& get_prop_font(static_prop_font_id id) {
+  prop_bitmap_font& get_prop_font(static_prop_font_id id) {
     return prop_fonts[static_cast<int>(id)];
   }
 
