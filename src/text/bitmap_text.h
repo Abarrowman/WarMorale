@@ -10,12 +10,12 @@
 
 class bitmap_text_context {
 private:
-  shader* text_shader;
+  program* text_shader;
   GLint trans_mat_idx;
   GLint color_idx;
 
 public:
-  void init(shader* t_shader) {
+  void init(program* t_shader) {
     text_shader = t_shader;
     trans_mat_idx = text_shader->get_uniform_location("trans_mat");
     color_idx = text_shader->get_uniform_location("color");

@@ -6,6 +6,7 @@
 
 class shader {
 private:
+
   static void compile_and_check(GLuint shader_idx) {
     glCompileShader(shader_idx);
     GLint success = 0;
@@ -20,6 +21,42 @@ private:
     }
   }
 
+  GLuint shader_idx_;
+  GLenum type_;
+
+public:
+  // do not copy, assign, or move assign
+  shader(shader&) = delete;
+  shader& operator=(const shader&) = delete;
+  shader& operator= (shader&& old) = delete;
+
+  //moving is ok
+  shader(shader&& old) : shader_idx_(old.shader_idx_), type_(old.type_) {
+    old.shader_idx_ = 0;
+  }
+
+  shader(int type, const char* shader_src) {
+    shader_idx_ = glCreateShader(static_cast<GLenum>(type));
+    glShaderSource(shader_idx_, 1, &shader_src, NULL);
+    compile_and_check(shader_idx_);
+  }
+
+  ~shader() {
+    glDeleteShader(shader_idx_);
+    shader_idx_ = 0;
+  }
+
+  GLuint shader_idx() const {
+    return shader_idx_;
+  }
+
+  GLenum type() const {
+    return type_;
+  }
+};
+
+class program {
+private:
   static void link_and_check(GLuint program_idx) {
     glLinkProgram(program_idx);
     GLint success = 0;
@@ -34,79 +71,60 @@ private:
     }
   }
 
-public:
-  GLuint vs;
-  GLuint gs;
-  GLuint fs;
-  GLuint program;
-
-  shader(const char* vertex_shader, const char* geometry_shader, const char* fragment_shader) {
-
-    vs = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vs, 1, &vertex_shader, NULL);
-    compile_and_check(vs);
-
-    gs = glCreateShader(GL_GEOMETRY_SHADER);
-    glShaderSource(gs, 1, &geometry_shader, NULL);
-    compile_and_check(gs);
-
-    fs = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fs, 1, &fragment_shader, NULL);
-    compile_and_check(fs);
-
-    program = glCreateProgram();
-    glAttachShader(program, fs);
-    glAttachShader(program, vs);
-    glAttachShader(program, gs);
-    link_and_check(program);
+  template<typename... Args>
+  void attach_shaders(shader& shader, Args&... programs) {
+    glAttachShader(prog, shader.shader_idx());
+    attach_shaders(programs...);
   }
 
-  shader(const char* vertex_shader, const char* fragment_shader) {
-    vs = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vs, 1, &vertex_shader, NULL);
-    compile_and_check(vs);
-    fs = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fs, 1, &fragment_shader, NULL);
-    compile_and_check(fs);
+  void attach_shaders(shader& shader) {
+    glAttachShader(prog, shader.shader_idx());
+  }
 
-    program = glCreateProgram();
-    glAttachShader(program, fs);
-    glAttachShader(program, vs);
-    link_and_check(program);
 
-    gs = 0;
+  template<typename... Args>
+  void detach_shaders(shader& shader, Args&... programs) {
+    glDetachShader(prog, shader.shader_idx());
+    detach_shaders(programs...);
+  }
+
+  void detach_shaders(shader& shader) {
+    glAttachShader(prog, shader.shader_idx());
+  }
+
+  GLuint prog;
+
+public:
+
+  template<typename... Args>
+  program(Args&... programs) {
+    prog = glCreateProgram();
+    attach_shaders(programs...);  
+    link_and_check(prog);
+    detach_shaders(programs...);
   }
 
   GLint get_uniform_location(char const* name) {
-    return glGetUniformLocation(program, name);
+    return glGetUniformLocation(prog, name);
   }
 
   // do not copy or assign
-  shader(shader&) = delete;
-  shader& operator=(const shader&) = delete;
+  program(program&) = delete;
+  program& operator=(const program&) = delete;
 
   //moving is ok
-  shader(shader&& old) : program(old.program), vs(old.vs), gs(old.gs), fs(old.fs) {
-    old.program = 0;
-    old.vs = 0;
-    old.gs = 0;
-    old.fs = 0;
+  program(program&& old) : prog(old.prog) {
+    old.prog = 0;
   }
   // move assinging is not ok
-  shader& operator= (shader&& old) = delete;
+  program& operator= (program&& old) = delete;
 
-  ~shader() {
-    glDeleteProgram(program);
-    glDeleteShader(fs);
-    glDeleteShader(gs);
-    glDeleteShader(vs);
-    program = 0;
-    fs = 0;
-    gs = 0;
-    vs = 0;
+  ~program() {
+    glDeleteProgram(prog);
+    prog = 0;
   }
 
   void use() const {
-    glUseProgram(program);
+    glUseProgram(prog);
   }
 };

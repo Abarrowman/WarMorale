@@ -9,28 +9,27 @@
 
 class polygon_context {
 public:
-  shader* polygon_fill_shader;
+  program* polygon_fill_program;
   GLint fill_trans_mat_idx;
   GLint fill_color_idx;
 
-  shader* polygon_edge_shader;
+  program* polygon_edge_program;
   GLint edge_trans_mat_idx;
   GLint edge_width_idx;
   GLint edge_color_idx;
   GLint edge_cap_type_idx;
 
 
-  void init(shader* fill_shader, shader* edge_shader) {
-    polygon_fill_shader = fill_shader;
-    fill_trans_mat_idx = polygon_fill_shader->get_uniform_location("trans_mat");
-    fill_color_idx = polygon_fill_shader->get_uniform_location("color");
+  void init(program* fill_shader, program* edge_shader) {
+    polygon_fill_program = fill_shader;
+    fill_trans_mat_idx = polygon_fill_program->get_uniform_location("trans_mat");
+    fill_color_idx = polygon_fill_program->get_uniform_location("color");
 
-
-    polygon_edge_shader = edge_shader;
-    edge_trans_mat_idx = polygon_edge_shader->get_uniform_location("trans_mat");
-    edge_width_idx = polygon_edge_shader->get_uniform_location("width");
-    edge_color_idx = polygon_edge_shader->get_uniform_location("color");
-    edge_cap_type_idx = polygon_edge_shader->get_uniform_location("cap_type");
+    polygon_edge_program = edge_shader;
+    edge_trans_mat_idx = polygon_edge_program->get_uniform_location("trans_mat");
+    edge_width_idx = polygon_edge_program->get_uniform_location("width");
+    edge_color_idx = polygon_edge_program->get_uniform_location("color");
+    edge_cap_type_idx = polygon_edge_program->get_uniform_location("cap_type");
   }
 };
 
@@ -43,12 +42,12 @@ inline void render_polygon(P const& p, matrix_3f const& parent_trans, simple_ver
 
   matrix_3f full_trans = parent_trans * p.local_trans;
 
-  p.context->polygon_fill_shader->use();
+  p.context->polygon_fill_program->use();
   glUniformMatrix3fv(p.context->fill_trans_mat_idx, 1, GL_TRUE, full_trans.values.data());
   glUniform4fv(p.context->fill_color_idx, 1, p.fill_color.values.data());
   arr.draw(GL_POLYGON);
 
-  p.context->polygon_edge_shader->use();
+  p.context->polygon_edge_program->use();
   glUniformMatrix3fv(p.context->edge_trans_mat_idx, 1, GL_TRUE, full_trans.values.data());
   glUniform4fv(p.context->edge_color_idx, 1, p.edge_color.values.data());
   glUniform1f(p.context->edge_width_idx, p.edge_width);

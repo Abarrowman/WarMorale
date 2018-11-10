@@ -15,10 +15,10 @@ inline world::world(GLFWwindow* win, static_resources& sr, int_keyed_resources& 
   std::seed_seq seed_val{ seed[0], seed[1], seed[2], seed[3] };
   gen = generator_type(seed_val);
 
-  s_ctx.init(&static_res.get_shader(static_shader_id::sprite), &static_res.get_vertex_array(static_vertex_array_id::sprite));
-  p_ctx.init(&static_res.get_shader(static_shader_id::polygon_fill), &static_res.get_shader(static_shader_id::line));
-  pp_ctx.init(&static_res.get_shader(static_shader_id::point_particle));
-  bt_ctx.init(&static_res.get_shader(static_shader_id::bitmap_text));
+  s_ctx.init(&static_res.get_program(static_program_id::sprite), &static_res.get_vertex_array(static_vertex_array_id::sprite));
+  p_ctx.init(&static_res.get_program(static_program_id::polygon_fill), &static_res.get_program(static_program_id::line));
+  pp_ctx.init(&static_res.get_program(static_program_id::point_particle));
+  bt_ctx.init(&static_res.get_program(static_program_id::bitmap_text));
 
   mouse_pos = { -width / 2.0f, height / 2.0f };
 

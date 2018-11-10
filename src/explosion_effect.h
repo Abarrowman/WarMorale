@@ -10,12 +10,12 @@
 
 class point_particle_context {
 public:
-  shader* point_particle_shader;
+  program* point_particle_program;
   GLint shader_trans_mat_idx;
 
-  void init(shader* p_shader) {
-    point_particle_shader = p_shader;
-    shader_trans_mat_idx = point_particle_shader->get_uniform_location("trans_mat");
+  void init(program* p_shader) {
+    point_particle_program = p_shader;
+    shader_trans_mat_idx = point_particle_program->get_uniform_location("trans_mat");
 
   }
 };
@@ -160,7 +160,7 @@ public:
     color_buffer.bind();
     glBufferData(GL_ARRAY_BUFFER, sizeof(float) * particle_count * 4, colors.data(), GL_STREAM_DRAW);
 
-    context->point_particle_shader->use();
+    context->point_particle_program->use();
 
     matrix_3f full_trans = parent_trans * local_trans;
     glUniformMatrix3fv(context->shader_trans_mat_idx, 1, GL_TRUE, full_trans.values.data());

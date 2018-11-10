@@ -12,7 +12,7 @@ class sprite;
 
 class sprite_context {
 public:
-  shader* sprite_shader;
+  program* sprite_program;
   simple_vertex_array* sprite_vertex_array;
   GLint trans_mat_idx;
   GLint proj_mat_idx;
@@ -21,13 +21,13 @@ public:
   GLint mask_color;
 
 
-  void init(shader* s_shader, simple_vertex_array* s_vertex_array) {
-    sprite_shader = s_shader;
+  void init(program* s_shader, simple_vertex_array* s_vertex_array) {
+    sprite_program = s_shader;
     sprite_vertex_array = s_vertex_array;
-    trans_mat_idx = sprite_shader->get_uniform_location("trans_mat");
-    frames_idx = sprite_shader->get_uniform_location("frames");
-    current_frame_idx = sprite_shader->get_uniform_location("current_frame");
-    mask_color = sprite_shader->get_uniform_location("mask_color");
+    trans_mat_idx = sprite_program->get_uniform_location("trans_mat");
+    frames_idx = sprite_program->get_uniform_location("frames");
+    current_frame_idx = sprite_program->get_uniform_location("current_frame");
+    mask_color = sprite_program->get_uniform_location("mask_color");
   }
 
   sprite* create_orphan(texture* t);
@@ -65,7 +65,7 @@ public:
       return;
     }
     assert(context != nullptr);
-    context->sprite_shader->use();
+    context->sprite_program->use();
 
     assert(tex != nullptr);
     tex->activate_bind(GL_TEXTURE0);

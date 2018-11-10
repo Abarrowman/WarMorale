@@ -23,7 +23,7 @@ enum class static_texture_id {
   COUNT
 };
 
-enum class static_shader_id {
+enum class static_program_id {
   sprite,
   bitmap_text,
   polygon_fill,
@@ -52,7 +52,7 @@ enum class static_prop_font_id {
 class static_resources {
 private:
   sized_vector<texture, static_cast<size_t>(static_texture_id::COUNT)> textures;
-  sized_vector<shader, static_cast<size_t>(static_shader_id::COUNT)> shaders;
+  sized_vector<program, static_cast<size_t>(static_program_id::COUNT)> programs;
   sized_vector<simple_vertex_array, static_cast<size_t>(static_vertex_array_id::COUNT)> vertex_arrays;
   sized_vector<mono_bitmap_font, static_cast<size_t>(static_mono_font_id::COUNT)> mono_fonts;
   sized_vector<prop_bitmap_font, static_cast<size_t>(static_prop_font_id::COUNT)> prop_fonts;
@@ -68,28 +68,27 @@ public:
     textures.emplace_back("./assets/textures/shot.png");
 
     {
-      std::string const vertex_shader = read_file_to_string("./assets/shaders/sprite.vert");
-      std::string const sprite_fragment_shader = read_file_to_string("./assets/shaders/sprite.frag");
-      shaders.emplace_back(vertex_shader.c_str(), sprite_fragment_shader.c_str());
+      shader vertex{ GL_VERTEX_SHADER, read_file_to_string("./assets/shaders/sprite.vert").c_str() };
+      shader sprite_frag{ GL_FRAGMENT_SHADER, read_file_to_string("./assets/shaders/sprite.frag").c_str() };
+      programs.emplace_back(vertex, sprite_frag);
 
-      std::string const text_fragment_shader = read_file_to_string("./assets/shaders/bitmap_text.frag");
-      shaders.emplace_back(vertex_shader.c_str(), text_fragment_shader.c_str());
+      shader text_frag{ GL_FRAGMENT_SHADER, read_file_to_string("./assets/shaders/bitmap_text.frag").c_str() };
+      programs.emplace_back(vertex, text_frag);
     }
     {
-      std::string const polygon_vertex_shader = read_file_to_string("./assets/shaders/polygon.vert");
-      std::string const solid_fragment_shader = read_file_to_string("./assets/shaders/solid.frag");
-      shaders.emplace_back(polygon_vertex_shader.c_str(), solid_fragment_shader.c_str());
+      shader polygon_vertex{ GL_VERTEX_SHADER, read_file_to_string("./assets/shaders/polygon.vert").c_str() };
+      shader solid_frag{ GL_FRAGMENT_SHADER, read_file_to_string("./assets/shaders/solid.frag").c_str() };
+      programs.emplace_back(polygon_vertex, solid_frag);
 
 
-      std::string const line_vertex_shader = read_file_to_string("./assets/shaders/line.vert");
-      std::string const line_geometry_shader = read_file_to_string("./assets/shaders/line.geom");
-      // TODO multiple copies of the same shaders are being compiled into programs
-      shaders.emplace_back(line_vertex_shader.c_str(), line_geometry_shader.c_str(), solid_fragment_shader.c_str());
+      shader line_vertex{ GL_VERTEX_SHADER, read_file_to_string("./assets/shaders/line.vert").c_str() };
+      shader line_geom{ GL_GEOMETRY_SHADER, read_file_to_string("./assets/shaders/line.geom").c_str() };
+      programs.emplace_back(line_vertex, line_geom, solid_frag);
     }
     {
-      std::string const pt_particle_vertex_shader = read_file_to_string("./assets/shaders/pt_particle.vert");
-      std::string const vertex_interp_fragment_shader = read_file_to_string("./assets/shaders/vertex_interp.frag");
-      shaders.emplace_back(pt_particle_vertex_shader.c_str(), vertex_interp_fragment_shader.c_str());
+      shader vertex{ GL_VERTEX_SHADER, read_file_to_string("./assets/shaders/pt_particle.vert").c_str() };
+      shader frag{ GL_FRAGMENT_SHADER,read_file_to_string("./assets/shaders/vertex_interp.frag").c_str() };
+      programs.emplace_back(vertex, frag);
     }
 
     {
@@ -110,7 +109,7 @@ public:
     }
 
     assert(textures.capacity() == textures.size());
-    assert(shaders.capacity() == shaders.size());
+    assert(programs.capacity() == programs.size());
     assert(vertex_arrays.capacity() == vertex_arrays.size());
     assert(mono_fonts.capacity() == mono_fonts.size());
     assert(prop_fonts.capacity() == prop_fonts.size());
@@ -134,11 +133,11 @@ public:
   }
 
   /*
-  Return the statically mapped shader associated with the id.
+  Return the statically mapped program associated with the id.
   O(1)
   */
-  shader& get_shader(static_shader_id id) {
-    return shaders[static_cast<int>(id)];
+  program& get_program(static_program_id id) {
+    return programs[static_cast<int>(id)];
   }
 
 
@@ -170,7 +169,7 @@ template<typename K>
 class dyanamic_resources {
 private:
   std::unordered_map<K, std::unique_ptr<texture>> textures;
-  std::unordered_map<K, std::unique_ptr<shader>> shaders;
+  std::unordered_map<K, std::unique_ptr<program>> programs;
   std::unordered_map<K, std::unique_ptr<simple_vertex_array>> vertex_arrays;
 public:
 
@@ -180,7 +179,7 @@ public:
   }
 
   bool has_shader(K const& id) {
-    return (shaders.end() != shaders.find(id));
+    return (programs.end() != programs.find(id));
 
   }
 
@@ -193,7 +192,7 @@ public:
     return *(textures[id].get());
   }
 
-  shader& get_shader(K const& id) {
+  program& get_program(K const& id) {
     return *(textures[id].get());
   }
 
