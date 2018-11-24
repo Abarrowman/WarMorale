@@ -28,7 +28,9 @@ bool point_threat::update(world& world_ref) {
   if (destroyed) {
     vector_2f center = trans.get_position();
     matrix_3f parent_trans = trans.to_matrix();
-    world_ref.over_effects_layer->add_orphan(explosion_effect::explode_sprite(&(world_ref.pp_ctx), image, center, parent_trans, world_ref.get_generator(), 20));
+
+    auto ex = explosion_effect::explode_sprite(&(world_ref.pp_ctx), image, center, parent_trans, world_ref.get_generator(), 20);
+    world_ref.add_explosion(std::move(ex));
   }
   return destroyed;
 }

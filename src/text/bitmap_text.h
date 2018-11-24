@@ -155,7 +155,7 @@ public:
       vector_2f bottom_right_vert{ top_left_vert.x + char_width, top_left_vert.y - font->char_height() };
 
       vector_2f top_left_tex = font->top_left_tex(c);
-      vector_2f bottom_right_tex{ top_left_tex.x + static_cast<float>(char_width) / font->tex.width, top_left_tex.y + font->char_tex_size().y };
+      vector_2f bottom_right_tex{ top_left_tex.x + static_cast<float>(char_width) / font->tex.width(), top_left_tex.y + font->char_tex_size().y };
 
       bitmap_text_context::create_char_triangles(buffer, top_left_vert, bottom_right_vert, top_left_tex, bottom_right_tex);
 

@@ -1,5 +1,6 @@
 #pragma once
 #include "2d_math.h"
+#include "sparse_container.h"
 #include <vector>
 #include <memory>
 #include <algorithm>
@@ -128,9 +129,51 @@ public:
   }
 };
 
+template<typename T, size_t N>
+class sparse_parent : public renderable {
+private:
+  sparse_container<T, N> children;
+public:
+
+  T& push(T const& value) {
+    return children.push(value);
+  }
+
+  T& push(T&& value) {
+    return children.push(std::move(value));
+  }
+
+  template<typename... Args>
+  T& emplace(Args&&... args) {
+    return children.emplace(args);
+  }
+
+  int child_count() {
+    return static_cast<int>(children.size());
+  }
+
+  virtual void render(matrix_3f const& parent_trans) {
+    if (!visible) {
+      return;
+    }
+    matrix_3f trans = parent_trans * local_trans;
+    for (T& child: children) {
+      child.render(trans);
+    }
+  }
+
+  virtual bool update() {
+    for (auto it = children.begin(); it != children.end(); ++it) {
+      if (it->update()) {
+        children.erase(it);
+      }
+    }
+    return false;
+  }
+};
+
 using ordered_parent = renderable_parent<renderable, true>;
 using unordered_parent = renderable_parent<renderable, false>;
-
 
 inline void inner_variadic_render(matrix_3f const& parent_trans) {
 }

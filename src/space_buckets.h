@@ -112,4 +112,8 @@ public:
     remove_entry(old_pos, entry);
     add_entry(new_pos, entry);
   }
+
+  void clear() {
+    map.clear();
+  }
 };

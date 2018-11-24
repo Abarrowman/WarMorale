@@ -49,7 +49,7 @@ protected:
   void death_action() override {
     vector_2f center = trans.get_position();
     matrix_3f parent_trans = trans.to_matrix();
-    world_ref.over_effects_layer->add_orphan(explosion_effect::explode_sprite(&(world_ref.pp_ctx), ship, center, parent_trans, world_ref.get_generator()));
+    world_ref.add_explosion(explosion_effect::explode_sprite(&(world_ref.pp_ctx), ship, center, parent_trans, world_ref.get_generator()));
   }
 
   void render(matrix_3f const& parent_trans) override {

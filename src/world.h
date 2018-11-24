@@ -26,6 +26,7 @@ inline world::world(GLFWwindow* win, static_resources& sr, int_keyed_resources& 
   obstacle_layer = add_orphan(new obstacle_parent());
   teams_layer = add_orphan(new team_parent());
   threat_layer = add_orphan(new threat_parent(*this));
+  explosion_layer = add_orphan(new explosion_parent());
   over_effects_layer = add_orphan(new ordered_parent());
   ui_layer = add_orphan(new ordered_parent());
 
@@ -69,8 +70,8 @@ inline world::world(GLFWwindow* win, static_resources& sr, int_keyed_resources& 
     ceres->trans.y = 200;
   }
     
-  player_team = teams_layer->add_orphan(new team("blew", color_rgb::blue()));
-  enemy_team = teams_layer->add_orphan(new team("read", color_rgb::red()));
+  player_team = teams_layer->add_orphan(new team("blew", color_rgb{{0, 0.5f, 1.0f}}));
+  enemy_team = teams_layer->add_orphan(new team("read", color_rgb{ {1.0f, 0.5f, 0.0f}}));
   enemy_team->establish_hostility(player_team);
 
   {
@@ -267,4 +268,8 @@ inline sprite world::static_sprite(static_texture_id id) {
 
 inline generator_type& world::get_generator() {
   return gen;
+}
+
+inline void world::add_explosion(explosion_effect e) {
+  explosion_layer->push(std::move(e));
 }

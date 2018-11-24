@@ -71,7 +71,7 @@ public:
     using difference_type = std::ptrdiff_t;
     using value_type = std::conditional_t<C, T const, T>;
     using reference = std::conditional_t<C, T const&, T&>;
-    using pointer = std::conditional_t<C, T const*, T>;
+    using pointer = std::conditional_t<C, T const*, T*>;
     using iterator_category = std::input_iterator_tag;
     using container_pointer = std::conditional_t<C, sparse_container<T,N> const*, sparse_container<T, N>*>;
 
@@ -218,17 +218,18 @@ public:
 
   // O(N)
   iterator begin() {
-    size_t _idx;
+    size_t idx;
 #ifdef USE_FAST_BITSET
-    _idx = _occupied.first_true();
+    idx = _occupied.first_true();
+    idx = idx == fast_bitset_utils::npos() ? capacity() : idx;
 #else
-    for (_idx = 0; _idx < capacity(); _idx++) {
-      if (_occupied[_idx]) {
+    for (idx = 0; idx < capacity(); idx++) {
+      if (_occupied[idx]) {
         break;
       }
     }
 #endif
-    return iterator{ this, _idx };
+    return iterator{ this, idx };
   }
 
   // O(1)
@@ -238,17 +239,18 @@ public:
 
   // O(N)
   const_iterator cbegin() const {
-    size_t _idx;
+    size_t idx;
 #ifdef USE_FAST_BITSET
-    _idx = _occupied.first_true();
+    idx = _occupied.first_true();
+    idx = idx == fast_bitset_utils::npos() ? capacity() : idx;
 #else
-    for (_idx = 0; _idx < capacity(); _idx++) {
-      if (_occupied[_idx]) {
+    for (idx = 0; idx < capacity(); idx++) {
+      if (_occupied[idx]) {
         break;
       }
     }
 #endif
-    return const_iterator{ this, _idx };
+    return const_iterator{ this, idx };
   }
 
   // O(1)
@@ -257,42 +259,66 @@ public:
   }
 
   // O(N)
-  void push(T const& value) {
+  reference push(T const& value) {
     assert(_size < capacity());
+    size_t idx;
 #ifdef USE_FAST_BITSET
-    size_t _idx = _occupied.first_false();
-    new (_typed_data() + _idx) T(value);
-    _occupied.set(_idx);
+    idx = _occupied.first_false();
+    new (_typed_data() + idx) T(value);
+    _occupied.set(idx);
 #else
-    for (size_t _idx = 0; _idx < capacity(); _idx++) {
-      if (!_occupied[_idx]) {
-        new (_typed_data() + _idx) T(value);
-        _occupied.set(_idx);
+    for (idx = 0; idx < capacity(); idx++) {
+      if (!_occupied[idx]) {
+        new (_typed_data() + idx) T(value);
+        _occupied.set(idx);
         break;
       }
     }
 #endif 
     _size++;
+    return _typed_data()[idx];
   }
 
   // O(N)
-  void push(T&& value) {
+  reference push(T&& value) {
     assert(_size < capacity());
-
+    size_t idx;
 #ifdef USE_FAST_BITSET
-    size_t _idx = _occupied.first_false();
-    new (_typed_data() + _idx) T(std::move(value));
-    _occupied.set(_idx);
+    idx = _occupied.first_false();
+    new (_typed_data() + idx) T(std::move(value));
+    _occupied.set(idx);
 #else
-    for (size_t _idx = 0; _idx < capacity(); _idx++) {
-      if (!_occupied[_idx]) {
-        new (_typed_data() + _idx) T(std::move(value));
-        _occupied.set(_idx);
+    for (idx = 0; idx < capacity(); idx++) {
+      if (!_occupied[idx]) {
+        new (_typed_data() + idx) T(std::move(value));
+        _occupied.set(idx);
         break;
       }
     }
 #endif
     _size++;
+    return _typed_data()[idx];
+  }
+
+  template<typename... Args>
+  reference emplace(Args&&... args) {
+    assert(_size < capacity());
+    size_t idx;
+#ifdef USE_FAST_BITSET
+    idx = _occupied.first_false();
+    new (_typed_data() + idx) T(std::forward<Args>(args)...);
+    _occupied.set(idx);
+#else
+    for (idx = 0; idx < capacity(); idx++) {
+      if (!_occupied[idx]) {
+        new (_typed_data() + idx) T(std::forward<Args>(args)...);
+        _occupied.set(idx);
+        break;
+      }
+    }
+#endif
+    _size++;
+    return _typed_data()[idx];
   }
 
   // O(N)

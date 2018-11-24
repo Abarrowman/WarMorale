@@ -49,16 +49,22 @@ public:
 
   owning_polygon* tri;
 
+  using explosion_parent = sparse_parent<explosion_effect, 1024>;
+
+
+
+  // Begin rendering layers
   ordered_parent* under_effects_layer; // A container for effects to render underneath the main game elements
   obstacle_parent* obstacle_layer;
   team_parent* teams_layer;
   threat_parent* threat_layer;
+  explosion_parent* explosion_layer;
   ordered_parent* over_effects_layer; // A container for effects to render over-top the main game elements
   ordered_parent* ui_layer;
+  // End rendering layers
 
   mono_bitmap_text* frame_rate_text;
   prop_bitmap_text* log_text;
-
 
   world(GLFWwindow* win, static_resources& sr, int_keyed_resources& dr);
 
@@ -73,6 +79,8 @@ public:
   sprite world::static_sprite(static_texture_id id);
 
   generator_type& get_generator();
+
+  void add_explosion(explosion_effect e);
 
   /*~world() {
     fprintf(stderr, "World Destructor\n");

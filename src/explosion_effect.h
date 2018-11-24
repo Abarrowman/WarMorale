@@ -58,18 +58,14 @@ public:
     return new explosion_effect(ctx, particle_count, 100, std::move(positions), std::move(colors), std::move(velocities), 0.01f);
   }
 
-  static explosion_effect* explode_sprite(point_particle_context* ctx,  sprite& spr, vector_2f center, matrix_3f const& parent_trans, generator_type& gen, int duration=60) {
+  static explosion_effect explode_sprite(point_particle_context* ctx,  sprite& spr, vector_2f center, matrix_3f const& parent_trans, generator_type& gen, int duration=60) {
     assert(spr.tex != nullptr);
 
-    int const image_width = spr.tex->width;
-    int const image_height = spr.tex->height;
-    std::vector<unsigned char> pixel_data;
-    pixel_data.resize(4 * image_width * image_height);
+    unsigned char* pixel_data = spr.tex->data();
+    vector_2i image_size{ spr.tex->width(), spr.tex->height() };
 
-    glGetTextureImage(spr.tex->tex, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixel_data.size(), pixel_data.data());
-
-    int max_particle_count = image_height * image_width;
-    vector_2f image_center = { static_cast<float>(image_width - 1) / 2.0f, static_cast<float>(image_height - 1) / 2.0f };
+    vector_2i frame_size = image_size / spr.frames;
+    int max_particle_count = frame_size.x * frame_size.y;
     std::vector<vector_2f> positions;
     std::vector<color_rgba> colors;
     std::vector<vector_2f> velocities;
@@ -79,11 +75,6 @@ public:
 
     matrix_3f total_trans = parent_trans * spr.local_trans;
 
-
-
-    vector_2i frame_size{ image_width, image_height };
-    frame_size /= spr.frames;
-
     vector_2i offset = frame_size * spr.current_frame;
 
     for (int x = 0; x < frame_size.x; x++) {
@@ -91,11 +82,11 @@ public:
 
         int tx = x + offset.x;
         int ty = y + offset.y;
-        unsigned char a_val = pixel_data[(ty * image_width + tx) * 4 + 3];
+        unsigned char a_val = pixel_data[(ty * image_size.x + tx) * 4 + 3];
         if (a_val != 0) {
-          unsigned char r_val = pixel_data[(ty * image_width + tx) * 4 + 0];
-          unsigned char g_val = pixel_data[(ty * image_width + tx) * 4 + 1];
-          unsigned char b_val = pixel_data[(ty * image_width + tx) * 4 + 2];
+          unsigned char r_val = pixel_data[(ty * image_size.x + tx) * 4 + 0];
+          unsigned char g_val = pixel_data[(ty * image_size.x + tx) * 4 + 1];
+          unsigned char b_val = pixel_data[(ty * image_size.x + tx) * 4 + 2];
 
           color_rgba p_col = { r_val / 255.0f, g_val / 255.0f, b_val / 255.0f, a_val / 255.0f };
           p_col *= spr.mask_color;
@@ -106,18 +97,24 @@ public:
 
           positions.push_back(trans_pos);
           colors.push_back(p_col);
-          velocities.push_back((trans_pos - center) * 0.5f * rand_float(gen));
+          velocities.push_back((trans_pos - center) * 0.3f * rand_float(gen));
         }
       }
     }
     int particle_count = positions.size();
 
-    return new explosion_effect(ctx, particle_count, duration, std::move(positions), std::move(colors), std::move(velocities), spr.mask_color.values[3] / duration);
+    return explosion_effect{ ctx, particle_count, duration, std::move(positions), std::move(colors), std::move(velocities), spr.mask_color.values[3] / duration };
   }
 
   explosion_effect(point_particle_context* ctx, int count, int dur, std::vector<vector_2f> pos,
-      std::vector<color_rgba> cols, std::vector<vector_2f> vels, float al_step) : context(ctx), particle_count(count),
-      duration(dur), positions(std::move(pos)), colors(std::move(cols)), velocities(std::move(vels)), alpha_step(al_step) {
+      std::vector<color_rgba> cols, std::vector<vector_2f> vels, float al_step) :
+      context(ctx),
+      particle_count(count),
+      duration(dur),
+      positions(std::move(pos)),
+      colors(std::move(cols)),
+      velocities(std::move(vels)),
+      alpha_step(al_step) {
 
     assert(positions.size() == particle_count);
     assert(colors.size() == particle_count);
@@ -135,9 +132,24 @@ public:
     glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
   }
 
-  // do not copy or assign
+  // do not copy, assign, or move assign
   explosion_effect(explosion_effect&) = delete;
   explosion_effect& operator=(const explosion_effect&) = delete;
+  explosion_effect& operator= (explosion_effect&& old) = delete;
+
+  // moving is ok
+  explosion_effect(explosion_effect&& old) :
+    context(old.context),
+    particle_count(old.particle_count),
+    duration(old.duration),
+    positions(std::move(old.positions)),
+    colors(std::move(old.colors)),
+    velocities(std::move(old.velocities)),
+    position_buffer(std::move(old.position_buffer)),
+    color_buffer(std::move(old.color_buffer)),
+    va(std::move(old.va)),
+    alpha_step(old.alpha_step)
+  {}
 
   bool update() override {
     for (int i = 0; i < particle_count; i++) {

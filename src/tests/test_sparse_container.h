@@ -145,6 +145,13 @@ TEST_CASE("Tests sparse_container", "[sparse_container]") {
       REQUIRE(copy_vector[1] == -7);
       REQUIRE(copy_vector[2] == 7);
     }
+    {
+      con.clear();
+      REQUIRE(con.size() == 0);
+      std::vector<int> copy_vector;
+      std::copy(con.begin(), con.end(), std::back_inserter(copy_vector));
+      REQUIRE(copy_vector.size() == 0);
+    }
   }
 
   /*SECTION("profile") {

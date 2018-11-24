@@ -33,10 +33,10 @@ public:
     char_height_ = info_pairs["Cell Height"];
     char_max_width_ = info_pairs["Cell Width"];
 
-    row_len = tex.width / char_max_width_;
+    row_len = tex.width() / char_max_width_;
 
-    char_tex_size_.x = static_cast<float>(char_max_width_) / tex.width;
-    char_tex_size_.y = static_cast<float>(char_height_) / tex.height;
+    char_tex_size_.x = static_cast<float>(char_max_width_) / tex.width();
+    char_tex_size_.y = static_cast<float>(char_height_) / tex.height();
 
     std::array<char, 20> base_width_name_buffer;
     for (int i = ' '; i <= '~'; i++) {
@@ -89,10 +89,10 @@ public:
     tex(std::move(t)),
     char_width(c_w),
     char_height(c_h),
-    row_length(tex.width / char_width),
+    row_length(tex.width() / char_width),
     char_tex_size(
-      static_cast<float>(char_width) / tex.width,
-      static_cast<float>(char_height) / tex.height) {}
+      static_cast<float>(char_width) / tex.width(),
+      static_cast<float>(char_height) / tex.height()) {}
 
   bool contains_char(char c) const {
     return ((c >= ' ') && (c <= '~'));

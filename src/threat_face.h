@@ -40,15 +40,24 @@ public:
   threat_parent(world& w) : world_ref(w) {}
 
   bool update() override {
+    buckets.clear();
     for (int i = child_count() - 1; i >= 0; i--) {
       threat& ob = child_at(i);
-      buckets.remove_entry(ob.trans.get_position(), &ob);
       if (ob.update(world_ref)) {
         remove_child_at(i);
       } else {
         buckets.add_entry(ob.trans.get_position(), &ob);
       }
     }
+    /*for (int i = child_count() - 1; i >= 0; i--) {
+      threat& ob = child_at(i);
+      buckets.remove_entry(ob.trans.get_position(), &ob);
+      if (ob.update(world_ref)) {
+        remove_child_at(i);
+      } else {
+        buckets.add_entry(ob.trans.get_dposition(), &ob);
+      }
+    }*/
     return false;
   }
 

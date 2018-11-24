@@ -3,21 +3,24 @@
 #include <stb/stb_image.h>
 
 class texture {
+private:
+  GLuint tex_;
+  int width_;
+  int height_;
+  unsigned char* data_;
+
 public:
-  GLuint tex;
-  int width;
-  int height;
 
   texture(const char* filename) {
-    glGenTextures(1, &tex);
-    glBindTexture(GL_TEXTURE_2D, tex);
+    glGenTextures(1, &tex_);
+    glBindTexture(GL_TEXTURE_2D, tex_);
     
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     
     int channel_count;
-    unsigned char* data = stbi_load(filename, &width, &height, &channel_count, 4);
-    if (!data) {
+    data_ = stbi_load(filename, &width_, &height_, &channel_count, 4);
+    if (!data_) {
       fprintf(stderr, "Could not read file %s\n", filename);
       exit(-1);
     }
@@ -25,13 +28,12 @@ public:
     glTexImage2D(GL_TEXTURE_2D,
       0,
       GL_RGBA,
-      width,
-      height,
+      width_,
+      height_,
       0,
       GL_RGBA,
       GL_UNSIGNED_BYTE,
-      data);
-    stbi_image_free(data);
+      data_);
 
     //glGenerateMipmap(GL_TEXTURE_2D);
     //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
@@ -50,18 +52,36 @@ public:
   texture& operator=(const texture&) = delete;
 
   //moving is ok
-  texture(texture&& old) : tex(old.tex), width(old.width), height(old.height) {
-    old.tex = 0;
+  texture(texture&& old) : tex_(old.tex_), width_(old.width_), height_(old.height_), data_(old.data_) {
+    old.tex_ = 0;
+    old.data_ = nullptr;
   }
   // move assinging is not ok
   texture& operator= (texture&& old) = delete;
 
   ~texture() {
-    glDeleteTextures(1, &tex);
+    glDeleteTextures(1, &tex_);
+    stbi_image_free(data_);
   }
 
   void activate_bind(GLenum texture) const {
     glActiveTexture(texture);
-    glBindTexture(GL_TEXTURE_2D, tex);
+    glBindTexture(GL_TEXTURE_2D, tex_);
+  }
+
+  int width() const {
+    return width_;
+  }
+
+  int height() const {
+    return height_;
+  }
+
+  int tex() const {
+    return tex_;
+  }
+
+  unsigned char* data() const {
+    return data_;
   }
 };
