@@ -35,6 +35,7 @@ enum class static_program_id {
 enum class static_vertex_array_id {
   sprite,
   dodecagon, // 12-sidded regular polygon basically a circle
+  dodecagon_border,
   COUNT
 };
 
@@ -95,7 +96,10 @@ public:
       vertex_arrays.push_back(simple_vertex_array::create_sprite_vertex_array());
     }
     {
-      vertex_arrays.push_back(simple_vertex_array::create_circle<12>());
+      auto verts = create_circle_verticies<12>();
+      vertex_arrays.push_back(simple_vertex_array::create_verticies(verts));
+      vertex_arrays.push_back(simple_vertex_array::create_verticies(create_polygon_border(verts, 5, 0.05f)));
+
     }
 
     {

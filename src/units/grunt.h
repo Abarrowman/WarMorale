@@ -29,7 +29,9 @@ private:
 public:
   grunt(world& w, team& t, legion* l) :
     unit(w, t, l, get_archetype()),
-    poly(&(world_ref.p_ctx), &(world_ref.static_res.get_vertex_array(static_vertex_array_id::dodecagon))) {
+    poly(&(world_ref.p_ctx),
+      &(world_ref.static_res.get_vertex_array(static_vertex_array_id::dodecagon)),
+      &(world_ref.static_res.get_vertex_array(static_vertex_array_id::dodecagon_border))) {
 
 
     ship = world_ref.static_sprite(static_texture_id::grunt);
@@ -41,7 +43,6 @@ public:
     highlights.current_frame = { 0, 1 };
     highlights.mask_color = team_ref.col.with_alpha(1.0f);
 
-    poly.edge_width = 1.0f / type.potential_radius;
     poly.local_trans = matrix_3f::transformation_matrix(type.potential_radius, type.potential_radius);
     poly.edge_color = team_ref.col.with_alpha(0.5);
     poly.fill_color = color_rgba::transparent_black();

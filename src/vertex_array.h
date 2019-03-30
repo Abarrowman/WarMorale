@@ -76,6 +76,58 @@ public:
   }
 };
 
+template<typename C>
+inline std::vector<vector_2f> create_polygon_border(C const& verts, size_t segments, float radius) {
+  std::vector<vector_2f> buffer;
+
+  size_t segments_floor = segments / 2;
+  bool has_odd_segments = (segments % 2 == 1);
+  float segment_angle = math_consts::pi() / segments;
+
+  for (size_t i = 0; i < verts.size(); i++) {
+    size_t j = (i + 1) % verts.size();
+    vector_2f start = verts[i];
+    vector_2f end = verts[j];
+    vector_2f norm = (end - start).normalized();
+    vector_2f perp = norm.perp();
+
+    if (has_odd_segments) {
+      buffer.push_back(start - radius * norm);
+    }
+    for (size_t k = 0; k < segments_floor; k++) {
+      float ang = segment_angle * (k + 1);
+      float adj = std::cos(ang);
+      float ops = std::sin(ang);
+
+      buffer.push_back(start - adj * radius * norm + ops * radius * perp);
+      buffer.push_back(start - adj * radius * norm - ops * radius * perp);  
+    }
+
+    buffer.push_back(start + radius * perp);
+    buffer.push_back(start - radius * perp);
+    buffer.push_back(end + radius * perp);
+    buffer.push_back(end - radius * perp);
+
+
+    for (size_t k = 0; k < segments_floor; k++) {
+      float ang = segment_angle * (k + 1);
+      float adj = std::cos(ang);
+      float ops = std::sin(ang);
+
+      buffer.push_back(end + ops * radius * norm + adj * radius * perp);
+      buffer.push_back(end + ops * radius * norm - adj * radius * perp);
+    }
+    if (has_odd_segments) {
+      buffer.push_back(end + radius * norm);
+    }
+    if (j != 0) {
+      // add a degenerate triangle to seperate segments
+      buffer.push_back({ buffer.back() });
+    }
+  }
+
+  return buffer;
+}
 
 template<size_t U>
 inline std::array<vector_2f, U> create_circle_verticies() {
