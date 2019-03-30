@@ -23,7 +23,7 @@ inline world::world(GLFWwindow* win, static_resources& sr, int_keyed_resources& 
   mouse_pos = { -width / 2.0f, height / 2.0f };
 
   under_effects_layer = add_orphan(new ordered_parent());
-  obstacle_layer = add_orphan(new obstacle_parent());
+  obstacle_layer = add_orphan(new obstacle_parent(space_bounds));
   teams_layer = add_orphan(new team_parent());
   threat_layer = add_orphan(new threat_parent(*this));
   explosion_layer = add_orphan(new explosion_parent());
@@ -80,7 +80,6 @@ inline world::world(GLFWwindow* win, static_resources& sr, int_keyed_resources& 
   player_team = teams_layer->add_orphan(new team("blew", color_rgb{{0, 0.5f, 1.0f}}));
   enemy_team = teams_layer->add_orphan(new team("read", color_rgb{ {1.0f, 0.5f, 0.0f}}));
   enemy_team->establish_hostility(player_team);
-
   {
     legion& p_first = player_team->create_legion();
     player_first_legion = &p_first;

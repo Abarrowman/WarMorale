@@ -1,3 +1,5 @@
+
+#undef NDEBUG
 #include "gl_includes.h"
 
 #include <cmath>

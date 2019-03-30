@@ -30,6 +30,10 @@ struct bounds {
       (pt.x <= max_bound.x) &&
       (pt.y <= max_bound.y));
   }
+
+  vector_2f clamp(vector_2f pt) const {
+    return  vector_2f{ std::clamp(pt.x, min_bound.x, max_bound.x), std::clamp(pt.y, min_bound.y, max_bound.y) };
+  }
 };
 
 struct precalc_segment {

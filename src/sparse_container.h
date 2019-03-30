@@ -17,7 +17,7 @@
 // Unlike std::vector sparse_container allocates its buffers as part of its memory so its buffer can stack allocated or declared in static memory.
 // The end and cend iterators remain valid regardless of any or all insertions and deletions.
 template<typename T, size_t N>
-class sparse_container {
+class sparse_container final {
 private:
   // used so that complex types can avoid being default initialized
   alignas(T) char _untyped_data[sizeof(T) * N];
@@ -157,7 +157,7 @@ public:
     if (_size > 0) {
       for (size_t i = 0; i < capacity(); i++) {
         if (_occupied[i]) {
-          _typed_data()[i] = other._typed_data()[i];
+          new (_typed_data() + i) T(other._typed_data()[i]);
         }
       }
     }
@@ -170,7 +170,7 @@ public:
 
     for (size_t i = 0; i < capacity(); i++) {
       if (_occupied[i]) {
-        _typed_data()[i] = std::move(other._typed_data()[i]);
+        new (_typed_data() + i) T(std::move(other._typed_data()[i]));
       }
     }
 
@@ -182,12 +182,13 @@ public:
   // copy assignment operator O(N)
   sparse_container<T, N>& operator= (sparse_container<T, N> const& other) {
     if (this != (&other)) {
-      size = other._size;
+      clear();
+      _size = other._size;
       _occupied = other._occupied;
 
       for (size_t i = 0; i < capacity(); i++) {
         if (_occupied[i]) {
-          _typed_data()[i] = other._typed_data()[i];
+          new (_typed_data() + i) T(other._typed_data()[i]);
         }
       }
     }
@@ -197,11 +198,12 @@ public:
   // move assignment operator O(N)
   sparse_container<T, N>& operator=(sparse_container<T, N>&& other) {
     if (this != (&other)) {
-      size = other._size;
+      clear();
+      _size = other._size;
 
       for (size_t i = 0; i < capacity(); i++) {
         if (_occupied[i]) {
-          _typed_data()[i] = std::move(other._typed_data()[i]);
+          new (_typed_data() + i) T(std::move(other._typed_data()[i]));
         }
       }
 

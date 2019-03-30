@@ -5,7 +5,7 @@
 #include <algorithm>
 
 TEST_CASE("space_buckets can be built and searched", "[space_buckets]") {
-  space_buckets<int> buckets{ 100 };
+  space_buckets<int, 10, 10> buckets{ {{0, 0}, {1000, 1000}} };
   buckets.add_entry({ 0, 0 }, 0);
   buckets.add_entry({ 10, 10 }, 1);
   buckets.add_entry({ 50, 110 }, 2);
@@ -15,14 +15,14 @@ TEST_CASE("space_buckets can be built and searched", "[space_buckets]") {
   vector_2f second_loc{ 800.0f, 900.0f };
 
   SECTION("find_local_bucket finds the values in the local bucket") {
-    std::vector<int>* bucket = buckets.find_local_bucket(search_loc);
+    std::vector<int>* bucket = buckets.find_bucket(search_loc);
     REQUIRE(bucket != nullptr);
     std::vector<int>& bucket_ref = *bucket;
     REQUIRE(bucket_ref.size() == 2);
     REQUIRE(bucket_ref[0] == 0);
     REQUIRE(bucket_ref[1] == 1);
 
-    std::vector<int>* before_bucket = buckets.find_local_bucket(second_loc);
+    std::vector<int>* before_bucket = buckets.find_bucket(second_loc);
     REQUIRE(before_bucket != nullptr);
     std::vector<int>& before_ref = *before_bucket;
     REQUIRE(before_ref.size() == 1);
@@ -30,7 +30,7 @@ TEST_CASE("space_buckets can be built and searched", "[space_buckets]") {
   }
 
   SECTION("find_nearby_buckets finds the values in the nearby buckets") {
-    sized_vector<std::vector<int>*, 9> found = buckets.find_nearby_buckets(search_loc);
+    sized_vector<std::vector<int>*, 9> found = buckets.find_adj_buckets(search_loc);
     REQUIRE(std::distance(found.begin(), found.end()) == 2);
 
     std::vector<int> found_vec;
@@ -48,14 +48,14 @@ TEST_CASE("space_buckets can be built and searched", "[space_buckets]") {
   SECTION("move_entry properly moves an entry") {
     buckets.move_entry({ 0, 0 }, { 820, 910 }, 0);
 
-    std::vector<int>* after_bucket = buckets.find_local_bucket(second_loc);
+    std::vector<int>* after_bucket = buckets.find_bucket(second_loc);
     REQUIRE(after_bucket != nullptr);
     std::vector<int>& after_ref = *after_bucket;
     REQUIRE(after_ref.size() == 2);
     REQUIRE(after_ref[0] == 3);
     REQUIRE(after_ref[1] == 0);
 
-    sized_vector<std::vector<int>*, 9> found = buckets.find_nearby_buckets(search_loc);
+    sized_vector<std::vector<int>*, 9> found = buckets.find_adj_buckets(search_loc);
     REQUIRE(std::distance(found.begin(), found.end()) == 2);
 
     std::vector<int> found_vec;

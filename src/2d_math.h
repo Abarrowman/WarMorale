@@ -146,6 +146,7 @@ public:
     return *this;
   }
 
+  // Element-wise division
   vector_2<T> operator/(vector_2<T> const& other) const {
     return { x / other.x, y / other.y };
   }
@@ -162,6 +163,18 @@ public:
 
   vector_2<T> round() const {
     return { static_cast<T>(std::round(x)), static_cast<T>(std::round(y)) };
+  }
+
+  vector_2<T> min(vector_2<T> const other) const {
+    return { std::min(x, other.x), std::min(y, other.y) };
+  }
+
+  vector_2<T> max(vector_2<T> const other) const {
+    return { std::max(x, other.x), std::max(y, other.y) };
+  }
+
+  vector_2<T> clamp(vector_2<T> const less, vector_2<T> const more) const {
+    return { std::clamp(x, less.x, more.x) , std::clamp(y, less.y, more.y) };
   }
 
   vector_2<T> element_squared() const {

@@ -34,9 +34,10 @@ public:
   bool mouse_down = false;
 
   /*
-  If buckets aretoo small big units potential fields do not propogate far enough.
+  If buckets are too small big units potential fields do not propogate far enough.
   */
-  space_buckets<unit_reference> unit_buckets{200};
+  bounds space_bounds{ {0, 0}, {1280, 720} };
+  space_buckets<unit_reference, 12, 8> unit_buckets{ space_bounds };
 
   team* player_team;
   team* enemy_team;
@@ -49,7 +50,7 @@ public:
 
   owning_polygon* tri;
 
-  using explosion_parent = sparse_parent<explosion_effect, 1024>;
+  using explosion_parent = sparse_parent<explosion_effect, 2048>;
 
 
 

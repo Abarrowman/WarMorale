@@ -48,7 +48,7 @@ inline void unit::living_update() {
   //vector_2f grad = vector_2f::zero();
   vector_2f goal_grad = legion_ptr->order.get_potential_force(trans.get_position());// *(type.potential_radius / 16.0f);
   vector_2f grad = goal_grad;
-  for (auto&& vec_ptr : world_ref.unit_buckets.find_nearby_buckets(position)) {
+  for (auto&& vec_ptr : world_ref.unit_buckets.find_adj_buckets(position)) {
     for (unit_reference ref : *vec_ptr) {
       if (!ref.valid()) {
         continue;

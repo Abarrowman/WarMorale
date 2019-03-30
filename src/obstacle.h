@@ -37,7 +37,6 @@ private:
 public:
   circular_obstacle(float rad, sprite img, sharing_polygon pol) : radius(rad), image(std::move(img)), poly(std::move(pol)) {
     assert(radius > 0.0f);
-    poly.edge_width = 1.0f / radius;
     poly.local_trans = matrix_3f::transformation_matrix(radius, radius);
     poly.edge_color = color_rgba::white();
     poly.fill_color = color_rgba::transparent_black();
@@ -84,8 +83,7 @@ private:
   owning_polygon poly;
 public:
   polygonal_obstacle(std::vector<vector_2f> verts, sprite img, polygon_context* p_ctx) :
-    precalc(std::move(verts)), image(std::move(img)), poly(p_ctx, simple_vertex_array::create_verticies(precalc.verticies)) {
-    poly.edge_width = 1.0f;
+    precalc(std::move(verts)), image(std::move(img)), poly(p_ctx, precalc.verticies, 5.0f) {
     poly.edge_color = color_rgba::white();
     poly.fill_color = color_rgba::transparent_black();
   }
@@ -122,9 +120,11 @@ public:
 class obstacle_parent : public renderable_parent<obstacle, true> {
 private:
   using parent_type = renderable_parent<obstacle, true>;
-  space_buckets<obstacle*> buckets{ 400 };
+  space_buckets<obstacle*, 10, 10> buckets;
 
 public:
+
+  obstacle_parent(bounds b) : buckets(std::move(b)) {}
 
   bool update() {
     bool result = parent_type::update();
@@ -141,7 +141,7 @@ public:
 
   vector_2f get_exerted_gradient(vector_2f location, float radius) {
     vector_2f grad = vector_2f::zero();
-    for (auto&& vec_ptr : buckets.find_nearby_buckets(location)) {
+    for (auto&& vec_ptr : buckets.find_adj_buckets(location)) {
       for (obstacle* ob_ptr : *vec_ptr) {
         grad += ob_ptr->get_exerted_gradient(location, radius);
       }
@@ -150,7 +150,7 @@ public:
   }
 
   bool is_point_occupied(vector_2f location, float other_radius) {
-    for (auto&& vec_ptr : buckets.find_nearby_buckets(location)) {
+    for (auto&& vec_ptr : buckets.find_adj_buckets(location)) {
       for (obstacle* ob_ptr : *vec_ptr) {
         if (ob_ptr->is_point_occupied(location, other_radius)) {
           return true;
@@ -162,7 +162,7 @@ public:
 
   bool is_segment_occupied(precalc_segment segment, float other_radius) {
     // TODO finish
-    /*for (obstacle* ob_ptr : buckets.find_nearby_buckets(location)) {
+    /*for (obstacle* ob_ptr : buckets.find_adj_buckets(location)) {
       if (ob_ptr->is_segment_occupied(location, other_radius)) {
         return true;
       }

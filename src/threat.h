@@ -2,6 +2,8 @@
 #include "threat_face.h"
 #include "obstacle.h"
 
+threat_parent::threat_parent(world& w) : world_ref(w), buckets(w.space_bounds) {}
+
 void point_threat::hurt(unit& target) {
   if (destroyed) {
     return;

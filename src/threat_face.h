@@ -33,11 +33,11 @@ public:
 class threat_parent : public renderable_parent<threat, true> {
 private:
   using parent_type = renderable_parent<threat, true>;
-  space_buckets<threat*> buckets{ 50 };
+  space_buckets<threat*, 20, 20> buckets;
   world& world_ref;
 public:
 
-  threat_parent(world& w) : world_ref(w) {}
+  threat_parent(world& w);
 
   bool update() override {
     buckets.clear();
@@ -62,7 +62,7 @@ public:
   }
 
   sized_vector<std::vector<threat*>*, 9> get_nearby_threats(vector_2f location) {
-    return buckets.find_nearby_buckets(location);
+    return buckets.find_adj_buckets(location);
   }
 };
 

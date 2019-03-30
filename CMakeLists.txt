@@ -24,6 +24,7 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
   add_custom_command(TARGET WarMorale POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${GLEW_DIR}/bin/Release/Win32/glew32.dll $<TARGET_FILE_DIR:WarMorale>/glew32.dll)
   add_custom_command(TARGET WarMorale POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/assets $<TARGET_FILE_DIR:WarMorale>/assets)
 
+  add_compile_options(/fp:fast)
   add_definitions ("-D_SCL_SECURE_NO_WARNINGS -D_SECURE_SCL=0 -D_HAS_ITERATOR_DEBUGGING=0")
 endif()
 
