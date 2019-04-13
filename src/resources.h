@@ -29,6 +29,7 @@ enum class static_program_id {
   polygon_fill,
   line,
   point_particle,
+  point_particle_comp,
   COUNT
 };
 
@@ -88,8 +89,11 @@ public:
     }
     {
       shader vertex{ GL_VERTEX_SHADER, read_file_to_string("./assets/shaders/pt_particle.vert").c_str() };
-      shader frag{ GL_FRAGMENT_SHADER,read_file_to_string("./assets/shaders/vertex_interp.frag").c_str() };
+      shader frag{ GL_FRAGMENT_SHADER, read_file_to_string("./assets/shaders/vertex_interp.frag").c_str() };
       programs.emplace_back(vertex, frag);
+
+      shader compute{ GL_COMPUTE_SHADER, read_file_to_string("./assets/shaders/pt_particle.comp").c_str() };
+      programs.emplace_back(compute);
     }
 
     {

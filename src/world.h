@@ -17,7 +17,7 @@ inline world::world(GLFWwindow* win, static_resources& sr, int_keyed_resources& 
 
   s_ctx.init(&static_res.get_program(static_program_id::sprite), &static_res.get_vertex_array(static_vertex_array_id::sprite));
   p_ctx.init(&static_res.get_program(static_program_id::polygon_fill), &static_res.get_program(static_program_id::line));
-  pp_ctx.init(&static_res.get_program(static_program_id::point_particle));
+  pp_ctx.init(&static_res.get_program(static_program_id::point_particle), &static_res.get_program(static_program_id::point_particle_comp));
   bt_ctx.init(&static_res.get_program(static_program_id::bitmap_text));
 
   mouse_pos = { -width / 2.0f, height / 2.0f };

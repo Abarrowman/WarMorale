@@ -34,8 +34,8 @@ public:
   // move assigning is not ok
   vertex_buffer& operator= (vertex_buffer&& other) = delete;
 
-  void bind() {
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+  void bind(GLenum mode = GL_ARRAY_BUFFER) {
+    glBindBuffer(mode, vbo);
   }
 
   ~vertex_buffer() {
@@ -140,11 +140,6 @@ inline std::array<vector_2f, U> create_circle_verticies() {
 }
 
 class simple_vertex_array {
-private:
-  simple_vertex_array(vertex_buffer vertex_buff, vertex_array vertex_arr, GLuint vertex_count) :
-    vb(std::move(vertex_buff)), va(std::move(vertex_arr)), size(vertex_count) {
-  }
-
 public:
   vertex_buffer vb;
   vertex_array va;
@@ -226,7 +221,11 @@ public:
     return array;
   }
 
+  explicit simple_vertex_array() : size(0) {}
 
+  simple_vertex_array(vertex_buffer vertex_buff, vertex_array vertex_arr, GLuint vertex_count) :
+    vb(std::move(vertex_buff)), va(std::move(vertex_arr)), size(vertex_count) {
+  }
 
   // do not copy or copy assign
   simple_vertex_array(simple_vertex_array&) = delete;

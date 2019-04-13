@@ -8,41 +8,47 @@
 #include <vector>
 #include <cassert>
 
+struct pt_particle {
+  vector_2f pos;
+  vector_2f vel;
+  color_rgba col;
+
+  pt_particle() {}
+  pt_particle(vector_2f p, vector_2f v, color_rgba c) : pos(p), vel(v), col(c) {}
+};
+
 class point_particle_context {
 public:
-  program* point_particle_program;
-  GLint shader_trans_mat_idx;
+  program* rend_prog;
+  GLint render_trans_mat_idx;
 
-  void init(program* p_shader) {
-    point_particle_program = p_shader;
-    shader_trans_mat_idx = point_particle_program->get_uniform_location("trans_mat");
+  program* comp_prog;
+  GLint comp_pt_count_idx;
+  GLint comp_alpha_step_idx;
 
+  void init(program* render_shader, program* comp_shader) {
+    rend_prog = render_shader;
+    render_trans_mat_idx = rend_prog->get_uniform_location("trans_mat");
+
+    comp_prog = comp_shader;
+    comp_pt_count_idx = comp_prog->get_uniform_location("pt_count");
+    comp_alpha_step_idx = comp_prog->get_uniform_location("alpha_step");
   }
 };
 
 class explosion_effect : public renderable {
 private:
   point_particle_context * context;
-  int particle_count;
+  simple_vertex_array sva;
   int duration;
-  std::vector<vector_2f> positions;
-  std::vector<color_rgba> colors;
-  std::vector<vector_2f> velocities;
-
-  vertex_buffer position_buffer;
-  vertex_buffer color_buffer;
-  vertex_array va;
   float alpha_step;
 public:
 
   static explosion_effect* create_example_orphan(point_particle_context* ctx, vector_2f center) {
     int particle_count = 10000;
-    std::vector<vector_2f> positions;
-    std::vector<color_rgba> colors;
-    std::vector<vector_2f> velocities;
-    positions.resize(particle_count);
-    colors.resize(particle_count);
-    velocities.resize(particle_count);
+
+    std::vector<pt_particle> parts;
+    parts.resize(particle_count);
 
     for (int i = 0; i < particle_count; i++) {
       int x = i % 100;
@@ -51,11 +57,9 @@ public:
       int y = i / 100;
       float y_frac = (y + 1) / 100.0f;
       float y_cen = y_frac * 2.0f - 1.0f;
-      positions[i] = center + vector_2f(x_cen * 50, y_cen * 50);
-      colors[i] = { x_frac, y_frac, 0.0f, 1.0f };
-      velocities[i] = { x_cen, y_cen };
+      parts[i] = { center + vector_2f(x_cen * 50, y_cen * 50) , vector_2f{ x_cen, y_cen },  color_rgba{ x_frac, y_frac, 0.0f, 1.0f } };
     }
-    return new explosion_effect(ctx, particle_count, 100, std::move(positions), std::move(colors), std::move(velocities), 0.01f);
+    return new explosion_effect(ctx, std::move(parts), 100, 0.01f);
   }
 
   static explosion_effect explode_sprite(point_particle_context* ctx,  sprite& spr, vector_2f center, matrix_3f const& parent_trans, generator_type& gen, int duration=60) {
@@ -66,12 +70,8 @@ public:
 
     vector_2i frame_size = image_size / spr.frames;
     int max_particle_count = frame_size.x * frame_size.y;
-    std::vector<vector_2f> positions;
-    std::vector<color_rgba> colors;
-    std::vector<vector_2f> velocities;
-    positions.reserve(max_particle_count);
-    colors.reserve(max_particle_count);
-    velocities.reserve(max_particle_count);
+    std::vector<pt_particle> parts;
+    parts.reserve(max_particle_count);
 
     matrix_3f total_trans = parent_trans * spr.local_trans;
 
@@ -95,41 +95,32 @@ public:
           vector_2f pos = vector_2f(static_cast<float>(x) / (frame_size.x - 1) - 0.5f, static_cast<float>(y) / (frame_size.y - 1) - 0.5f);
           vector_2f trans_pos = total_trans * pos;
 
-          positions.push_back(trans_pos);
-          colors.push_back(p_col);
-          velocities.push_back((trans_pos - center) * 0.3f * rand_float(gen));
+          parts.emplace_back(trans_pos, (trans_pos - center) * 0.3f * rand_float(gen), p_col);
         }
       }
     }
-    int particle_count = positions.size();
 
-    return explosion_effect{ ctx, particle_count, duration, std::move(positions), std::move(colors), std::move(velocities), spr.mask_color.values[3] / duration };
+    return explosion_effect{ ctx, std::move(parts), duration, spr.mask_color.values[3] / duration };
   }
 
-  explosion_effect(point_particle_context* ctx, int count, int dur, std::vector<vector_2f> pos,
-      std::vector<color_rgba> cols, std::vector<vector_2f> vels, float al_step) :
+  explosion_effect(point_particle_context* ctx, std::vector<pt_particle> parts, int dur, float al_step) :
       context(ctx),
-      particle_count(count),
       duration(dur),
-      positions(std::move(pos)),
-      colors(std::move(cols)),
-      velocities(std::move(vels)),
       alpha_step(al_step) {
 
-    assert(positions.size() == particle_count);
-    assert(colors.size() == particle_count);
-    assert(velocities.size() == particle_count);
+    sva.size = parts.size();
+    sva.vb.bind(GL_SHADER_STORAGE_BUFFER);
+    glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(pt_particle) * sva.size, parts.data(), GL_STATIC_DRAW);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, sva.vb.vbo);
 
-
-    va.bind();
-
+    sva.va.bind();
     glEnableVertexAttribArray(0);
-    position_buffer.bind();
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), 0);
+    sva.vb.bind();
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), 0);
 
     glEnableVertexAttribArray(1);
-    color_buffer.bind();
-    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
+    sva.vb.bind();
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)(4 * sizeof(float)));
   }
 
   // do not copy, assign, or move assign
@@ -140,23 +131,12 @@ public:
   // moving is ok
   explosion_effect(explosion_effect&& old) :
     context(old.context),
-    particle_count(old.particle_count),
+    sva(std::move(old.sva)),
     duration(old.duration),
-    positions(std::move(old.positions)),
-    colors(std::move(old.colors)),
-    velocities(std::move(old.velocities)),
-    position_buffer(std::move(old.position_buffer)),
-    color_buffer(std::move(old.color_buffer)),
-    va(std::move(old.va)),
     alpha_step(old.alpha_step)
   {}
 
   bool update() override {
-    for (int i = 0; i < particle_count; i++) {
-      positions[i] += velocities[i];
-      velocities[i] *= 0.9f;
-      colors[i].values[3] -= alpha_step;
-    }
     duration--;
     return (duration < 0);
   }
@@ -167,17 +147,16 @@ public:
     }
     assert(context != nullptr);
 
-    position_buffer.bind();
-    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * particle_count * 2, positions.data(), GL_STREAM_DRAW);
-    color_buffer.bind();
-    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * particle_count * 4, colors.data(), GL_STREAM_DRAW);
+    context->comp_prog->use();
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, sva.vb.vbo);
+    glUniform1ui(context->comp_pt_count_idx, sva.size);
+    glUniform1f(context->comp_alpha_step_idx, alpha_step);
+    glDispatchCompute(sva.size / 256 + 1, 1, 1);
+    glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT | GL_VERTEX_ATTRIB_ARRAY_BARRIER_BIT);
 
-    context->point_particle_program->use();
-
+    context->rend_prog->use();
     matrix_3f full_trans = parent_trans * local_trans;
-    glUniformMatrix3fv(context->shader_trans_mat_idx, 1, GL_TRUE, full_trans.values.data());
-
-    va.bind();
-    glDrawArrays(GL_POINTS, 0, particle_count);
+    glUniformMatrix3fv(context->render_trans_mat_idx, 1, GL_TRUE, full_trans.values.data());
+    sva.draw(GL_POINTS);
   }
 };
